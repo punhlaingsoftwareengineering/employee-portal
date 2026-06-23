@@ -1,4 +1,4 @@
-FROM denoland/deno:2.8.3
+FROM denoland/deno:2.8.3 AS builder
 
 WORKDIR /app
 
@@ -17,10 +17,20 @@ ENV BETTER_AUTH_SECRET="docker-build-placeholder-min-32-chars"
 # Build SvelteKit (adapter-node → build/)
 RUN deno task build
 
+FROM node:22-slim AS runner
+
+WORKDIR /app
+
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=1027
 
+# adapter-node runtime needs build output, kit adapter bundle, and node_modules
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/.svelte-kit ./.svelte-kit
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
 EXPOSE 1027
 
-CMD ["deno", "task", "start"]
+CMD ["node", "build/index.js"]
