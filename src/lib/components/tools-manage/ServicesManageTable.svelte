@@ -8,6 +8,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteService } from '$lib/remotes/service.remote';
+	import { accentGradientBackground } from '$lib/utils/accent-gradient';
 	import type { getServices } from '$lib/remotes/service.remote';
 
 	let {
@@ -69,6 +70,26 @@
 	<DataTableColumn label="Name" firstData filterText={(item) => item.name}>
 		{#snippet children({ row: item })}
 			{item.name}
+		{/snippet}
+	</DataTableColumn>
+
+	<DataTableColumn label="Category" filterText={(item) => item.category ?? ''}>
+		{#snippet children({ row: item })}
+			{item.category ?? '—'}
+		{/snippet}
+	</DataTableColumn>
+
+	<DataTableColumn label="Accent" filterText={(item) => item.accentColor ?? ''}>
+		{#snippet children({ row: item })}
+			{#if item.accentColor}
+				<span
+					class="inline-block size-5 rounded-full border border-base-300"
+					style:background={accentGradientBackground(item.accentColor)}
+					title={item.accentColor}
+				></span>
+			{:else}
+				<span class="text-base-content/50">—</span>
+			{/if}
 		{/snippet}
 	</DataTableColumn>
 

@@ -6,6 +6,8 @@ export const service = pgTable('service', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
+	category: text('category'),
+	accentColor: text('accent_color'),
 	link: text('link').notNull(),
 	iconUrl: text('icon_url'),
 	embedMode: text('embed_mode').notNull().default('external'),

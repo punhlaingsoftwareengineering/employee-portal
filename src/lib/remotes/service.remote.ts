@@ -52,3 +52,12 @@ export const deleteService = command(z.string().uuid(), async (id) => {
 	void getServices().refresh();
 	void getAvailableServices().refresh();
 });
+
+export const getServiceLinkStatuses = query(z.array(z.string().uuid()), async (serviceIds) => {
+	const event = getRequestEvent();
+	if (event.locals.user) {
+		const perms = await requireAppAccess(event);
+		return serviceService.getServiceLinkStatuses(serviceIds, perms);
+	}
+	return serviceService.getServiceLinkStatuses(serviceIds, 'public');
+});

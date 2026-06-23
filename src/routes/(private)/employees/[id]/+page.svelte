@@ -44,7 +44,7 @@
 		</div>
 	</div>
 
-	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+	<div class="card-grid md:grid-cols-2 lg:grid-cols-4">
 		<div class="stat rounded-box border border-base-300 bg-base-100">
 			<div class="stat-title">Role</div>
 			<div class="stat-value text-lg">{employee.role.name}</div>

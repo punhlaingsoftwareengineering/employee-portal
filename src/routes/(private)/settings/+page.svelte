@@ -55,7 +55,7 @@
 
 <h1 class="mb-6 text-2xl font-bold">Settings</h1>
 
-<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+<div class="card-masonry">
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">
 			<h2 class="card-title text-lg">Appearance</h2>
@@ -256,11 +256,11 @@
 			</svelte:boundary>
 		</div>
 	</div>
+</div>
 
-	<div class="flex justify-end xl:col-span-3">
-		<button type="button" class="btn btn-ghost gap-2" onclick={handleReset}>
-			<RotateCcw class="h-4 w-4" />
-			Reset device preferences
-		</button>
-	</div>
+<div class="mt-6 flex justify-end">
+	<button type="button" class="btn btn-ghost gap-2" onclick={handleReset}>
+		<RotateCcw class="h-4 w-4" />
+		Reset device preferences
+	</button>
 </div>

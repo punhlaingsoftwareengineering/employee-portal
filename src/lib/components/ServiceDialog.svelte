@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { Service } from '$lib/server/db/schema/service';
+	import { normalizeAccentColor } from '$lib/schemas/service';
 	import { createService, updateService, getServices } from '$lib/remotes/service.remote';
+	import { DEFAULT_SERVICE_ACCENT, accentGradientBackground } from '$lib/utils/accent-gradient';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingService = $state<Service | null>(null);
 	let name = $state('');
 	let description = $state('');
+	let category = $state('');
+	let accentColor = $state(DEFAULT_SERVICE_ACCENT);
 	let link = $state('');
 	let iconUrl = $state('');
 	let isPublic = $state(false);
@@ -15,12 +19,15 @@
 	let error = $state<string | null>(null);
 
 	const isEdit = $derived(Boolean(editingService?.id));
+	const previewBackground = $derived(accentGradientBackground(accentColor));
 
 	export function open(existing?: Service | null) {
 		editingService = existing ?? null;
 		error = null;
 		name = existing?.name ?? '';
 		description = existing?.description ?? '';
+		category = existing?.category ?? '';
+		accentColor = existing?.accentColor ?? DEFAULT_SERVICE_ACCENT;
 		link = existing?.link ?? '';
 		iconUrl = existing?.iconUrl ?? '';
 		isPublic = existing?.isPublic ?? false;
@@ -34,6 +41,15 @@
 		submitting = false;
 	}
 
+	function syncAccentFromPicker(value: string) {
+		accentColor = value.toUpperCase();
+	}
+
+	function syncAccentFromText(value: string) {
+		const normalized = normalizeAccentColor(value);
+		if (normalized) accentColor = normalized;
+	}
+
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		submitting = true;
@@ -43,6 +59,8 @@
 			const payload = {
 				name: name.trim(),
 				description: description.trim() || undefined,
+				category: category.trim() || undefined,
+				accentColor: normalizeAccentColor(accentColor),
 				link: link.trim(),
 				iconUrl: iconUrl.trim() || null,
 				isPublic
@@ -84,6 +102,46 @@
 						</td>
 					</tr>
 					<tr>
+						<td class="form-table-label">Category</td>
+						<td class="form-table-field">
+							<input
+								type="text"
+								bind:value={category}
+								class="input input-bordered w-full max-w-md"
+								maxlength="32"
+								placeholder="Design"
+							/>
+							<p class="mt-1 text-xs text-base-content/60">
+								Shown uppercase on the service card (e.g. DESIGN, SKILLS).
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="form-table-label">Accent color</td>
+						<td class="form-table-field">
+							<div class="flex flex-wrap items-center gap-3">
+								<input
+									type="color"
+									class="h-10 w-14 cursor-pointer rounded-box border border-base-300 bg-base-100 p-1"
+									value={accentColor}
+									oninput={(event) => syncAccentFromPicker(event.currentTarget.value)}
+								/>
+								<input
+									type="text"
+									class="input input-bordered w-28 font-mono text-sm"
+									value={accentColor}
+									placeholder="#5B6CFF"
+									oninput={(event) => syncAccentFromText(event.currentTarget.value)}
+								/>
+								<div
+									class="h-10 min-w-24 flex-1 rounded-box border border-base-300"
+									style:background={previewBackground}
+									aria-hidden="true"
+								></div>
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<td class="form-table-label">Description</td>
 						<td class="form-table-field">
 							<textarea
@@ -102,6 +160,9 @@
 								class="input input-bordered w-full max-w-md"
 								placeholder="https://example.com/icon.png"
 							/>
+							<p class="mt-1 text-xs text-base-content/60">
+								Shown large on the bottom-right of the service card.
+							</p>
 						</td>
 					</tr>
 					<tr>

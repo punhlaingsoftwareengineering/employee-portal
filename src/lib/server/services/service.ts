@@ -10,6 +10,13 @@ import {
 	type UpdateServiceInput
 } from '$lib/schemas/service';
 import type { UserPermissions } from '$lib/server/permissions';
+import {
+	checkServiceLinkHealth,
+	mapWithConcurrency,
+	type ServiceLinkHealth
+} from '$lib/server/services/service-link-health';
+
+export type ServiceLinkStatusMap = Record<string, ServiceLinkHealth>;
 
 export async function listServices() {
 	return db.query.service.findMany({ orderBy: [asc(service.name)] });
@@ -164,4 +171,60 @@ export async function canUserAccessService(
 	});
 
 	return assignment !== undefined;
+}
+
+async function resolveAuthorizedServices(
+	serviceIds: string[],
+	permissions: UserPermissions | 'public'
+): Promise<Array<{ id: string; link: string }>> {
+	const uniqueIds = [...new Set(serviceIds)];
+	if (uniqueIds.length === 0) return [];
+
+	if (permissions === 'public') {
+		const rows = await db.query.service.findMany({
+			where: and(inArray(service.id, uniqueIds), eq(service.isPublic, true)),
+			columns: { id: true, link: true }
+		});
+		return rows;
+	}
+
+	const allowed = await getServicesForUser(permissions);
+	const idSet = new Set(uniqueIds);
+
+	return allowed
+		.filter((item) => idSet.has(item.id))
+		.map((item) => ({ id: item.id, link: item.link }));
+}
+
+export async function getServiceLinkStatuses(
+	serviceIds: string[],
+	permissions: UserPermissions | 'public'
+): Promise<ServiceLinkStatusMap> {
+	const authorized = await resolveAuthorizedServices(serviceIds, permissions);
+	const statuses: ServiceLinkStatusMap = {};
+
+	for (const id of serviceIds) {
+		statuses[id] = 'down';
+	}
+
+	const urlToIds = new Map<string, string[]>();
+	for (const item of authorized) {
+		const ids = urlToIds.get(item.link) ?? [];
+		ids.push(item.id);
+		urlToIds.set(item.link, ids);
+	}
+
+	const uniqueUrls = [...urlToIds.keys()];
+	const healthResults = await mapWithConcurrency(uniqueUrls, 5, async (url) => ({
+		url,
+		health: await checkServiceLinkHealth(url)
+	}));
+
+	for (const { url, health } of healthResults) {
+		for (const id of urlToIds.get(url) ?? []) {
+			statuses[id] = health;
+		}
+	}
+
+	return statuses;
 }

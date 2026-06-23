@@ -30,6 +30,7 @@
 			services={data.publicServices}
 			apps={data.publicApps}
 			appHref={(id) => `/onboarding/apps/${id}`}
+			gridMaxCols={5}
 		/>
 	</section>
 {/if}
