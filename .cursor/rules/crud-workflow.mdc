@@ -1,0 +1,32 @@
+---
+description: Entity CRUD layer order for Employee Portal
+alwaysApply: true
+---
+
+# CRUD Workflow
+
+When adding or modifying a domain entity `{entity}`, follow this order:
+
+```
+schema → service → remote → API → routes
+```
+
+| Step | Path |
+|------|------|
+| 1. Schema | `src/lib/server/db/schema/{entity}.ts` |
+| 2. Zod | `src/lib/schemas/{entity}.ts` |
+| 3. Service | `src/lib/server/services/{entity}.ts` |
+| 4. Remote | `src/lib/remotes/{entity}.remote.ts` |
+| 5. API | `src/routes/api/{entities}/+server.ts` and `[id]/+server.ts` |
+| 6. Routes | `(private)/{entities}/` or `(public)/` |
+
+**Reference implementation**: copy `department` + `employee` vertical slice.
+
+**Never** duplicate Drizzle logic in remotes or API — both call the same service functions.
+
+After schema changes:
+
+```sh
+deno task auth:schema   # if auth config changed
+deno task db:push       # or db:generate + db:migrate
+```

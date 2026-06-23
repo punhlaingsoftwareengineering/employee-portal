@@ -1,0 +1,35 @@
+---
+description: Auth pages live under (public)/auth/*
+globs: "src/routes/(public)/auth/**"
+alwaysApply: true
+---
+
+# Auth Routes
+
+All authentication UI lives under **`src/routes/(public)/auth/`** — never at the route root or outside `(public)/auth/`.
+
+| Page | Path |
+|------|------|
+| Login | `/auth/login` |
+| Sign up | `/auth/signup` |
+| Forgot password | `/auth/forget-password` |
+| Reset password | `/auth/reset-password` |
+| OTP / verification code | `/auth/otp` |
+| Verification success | `/auth/verification-success` |
+| Accept invite | `/auth/accept-invite` |
+| Sign out (POST) | `/auth/logout` |
+
+Use path constants from [`src/lib/constants/auth-routes.ts`](src/lib/constants/auth-routes.ts).
+
+Rules:
+
+- **No** `/login`, `/signup`, or `/logout` at the routes root (legacy redirects only)
+- Auth pages use the shared `(public)/auth/+layout.svelte` shell
+- Forms follow [`forms-layout.mdc`](forms-layout.mdc) (card + `form-table` + `form-actions`)
+- Unauthenticated guards redirect to `/auth/login?redirectTo=…`
+- Better Auth API stays at `/api/auth/*` (hooks) — only **pages** use `/auth/*`
+- Email sign-up sends an OTP via Better Auth `emailOTP` plugin; user completes verification at `/auth/otp`
+- Admin invites use `/auth/accept-invite?token=…` (password only, no OTP)
+- Configure SMTP env vars for production email delivery (see `.env.example`)
+
+Skill: `employee-portal-better-auth`

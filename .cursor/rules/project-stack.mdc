@@ -1,0 +1,34 @@
+---
+description: Employee Portal stack, deno commands, and documentation index
+alwaysApply: true
+---
+
+# Project Stack
+
+- **Runtime**: TypeScript, Deno (`deno task …`, not npm directly)
+- **Framework**: SvelteKit 3 + Svelte 5 (runes, experimental async + remote functions)
+- **Database**: Local PostgreSQL via `pg` + Drizzle ORM
+- **Auth**: Better Auth + Drizzle adapter
+- **UI**: Tailwind v4, DaisyUI, Lucide (`lucide-svelte`)
+- **Validation**: Zod (Standard Schema for remotes)
+- **Layer order**: `schema → service → remote → API → routes`
+
+## Deno tasks
+
+```sh
+deno task dev          # dev server
+deno task build        # production build
+deno task check        # svelte-check
+deno task lint         # prettier + eslint
+deno task format       # prettier --write
+deno task db:push      # push schema to local Postgres
+deno task auth:schema  # regenerate auth.schema.ts (if auth config changed)
+```
+
+## Deep reference (personal skills)
+
+Load skills from `~/.cursor/skills/employee-portal-*` when working on matching tasks. See [AGENTS.md](../../AGENTS.md) for the full index.
+
+## Live docs (Svelte MCP)
+
+Use Svelte MCP `list-sections` → `get-documentation` for SvelteKit remote functions, routing, async Svelte — not for DaisyUI/Zod/Drizzle.

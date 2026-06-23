@@ -1,0 +1,73 @@
+---
+description: Icon-only row actions with Lucide icons and DaisyUI tooltips
+globs: "**/*.svelte"
+alwaysApply: false
+---
+
+# Row Action Buttons
+
+Table and list row actions are **icon-only** Lucide buttons inside **DaisyUI tooltips**. No text labels on the button itself.
+
+Use [`IconActionButton`](src/lib/components/IconActionButton.svelte) — it applies the button classes, `aria-label`, and matching `tooltip-{variant}` wrapper.
+
+**Placement:** row actions live in the **first column** of [`DataTable`](src/lib/components/DataTable.svelte) via the `actions` snippet — see [`data-tables.mdc`](data-tables.mdc). `DataTable` wraps actions in `flex flex-nowrap gap-1` and sets context so buttons are **xs** with **`tooltip-right`** automatically.
+
+| Context | Button size | Tooltip | Icon size | Wrapper |
+|---------|-------------|---------|-----------|---------|
+| `DataTable` actions cell | `btn-xs` (via context) | `tooltip-right` | `h-3.5 w-3.5` (CSS in actions column) | `flex-nowrap gap-1` (automatic) |
+| Legacy / non-table lists | `btn-sm` (default) | `tooltip-left` (default) | `h-4 w-4` on Lucide icon | `flex flex-wrap gap-2` |
+
+| Action | Icon | Variant | Tooltip label |
+|--------|------|---------|---------------|
+| View (internal) | `Eye` | `primary` | `View` |
+| Open (external) | `ExternalLink` | `primary` | `Open` |
+| Edit | `Pencil` | `secondary` | `Edit` |
+| Resend | `RefreshCw` | `secondary` | `Resend` |
+| Delete | `Trash2` | `error` | `Delete` |
+| Revoke | `Ban` | `error` | `Revoke` |
+
+Wrap a row's actions in `flex flex-wrap gap-2` when **not** using `DataTable` (legacy). Inside `DataTable`, size, tooltip placement, and wrapper are automatic — do **not** repeat `size` or `tooltipPlacement` unless overriding.
+
+```svelte
+<script lang="ts">
+	import { Eye, ExternalLink, Pencil, Trash2 } from 'lucide-svelte';
+	import IconActionButton from '$lib/components/IconActionButton.svelte';
+</script>
+
+<div class="flex flex-wrap gap-2">
+	<IconActionButton label="View" href="/items/{item.id}">
+		<Eye class="h-4 w-4" />
+	</IconActionButton>
+	<IconActionButton label="Open" href={item.link} external>
+		<ExternalLink class="h-4 w-4" />
+	</IconActionButton>
+	<IconActionButton label="Edit" variant="secondary" onclick={() => dialog?.open(item)}>
+		<Pencil class="h-4 w-4" />
+	</IconActionButton>
+	<IconActionButton
+		label="Delete"
+		variant="error"
+		disabled={deleteLoading.isPending(item.id)}
+		onclick={handleDelete}
+	>
+		{#if deleteLoading.isPending(item.id)}
+			<span class="loading loading-spinner loading-xs"></span>
+		{:else}
+			<Trash2 class="h-4 w-4" />
+		{/if}
+	</IconActionButton>
+</div>
+```
+
+Rules:
+
+- **DataTable:** icons may use `h-4 w-4` in markup; `.sticky-col-actions` CSS scales them to `h-3.5 w-3.5`
+- **Non-table:** icon size `class="h-4 w-4"` on every Lucide icon
+- Tooltip color must match button variant: `tooltip-primary` / `tooltip-secondary` / `tooltip-error`
+- External links: `external` prop on `IconActionButton` (`target="_blank"`, `rel="noopener noreferrer"`)
+- Internal navigation: `Eye` + `View`; external URLs: `ExternalLink` + `Open`
+- Delete while loading: keep `variant="error"`; swap icon for spinner in children
+- Decorative icons inside a larger clickable card: wrap with the same `tooltip tooltip-{variant}` + `data-tip` pattern
+- Primary CTAs (Add, Invite, Save) keep icon + text — this rule is for icon-only actions only
+
+Skill: `employee-portal-lucide`

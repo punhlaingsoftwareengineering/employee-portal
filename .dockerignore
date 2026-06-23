@@ -1,0 +1,43 @@
+# Dependencies and build output (rebuilt in image)
+node_modules
+.svelte-kit
+build
+.output
+
+# Git and editor
+.git
+.gitignore
+.cursor
+.vscode
+
+# Env and secrets (pass via compose / runtime)
+.env
+.env.*
+!.env.example
+
+# Tests and reports
+test-results
+playwright-report
+coverage
+**/*.e2e.ts
+**/*.spec.ts
+**/*.test.ts
+
+# Docs and misc
+README.md
+AGENTS.md
+*.md
+.DS_Store
+Thumbs.db
+
+# Docker files (not needed inside image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Vite timestamps
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Paraglide cache (regenerated on build)
+project.inlang/cache

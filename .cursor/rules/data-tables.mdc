@@ -1,0 +1,66 @@
+---
+description: List/data tables — serial #, sticky actions, filterable header inputs
+globs: "src/routes/(private)/**/+page.svelte,src/lib/components/**/*Table.svelte"
+alwaysApply: false
+---
+
+# Data Tables (list views)
+
+Use for **entity list tables** — not `form-table` in dialogs (see [`forms-layout.mdc`](forms-layout.mdc)).
+
+## Required components
+
+- [`DataTable.svelte`](src/lib/components/DataTable.svelte) — wrapper, filtering, pagination, serial #, sticky columns
+- [`DataTableColumn.svelte`](src/lib/components/DataTableColumn.svelte) — one per data column
+
+## Column order (left to right)
+
+| Position | Content | Sticky |
+|----------|---------|--------|
+| 1 | Row actions (`IconActionButton`) | yes (`5.5rem`) |
+| 2 | Serial `#` (continuous across pages on filtered rows) | yes |
+| 3+ | Data columns — mark primary name/title with `firstData` | first data column sticky |
+
+## Header filters
+
+- Each `DataTableColumn` header is an `input` with `placeholder={label}`
+- Client-side, case-insensitive contains on `filterText(row)`
+- Actions and `#` columns have no filter input
+- Serial numbers reflect the **filtered** set and **continue across pages** (e.g. page 2 with page size 20 starts at 21)
+
+## Pagination
+
+- Built into `DataTable` — default **20** rows per page
+- Page size selector: **10 / 20 / 50** (`pageSizeOptions` prop)
+- Filters apply first, then pagination; changing filters or page size resets to page 1
+- Footer hidden when there are no rows; shows page controls + `1–20 of 142` range text
+
+## Actions snippet
+
+```svelte
+<DataTable rows={items} rowKey={(row) => row.id} emptyMessage="No items yet.">
+	{#snippet actions({ row })}
+		<IconActionButton label="Edit" variant="secondary" onclick={() => dialog?.open(row)}>
+			<Pencil class="h-4 w-4" />
+		</IconActionButton>
+	{/snippet}
+
+	<DataTableColumn label="Name" firstData filterText={(row) => row.name}>
+		{#snippet children({ row })}
+			{row.name}
+		{/snippet}
+	</DataTableColumn>
+</DataTable>
+```
+
+## Rules
+
+- Row actions in the **first** column only — see [`action-buttons.mdc`](action-buttons.mdc)
+- `filterText` must return plain searchable text (join nested lists with spaces for complex cells)
+- Optional non-sticky columns before `firstData` (e.g. icon/image) — do **not** set `firstData` on them
+- Empty state: `emptyMessage` on `DataTable` (single row, full colspan)
+- Wrapper styling is built into `DataTable` — do not duplicate `overflow-x-auto rounded-box border`
+
+Filter logic: [`src/lib/utils/table-filter.ts`](src/lib/utils/table-filter.ts)
+
+Sticky CSS: `.data-table .sticky-col-*` in [`src/routes/layout.css`](src/routes/layout.css)

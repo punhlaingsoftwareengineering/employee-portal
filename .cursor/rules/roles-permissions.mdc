@@ -1,0 +1,44 @@
+---
+description: Portal roles, department-scoped permissions, and admin invite workflow
+alwaysApply: false
+---
+
+# Roles & Permissions
+
+## Portal roles (`user_profile.portal_role`)
+
+| Role | Access |
+|------|--------|
+| `admin` | Full access + Users & roles management |
+| `guest` | Sign in only; redirected to `/pending` |
+| `member` | Access via department role matrix |
+
+## Department roles (`access_role` + `user_department_role`)
+
+Roles are **CRUD-managed** by admins at `/users` (Manager, HR, Viewer seeded by default).
+
+Each role defines permission flags: employee read/write/delete, department read/write.
+
+Users get per-department assignments via `roleId` FK.
+
+## Bootstrap
+
+- First user (email or GitHub) → `admin`
+- Later self-signups → `guest`
+- Invited users → pre-assigned `admin` or `member` + department roles (not guest)
+
+## Guards
+
+- `requireUser` — authenticated
+- `requireAppAccess` — not guest; has admin or ≥1 department role
+- `requireAdmin` — portal admin only
+
+Services accept `UserPermissions` from `getUserPermissions(userId)`.
+
+## Invites
+
+- Admin UI: `/users` → invite form → email with `/auth/accept-invite?token=…`
+- Single-use token, 24h expiry, resend/revoke from admin UI
+- Accept: password only (name/roles pre-chosen)
+
+Skill: `employee-portal-better-auth`

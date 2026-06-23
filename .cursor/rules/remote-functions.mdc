@@ -1,0 +1,15 @@
+---
+description: SvelteKit remote function conventions
+globs: "**/*.remote.ts"
+alwaysApply: false
+---
+
+# Remote Functions
+
+- Location: `src/lib/remotes/{entity}.remote.ts` — **never** under `src/lib/server/`
+- Types: `query` (read), `form` (create/update), `command` (delete)
+- Validated inputs: Zod schema as **first argument** to `query`/`form`/`command`
+- After mutations: `void relatedQuery().refresh()`; use `redirect()` after create/update forms
+- Implementation: call service functions only — no direct Drizzle in remotes
+
+Skill: `employee-portal-sveltekit-remotes`

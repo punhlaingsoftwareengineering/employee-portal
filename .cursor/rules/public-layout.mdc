@@ -1,0 +1,20 @@
+---
+description: Public shell — onboarding entry, navbar, footer
+globs: "src/routes/(public)/**"
+alwaysApply: false
+---
+
+# Public Layout
+
+Entry page: **`/onboarding`** (`src/routes/(public)/onboarding/`). Root `/` redirects there.
+
+Shared shell in `(public)/+layout.svelte`:
+
+- [`PublicNavbar.svelte`](src/lib/components/PublicNavbar.svelte) — DaisyUI `navbar`
+- [`PublicFooter.svelte`](src/lib/components/PublicFooter.svelte) — DaisyUI `footer`
+
+Path constant: [`src/lib/constants/public-routes.ts`](src/lib/constants/public-routes.ts)
+
+Auth pages under `(public)/auth/` inherit the same navbar and footer.
+
+Skill: `employee-portal-daisyui`

@@ -1,0 +1,98 @@
+@import '$lib/assets/fonts/fonts.css';
+@import 'tailwindcss';
+
+/* IconActionButton variants — always emit (avoids intermittent missing styles on tab remount/HMR) */
+@source inline(
+	'btn-primary btn-secondary btn-error btn-square btn-sm btn-xs tooltip-primary tooltip-secondary tooltip-error tooltip-left tooltip-right'
+);
+
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+@plugin 'daisyui' {
+	themes:
+		winter --default,
+		night --prefersdark;
+}
+
+@theme {
+	--font-maple-mono: 'Maple Mono', ui-monospace, monospace;
+	--font-adwaita-sans: 'Adwaita Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+	font-family: var(--font-maple-mono);
+}
+
+html[data-app-font='maple-mono'] {
+	font-family: var(--font-maple-mono);
+}
+
+html[data-app-font='adwaita-sans'] {
+	font-family: var(--font-adwaita-sans);
+}
+
+@layer components {
+	.card {
+		@apply border border-primary;
+	}
+
+	.form-table {
+		@apply table w-full border-separate border-spacing-y-2;
+	}
+
+	.form-table :is(thead, tbody, tfoot, tr, td, th) {
+		border: none;
+	}
+
+	.form-table-label {
+		@apply w-40 py-2 text-right align-middle font-medium whitespace-nowrap;
+	}
+
+	.form-table-field {
+		@apply py-2 align-middle;
+	}
+
+	.form-actions {
+		@apply mt-4 flex w-full gap-2;
+	}
+
+	.form-actions > :is(a, button) {
+		@apply flex-1;
+	}
+
+	/* Private portal: default buttons to sm; keep explicit xs/lg sizes */
+	.portal-private .btn:not(.btn-xs):not(.btn-lg):not(.btn-xl) {
+		@apply btn-sm;
+	}
+
+	.data-table .sticky-col-actions {
+		@apply bg-base-100 min-w-[5.5rem] w-[5.5rem];
+		position: sticky;
+		left: 0;
+		z-index: 3;
+	}
+
+	.data-table .sticky-col-actions :is(svg, .loading) {
+		@apply h-3.5 w-3.5;
+	}
+
+	.data-table .sticky-col-serial {
+		@apply bg-base-100 min-w-[3rem] w-[3rem] text-center;
+		position: sticky;
+		left: 5.5rem;
+		z-index: 2;
+	}
+
+	.data-table .sticky-col-first {
+		@apply bg-base-100 min-w-[10rem];
+		position: sticky;
+		left: 8.5rem;
+		z-index: 1;
+	}
+
+	.data-table thead .sticky-col-actions,
+	.data-table thead .sticky-col-serial,
+	.data-table thead .sticky-col-first {
+		@apply bg-base-200;
+	}
+}

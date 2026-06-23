@@ -1,0 +1,19 @@
+---
+description: Svelte 5 page and component conventions
+globs: "**/*.svelte"
+alwaysApply: false
+---
+
+# Svelte Pages
+
+- Svelte 5 runes: `$props()`, `$derived()`, `$state()` — no legacy `export let`
+- Content projection: **`Snippet` + `{@render}` only** — see [`svelte-render.mdc`](svelte-render.mdc); no `<slot>`
+- Data: `{#await remote()}` inside `<svelte:boundary>` with `pending` / `failed` snippets
+- **Never** import `$lib/server/*` in `.svelte` files — use `$lib/constants/` for client-safe enums
+- Icons: `lucide-svelte` with `class="h-4 w-4"` in buttons/nav
+- Row actions (view / open / edit / delete): icon-only + tooltips — see [`action-buttons.mdc`](action-buttons.mdc); use `IconActionButton`
+- Before finishing: run **svelte-autofixer** on every edited `.svelte` file
+
+Svelte MCP: `list-sections` → `get-documentation` for remote functions, async, routing.
+
+Skills: `employee-portal-sveltekit-remotes`, `employee-portal-lucide`, `employee-portal-daisyui`

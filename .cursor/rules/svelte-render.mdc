@@ -1,0 +1,76 @@
+---
+description: Svelte 5 snippets and {@render} only — no legacy slots
+globs: "**/*.svelte"
+alwaysApply: false
+---
+
+# Snippets and `{@render}` (no slots)
+
+This project uses **Svelte 5 snippets**. Do **not** use legacy slots anywhere.
+
+## Forbidden
+
+- `<slot />`, `<slot name="…" />`
+- `slot="…"` on child elements
+- `$$slots`, `let:` on slot content
+- `export let` for component props (use `$props()`)
+
+## Required patterns
+
+### Default content (layouts, wrappers)
+
+```svelte
+<script lang="ts">
+	let { children } = $props();
+</script>
+
+{@render children()}
+```
+
+Reference: [`src/routes/+layout.svelte`](src/routes/+layout.svelte), [`src/routes/(private)/+layout.svelte`](src/routes/(private)/+layout.svelte)
+
+### Named snippet props (reusable components)
+
+```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+
+	let { label, children }: { label: string; children: Snippet } = $props();
+</script>
+
+<button aria-label={label}>
+	{@render children()}
+</button>
+```
+
+Reference: [`src/lib/components/IconActionButton.svelte`](src/lib/components/IconActionButton.svelte)
+
+### Multiple snippets
+
+Pass each region as a typed `Snippet` prop and render with `{@render propName()}`:
+
+```svelte
+let {
+	header,
+	footer,
+	children
+}: {
+	header?: Snippet;
+	footer?: Snippet;
+	children: Snippet;
+} = $props();
+```
+
+Optional snippets: `{#if header}{@render header()}{/if}`
+
+### Boundaries and control flow
+
+Use `{#snippet name()}…{/snippet}` for `svelte:boundary` pending/failed handlers — not slots.
+
+## When editing
+
+- New layout or wrapper → `children: Snippet` + `{@render children()}`
+- New component with injectable markup → `Snippet` props, never `<slot>`
+- Converting legacy code → replace slots with snippet props and update call sites to `{#snippet …}`
+
+Skill: `employee-portal-sveltekit-remotes` · Svelte MCP: `svelte/snippet`, `svelte/@render`

@@ -1,0 +1,29 @@
+---
+description: DaisyUI card border styling
+globs: "**/*.svelte"
+alwaysApply: false
+---
+
+# Card Style
+
+Every DaisyUI **card** must have a **primary-colored border**.
+
+Global default in [`src/routes/layout.css`](src/routes/layout.css):
+
+```css
+.card {
+	@apply border border-primary;
+}
+```
+
+When adding a card in markup, still use the standard stack:
+
+```svelte
+<div class="card bg-base-100 shadow-sm">
+	<div class="card-body">...</div>
+</div>
+```
+
+Do **not** remove `border-primary` or override with `border-base-300` unless the element is not a content card (e.g. tables use `rounded-box border border-base-300`, not `.card`).
+
+Skill: `employee-portal-daisyui`

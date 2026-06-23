@@ -1,0 +1,26 @@
+---
+description: DaisyUI theme — winter light, night dark
+alwaysApply: true
+---
+
+# DaisyUI Themes
+
+Use **only** these themes — no other DaisyUI theme names:
+
+| Mode | Theme | When |
+|------|-------|------|
+| Light | `winter` | Default / light color scheme |
+| Dark | `night` | `prefers-color-scheme: dark` |
+
+Configured in [`src/routes/layout.css`](src/routes/layout.css):
+
+```css
+@plugin 'daisyui' {
+	themes: winter --default, night --prefersdark;
+}
+```
+
+- Do **not** set `data-theme="corporate"` or other themes on layout wrappers
+- Do **not** add theme toggle buttons that switch to other theme names unless they only toggle between `winter` and `night`
+
+Skill: `employee-portal-daisyui`

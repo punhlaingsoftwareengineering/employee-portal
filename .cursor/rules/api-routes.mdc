@@ -1,0 +1,15 @@
+---
+description: REST API route handler conventions
+globs: "**/+server.ts"
+alwaysApply: false
+---
+
+# API Routes
+
+- Path: `src/routes/api/{entities}/+server.ts` and `[id]/+server.ts`
+- Auth: `requireUser(event)` from `$lib/server/auth-guard` unless explicitly public
+- Validation: Zod `.parse()` on body/params
+- Data access: call **service functions** — same as remotes, no duplicated Drizzle
+- Responses: `json(data)` with appropriate status codes; `204` for DELETE
+
+Skill: `employee-portal-workflow`

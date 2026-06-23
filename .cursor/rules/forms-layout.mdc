@@ -1,0 +1,46 @@
+---
+description: DaisyUI card + borderless table form layout
+globs: "**/+page.svelte"
+alwaysApply: false
+---
+
+# Form Layout
+
+Every form is wrapped in a **DaisyUI card**. Inside the card, use a **borderless table** for fields (label left, control right).
+
+Classes from `src/routes/layout.css`: `form-table`, `form-table-label`, `form-table-field`, `form-actions`.
+
+```svelte
+<div class="card bg-base-100 shadow-sm max-w-2xl">
+	<div class="card-body">
+		<form {...remoteForm}>
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<td class="form-table-label">Label</td>
+						<td class="form-table-field">
+							<input {...remoteForm.fields.name.as('text')} class="input input-bordered w-full max-w-md" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="form-actions">
+				<a href="..." class="btn btn-ghost">Cancel</a>
+				<button type="submit" class="btn btn-primary">Save</button>
+			</div>
+		</form>
+	</div>
+</div>
+```
+
+Rules:
+
+- **Card required**: `card bg-base-100 shadow-sm` + `card-body` wrapping each form (primary border applied globally via `.card` in `layout.css`)
+- **Table inside card**: no `table-zebra`; borderless via `form-table`
+- **Actions**: `form-actions` below the table — full width; one button spans all width; multiple buttons share width equally (`flex-1` each)
+- **Password fields**: use [`PasswordInput`](src/lib/components/PasswordInput.svelte) — never a bare `type="password"` input; includes eye toggle to show/hide
+- **Sign up**: always include a confirm-password field; validate match server-side
+- Hidden fields (e.g. `id` on edit): inside `<form>` but outside `<table>`
+- Page title (`h1`) stays **above** the card
+
+Skill: `employee-portal-daisyui`
