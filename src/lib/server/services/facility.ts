@@ -68,6 +68,13 @@ export async function updateFacility(
 	return record;
 }
 
+export async function deleteFacility(perms: UserPermissions, id: string) {
+	assertCanManage(perms);
+
+	await getFacility(perms, id);
+	await db.delete(facility).where(eq(facility.id, id));
+}
+
 export async function listAllFacilities() {
 	return db.query.facility.findMany({
 		orderBy: [asc(facility.name)]
