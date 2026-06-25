@@ -154,7 +154,7 @@
 </script>
 
 <dialog bind:this={dialog} class="modal">
-	<div class="modal-box max-w-2xl">
+	<div class="modal-box modal-box-fit">
 		<h3 class="text-lg font-bold">{isEdit ? 'Edit role' : 'New role'}</h3>
 
 		{#if opening}

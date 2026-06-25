@@ -6,6 +6,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 
 	const id = $derived(page.params.id!);
 	let deleting = $state(false);
@@ -25,11 +26,10 @@
 <svelte:boundary>
 	{@const employee = await getEmployee(id)}
 
-	<div class="mb-6 flex items-center justify-between">
-		<div>
-			<h1 class="text-2xl font-bold">{employee.firstName} {employee.lastName}</h1>
-			<p class="text-base-content/70">{employee.email}</p>
-		</div>
+	<PrivatePageHeader title={`${employee.firstName} ${employee.lastName}`} />
+
+	<div class="flex items-center justify-between">
+		<p class="text-base-content/70">{employee.email}</p>
 		<div class="flex gap-2">
 			<IconActionButton label="Edit" variant="secondary" href="/employees/{employee.id}/edit">
 				<Pencil class="h-4 w-4" />

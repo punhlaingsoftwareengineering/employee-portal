@@ -77,7 +77,7 @@
 	])}
 
 	<dialog bind:this={dialog} class="modal" onclose={resetForm}>
-		<div class="modal-box max-w-2xl">
+		<div class="modal-box modal-box-fit">
 			<h3 class="text-lg font-bold">Invite user</h3>
 			<p class="mt-1 text-sm opacity-70">
 				They will receive an email link to set their password. Link expires in 24 hours.
@@ -209,7 +209,7 @@
 
 	{#snippet pending()}
 		<dialog class="modal modal-open">
-			<div class="modal-box flex justify-center py-12">
+			<div class="modal-box modal-box-fit flex justify-center py-12">
 				<LoadingSpinner size="lg" />
 			</div>
 		</dialog>
@@ -217,7 +217,7 @@
 
 	{#snippet failed(err)}
 		<dialog class="modal modal-open">
-			<div class="modal-box">
+			<div class="modal-box modal-box-fit">
 				<div class="alert alert-error">
 					<span>{err instanceof Error ? err.message : 'Failed to load departments'}</span>
 				</div>

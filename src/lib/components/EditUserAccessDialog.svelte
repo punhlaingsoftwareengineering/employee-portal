@@ -85,7 +85,7 @@
 	])}
 
 	<dialog bind:this={dialog} class="modal">
-		<div class="modal-box max-w-2xl">
+		<div class="modal-box modal-box-fit">
 			{#if portalUser}
 				<h3 class="text-lg font-bold">Edit access — {portalUser.name}</h3>
 				<p class="text-sm opacity-70">{portalUser.email}</p>
@@ -190,7 +190,7 @@
 
 	{#snippet pending()}
 		<dialog class="modal modal-open">
-			<div class="modal-box flex justify-center py-12">
+			<div class="modal-box modal-box-fit flex justify-center py-12">
 				<LoadingSpinner size="lg" />
 			</div>
 		</dialog>

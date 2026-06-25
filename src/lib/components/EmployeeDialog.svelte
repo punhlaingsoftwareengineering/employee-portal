@@ -73,7 +73,7 @@
 	])}
 
 	<dialog bind:this={dialog} class="modal" onclose={resetForm}>
-		<div class="modal-box max-w-2xl">
+		<div class="modal-box modal-box-fit">
 			<h3 class="text-lg font-bold">New employee</h3>
 
 			<form class="mt-6" onsubmit={handleSubmit}>
@@ -201,7 +201,7 @@
 
 	{#snippet pending()}
 		<dialog class="modal modal-open">
-			<div class="modal-box flex justify-center py-12">
+			<div class="modal-box modal-box-fit flex justify-center py-12">
 				<LoadingSpinner size="lg" />
 			</div>
 		</dialog>
@@ -209,7 +209,7 @@
 
 	{#snippet failed(loadError)}
 		<dialog class="modal modal-open">
-			<div class="modal-box">
+			<div class="modal-box modal-box-fit">
 				<div class="alert alert-error">
 					<span>{loadError instanceof Error ? loadError.message : 'Failed to load form'}</span>
 				</div>

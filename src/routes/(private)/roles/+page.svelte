@@ -6,6 +6,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { getAccessRoles, deleteAccessRole } from '$lib/remotes/access-role.remote';
 	import { getServices } from '$lib/remotes/service.remote';
@@ -34,8 +35,9 @@
 
 	<RoleDialog bind:this={roleDialog} {allServices} {allApps} />
 
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Roles</h1>
+	<PrivatePageHeader title="Roles" />
+
+	<div class="flex justify-end">
 		<button type="button" class="btn btn-primary gap-2" onclick={() => roleDialog?.open()}>
 			<Plus class="h-4 w-4" />
 			New role

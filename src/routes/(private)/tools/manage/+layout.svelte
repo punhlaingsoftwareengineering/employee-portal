@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { Layers, Smartphone } from 'lucide-svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import AppsManageTable from '$lib/components/tools-manage/AppsManageTable.svelte';
 	import ServicesManageTable from '$lib/components/tools-manage/ServicesManageTable.svelte';
 	import { getApps } from '$lib/remotes/app.remote';
@@ -18,10 +19,9 @@
 		{@const services = await getServices()}
 		{@const apps = await getApps()}
 
-		<div class="mb-6">
-			<h1 class="text-2xl font-bold">Manage tools</h1>
-			<p class="mt-1 text-base-content/70">Register services and apps for role assignment.</p>
-		</div>
+		<PrivatePageHeader title="Manage tools" />
+
+		<p class="text-base-content/70">Register services and apps for role assignment.</p>
 
 		<div class="tabs tabs-lift">
 			<a
@@ -56,10 +56,8 @@
 		{@render children()}
 
 		{#snippet pending()}
-			<div class="mb-6">
-				<h1 class="text-2xl font-bold">Manage tools</h1>
-				<p class="mt-1 text-base-content/70">Register services and apps for role assignment.</p>
-			</div>
+			<PrivatePageHeader title="Manage tools" />
+			<p class="text-base-content/70">Register services and apps for role assignment.</p>
 			<LoadingCenter />
 		{/snippet}
 

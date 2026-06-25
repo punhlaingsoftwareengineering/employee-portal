@@ -1,0 +1,60 @@
+---
+description: DaisyUI modal dialogs that size to their content
+globs: "**/*Dialog.svelte"
+alwaysApply: false
+---
+
+# Modal dialogs
+
+CRUD and admin dialogs use DaisyUI `<dialog class="modal">` with a **content-sized** inner box.
+
+## Width
+
+Use `modal-box modal-box-fit` on the inner box. **Do not** set `max-w-lg`, `max-w-2xl`, or `max-w-3xl` on dialogs.
+
+`.modal-box-fit` is defined in [`src/routes/layout.css`](src/routes/layout.css) — width follows form content, capped at viewport.
+
+## Structure
+
+```svelte
+<dialog bind:this={dialog} class="modal">
+	<div class="modal-box modal-box-fit">
+		<h3 class="text-lg font-bold">Title</h3>
+
+		<form class="mt-6" onsubmit={handleSubmit}>
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<td class="form-table-label">Label</td>
+						<td class="form-table-field">
+							<input class="input input-bordered w-full max-w-md" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			{#if error}
+				<div class="alert alert-error mt-4">
+					<span>{error}</span>
+				</div>
+			{/if}
+
+			<div class="modal-action">
+				<button type="button" class="btn btn-ghost">Cancel</button>
+				<button type="submit" class="btn btn-primary">Save</button>
+			</div>
+		</form>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button aria-label="Close dialog">close</button>
+	</form>
+</dialog>
+```
+
+## Rules
+
+- **Loading / error nested dialogs** (e.g. `svelte:boundary` snippets): also use `modal-box modal-box-fit`
+- **Fields**: keep `max-w-md` on inputs in `form-table-field` — they set natural dialog width
+- **Form layout**: same `form-table` pattern as [`forms-layout.mdc`](forms-layout.mdc)
+
+Skill: `employee-portal-daisyui`

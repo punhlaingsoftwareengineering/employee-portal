@@ -8,6 +8,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import EditUserAccessDialog from '$lib/components/EditUserAccessDialog.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import {
 		getPortalUsers,
@@ -98,8 +99,9 @@
 	<InviteUserDialog bind:this={inviteDialog} />
 	<EditUserAccessDialog bind:this={editUserDialog} />
 
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Users</h1>
+	<PrivatePageHeader title="Users" />
+
+	<div class="flex justify-end">
 		<button type="button" class="btn btn-primary gap-2" onclick={() => inviteDialog?.open()}>
 			<Plus class="h-4 w-4" />
 			Invite user

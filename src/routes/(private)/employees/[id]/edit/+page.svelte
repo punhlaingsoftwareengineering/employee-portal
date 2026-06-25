@@ -7,6 +7,7 @@
 	import { EMPLOYEE_STATUSES } from '$lib/constants/employee-status';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 
 	const id = $derived(page.params.id!);
 </script>
@@ -19,7 +20,7 @@
 		getFacilities()
 	])}
 
-	<h1 class="mb-6 text-2xl font-bold">Edit employee</h1>
+	<PrivatePageHeader title="Edit employee" />
 
 	<div class="card bg-base-100 shadow-sm max-w-2xl">
 		<div class="card-body">

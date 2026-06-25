@@ -7,6 +7,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { getFacilities, deleteFacility } from '$lib/remotes/facility.remote';
 
@@ -25,15 +26,16 @@
 
 	<FacilityDialog bind:this={facilityDialog} />
 
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Facilities</h1>
-		{#if canManage}
+	<PrivatePageHeader title="Facilities" />
+
+	{#if canManage}
+		<div class="flex justify-end">
 			<button type="button" class="btn btn-primary gap-2" onclick={() => facilityDialog?.open()}>
 				<Plus class="h-4 w-4" />
 				Add facility
 			</button>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	<DataTable rows={facilities} rowKey={(item) => item.id} emptyMessage="No facilities yet.">
 		{#snippet actions({ row: item })}

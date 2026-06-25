@@ -58,7 +58,7 @@
 </script>
 
 <dialog bind:this={dialog} class="modal">
-	<div class="modal-box max-w-lg">
+	<div class="modal-box modal-box-fit">
 		<h3 class="text-lg font-bold">{isEdit ? 'Edit department' : 'New department'}</h3>
 
 		<form class="mt-6" onsubmit={handleSubmit}>

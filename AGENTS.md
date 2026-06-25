@@ -27,6 +27,7 @@
 | [`daisyui-theme.mdc`](.cursor/rules/daisyui-theme.mdc)         | Always on — `winter` light, `night` dark      |
 | [`auth-routes.mdc`](.cursor/rules/auth-routes.mdc)             | Always on — auth pages under `/auth/*`        |
 | [`forms-layout.mdc`](.cursor/rules/forms-layout.mdc)           | `**/+page.svelte` — card + form-table layout  |
+| [`modal-dialogs.mdc`](.cursor/rules/modal-dialogs.mdc)       | `**/*Dialog.svelte` — content-sized modals    |
 | [`drizzle-schema.mdc`](.cursor/rules/drizzle-schema.mdc)       | `**/db/schema/**` — pgEnum, FK, relations     |
 | [`remote-functions.mdc`](.cursor/rules/remote-functions.mdc)   | `**/*.remote.ts` — query/form/command         |
 | [`api-routes.mdc`](.cursor/rules/api-routes.mdc)               | `**/+server.ts` — REST handlers               |

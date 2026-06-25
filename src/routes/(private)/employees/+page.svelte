@@ -7,6 +7,7 @@
 	import { getEmployees } from '$lib/remotes/employee.remote';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 
 	const permissions = $derived(page.data.permissions);
 	const canCreate = $derived(
@@ -22,9 +23,10 @@
 
 	<EmployeeDialog bind:this={employeeDialog} />
 
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Employees</h1>
-		{#if canCreate}
+	<PrivatePageHeader title="Employees" />
+
+	{#if canCreate}
+		<div class="flex justify-end">
 			<button
 				type="button"
 				class="btn btn-primary gap-2"
@@ -33,8 +35,8 @@
 				<Plus class="h-4 w-4" />
 				Add employee
 			</button>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	<DataTable rows={employees} rowKey={(employee) => employee.id} emptyMessage="No employees yet.">
 		{#snippet actions({ row: employee })}

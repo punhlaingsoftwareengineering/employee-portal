@@ -7,6 +7,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { getDepartments, deleteDepartment } from '$lib/remotes/department.remote';
 
@@ -20,15 +21,16 @@
 
 	<DepartmentDialog bind:this={departmentDialog} />
 
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Departments</h1>
-		{#if isAdmin}
+	<PrivatePageHeader title="Departments" />
+
+	{#if isAdmin}
+		<div class="flex justify-end">
 			<button type="button" class="btn btn-primary gap-2" onclick={() => departmentDialog?.open()}>
 				<Plus class="h-4 w-4" />
 				Add department
 			</button>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	<DataTable rows={departments} rowKey={(department) => department.id} emptyMessage="No departments yet.">
 		{#snippet actions({ row: department })}
