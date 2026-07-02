@@ -1,14 +1,10 @@
 <script lang="ts">
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 	import AppDetailPanel from '$lib/components/AppDetailPanel.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 
 	let { data } = $props();
 </script>
-
-<svelte:head>
-	<title>{data.app.name}</title>
-</svelte:head>
 
 <PrivatePageHeader title={data.app.name} />
 

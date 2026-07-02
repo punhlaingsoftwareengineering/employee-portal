@@ -11,6 +11,8 @@
 		<AnnouncementBanner announcement={data.announcement} />
 	{/if}
 	<PublicNavbar />
-	<main class="flex-1">{@render children()}</main>
+	<main class="flex-1">
+		{@render children?.()}
+	</main>
 	<PublicFooter />
 </div>

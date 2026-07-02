@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Eye, Pencil, Trash2 } from 'lucide-svelte';
+	import { Plus, Eye, Pencil, Trash2 } from '@lucide/svelte';
 	import AppDialog from '$lib/components/AppDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';

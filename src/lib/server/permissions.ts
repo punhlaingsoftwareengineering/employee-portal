@@ -94,6 +94,16 @@ export function canAccessSettings(perms: UserPermissions): boolean {
 	return perms.departmentRoles.some((assignment) => assignment.permissions.navSettings);
 }
 
+export function canAccessTools(perms: UserPermissions): boolean {
+	if (perms.isAdmin) return true;
+	return perms.departmentRoles.some((assignment) => assignment.permissions.navTools);
+}
+
+export function canManageCommunity(perms: UserPermissions): boolean {
+	if (perms.isAdmin) return true;
+	return perms.departmentRoles.some((assignment) => assignment.permissions.navDashboard);
+}
+
 export function canAccessService(
 	availableServices: { id: string }[],
 	serviceId: string

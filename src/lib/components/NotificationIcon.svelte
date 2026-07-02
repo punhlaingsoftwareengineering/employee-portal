@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PublicNotification } from '$lib/schemas/notification';
-	import * as icons from 'lucide-svelte';
-	import { Bell } from 'lucide-svelte';
+	import { Bell, icons } from '@lucide/svelte';
 
 	let {
 		notification,

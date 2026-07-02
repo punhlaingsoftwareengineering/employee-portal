@@ -9,13 +9,16 @@ RUN deno install --allow-scripts
 # Copy application source
 COPY . .
 
-# SvelteKit validates env at build time — required vars only; optional vars use schema in src/env.ts
-ENV DATABASE_URL="postgres://postgres:postgres@db:5432/employee_portal"
-ENV ORIGIN="http://localhost:1027"
-ENV BETTER_AUTH_SECRET="docker-build-placeholder-min-32-chars"
+# SvelteKit validates env at build time — placeholders only; runtime uses --env-file
+ARG BUILD_DATABASE_URL="postgres://postgres:postgres@db:5432/employee_portal"
+ARG BUILD_ORIGIN="http://localhost:1027"
+ARG BUILD_KIT_DUMMY_VALUE="docker-build-placeholder-min-32-chars"
 
 # Build SvelteKit (adapter-node → build/)
-RUN deno task build
+RUN DATABASE_URL="$BUILD_DATABASE_URL" \
+	ORIGIN="$BUILD_ORIGIN" \
+	BETTER_AUTH_SECRET="$BUILD_KIT_DUMMY_VALUE" \
+	deno task build
 
 FROM node:22-slim AS runner
 

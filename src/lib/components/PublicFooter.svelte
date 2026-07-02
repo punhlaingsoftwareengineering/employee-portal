@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Building2, Users } from 'lucide-svelte';
+	import { Building2, Users } from '@lucide/svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 

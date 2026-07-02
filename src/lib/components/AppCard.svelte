@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Pin } from '@lucide/svelte';
 	import ServiceIcon from '$lib/components/ServiceIcon.svelte';
 
 	let {
@@ -9,7 +10,10 @@
 		iconUrl = null,
 		category = null,
 		developer = null,
-		version = null
+		version = null,
+		pinned = false,
+		showPin = false,
+		onPinToggle
 	}: {
 		href: string;
 		name: string;
@@ -19,13 +23,37 @@
 		category?: string | null;
 		developer?: string | null;
 		version?: string | null;
+		pinned?: boolean;
+		showPin?: boolean;
+		onPinToggle?: () => void;
 	} = $props();
 
 	const metaParts = $derived(
 		[developer, version ? `v${version}` : null].filter(Boolean)
 	);
 	const subtitle = $derived(tagline ?? description);
+
+	function handlePinClick(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		onPinToggle?.();
+	}
 </script>
+
+<div class="relative w-full">
+	{#if showPin}
+		<button
+			type="button"
+			class="btn btn-circle btn-xs absolute top-2 right-2 z-20 border border-base-300 bg-base-100/90 shadow-sm backdrop-blur-sm"
+			class:btn-primary={pinned}
+			class:btn-ghost={!pinned}
+			aria-label={pinned ? 'Unpin from dashboard' : 'Pin to dashboard'}
+			aria-pressed={pinned}
+			onclick={handlePinClick}
+		>
+			<Pin class="h-3.5 w-3.5 {pinned ? 'fill-current' : ''}" />
+		</button>
+	{/if}
 
 <a href={href} class="app-card hover-3d w-full cursor-pointer" aria-label="View {name}">
 	<figure class="app-card-face flex h-full flex-col rounded-3xl bg-base-100 p-4">
@@ -70,3 +98,4 @@
 	<div></div>
 	<div></div>
 </a>
+</div>

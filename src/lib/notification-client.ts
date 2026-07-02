@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import {
 	DISMISSED_NOTIFICATIONS_KEY,
 	NOTIFICATIONS_MUTED_KEY

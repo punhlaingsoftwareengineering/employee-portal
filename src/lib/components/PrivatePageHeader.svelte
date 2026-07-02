@@ -1,14 +1,19 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
+	import PageTitle from '$lib/components/PageTitle.svelte';
 
 	let {
 		title,
-		icon: Icon
+		icon: Icon,
+		titlePrefix
 	}: {
 		title: string;
 		icon?: Component;
+		titlePrefix?: string;
 	} = $props();
 </script>
+
+<PageTitle {title} prefix={titlePrefix} />
 
 <header class="portal-sticky-page-header">
 	<h1 class="portal-panel-header__title">

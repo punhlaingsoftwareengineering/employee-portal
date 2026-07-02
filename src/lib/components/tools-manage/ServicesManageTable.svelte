@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, ExternalLink, Pencil, Trash2 } from 'lucide-svelte';
+	import { Plus, ExternalLink, Pencil, Trash2 } from '@lucide/svelte';
 	import ServiceDialog from '$lib/components/ServiceDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
@@ -8,6 +8,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteService } from '$lib/remotes/service.remote';
+	import { isBuiltinServiceId } from '$lib/constants/builtin-services';
 	import { accentGradientBackground } from '$lib/utils/accent-gradient';
 	import type { getServices } from '$lib/remotes/service.remote';
 
@@ -42,23 +43,25 @@
 		>
 			<Pencil class="h-4 w-4" />
 		</IconActionButton>
-		<IconActionButton
-			label="Delete"
-			variant="error"
-			disabled={deleteLoading.isPending(item.id)}
-			onclick={async () => {
-				if (!confirm(`Delete service "${item.name}"?`)) return;
-				await deleteLoading.run(item.id, async () => {
-					await deleteService(item.id);
-				});
-			}}
-		>
-			{#if deleteLoading.isPending(item.id)}
-				<LoadingSpinner size="sm" />
-			{:else}
-				<Trash2 class="h-4 w-4" />
-			{/if}
-		</IconActionButton>
+		{#if !isBuiltinServiceId(item.id)}
+			<IconActionButton
+				label="Delete"
+				variant="error"
+				disabled={deleteLoading.isPending(item.id)}
+				onclick={async () => {
+					if (!confirm(`Delete service "${item.name}"?`)) return;
+					await deleteLoading.run(item.id, async () => {
+						await deleteService(item.id);
+					});
+				}}
+			>
+				{#if deleteLoading.isPending(item.id)}
+					<LoadingSpinner size="sm" />
+				{:else}
+					<Trash2 class="h-4 w-4" />
+				{/if}
+			</IconActionButton>
+		{/if}
 	{/snippet}
 
 	<DataTableColumn label="Icon" filterText={(item) => item.iconUrl ?? item.name} class="w-10">

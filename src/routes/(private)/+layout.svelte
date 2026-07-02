@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { appSettings } from '$lib/app-settings.svelte';
 	import PortalIcon from '$lib/components/PortalIcon.svelte';
 	import PortalSidebarNav from '$lib/components/PortalSidebarNav.svelte';
 	import SidebarResizeHandle from '$lib/components/SidebarResizeHandle.svelte';
-	import { sidebarLayout } from '$lib/sidebar-layout.svelte';
-	import { page } from '$app/state';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { hydrateSidebarLayout, sidebarLayout } from '$lib/sidebar-layout.svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		hydrateSidebarLayout();
+	});
 
 	function closeDrawer() {
 		const toggle = document.getElementById('app-drawer');
@@ -46,16 +51,14 @@
 					/>
 				</svg>
 			</label>
-			<span class="flex items-center gap-2 font-semibold">
+			<a href={PUBLIC_ROUTES.onboarding} class="btn btn-ghost min-w-0 flex-1 justify-start gap-2 font-semibold">
 				<PortalIcon iconUrl={appSettings.iconUrl} class="h-5 w-5" />
-				{appSettings.title}
-			</span>
+				<span class="truncate">{appSettings.title}</span>
+			</a>
 		</header>
 
 		<main class="portal-private-main">
-			{#key page.url.pathname}
-				{@render children()}
-			{/key}
+			{@render children?.()}
 		</main>
 	</div>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Trash2 } from 'lucide-svelte';
+	import { Plus, Trash2 } from '@lucide/svelte';
 	import { createInvite, getAllDepartments, getAllFacilities, getInvites } from '$lib/remotes/portal-user.remote';
 	import { getAccessRoles } from '$lib/remotes/access-role.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';

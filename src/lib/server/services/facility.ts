@@ -80,3 +80,11 @@ export async function listAllFacilities() {
 		orderBy: [asc(facility.name)]
 	});
 }
+
+/** Public onboarding showcase — first N facilities by name. */
+export async function listOnboardingFacilities(limit = 6) {
+	return db.query.facility.findMany({
+		orderBy: [asc(facility.name)],
+		limit
+	});
+}

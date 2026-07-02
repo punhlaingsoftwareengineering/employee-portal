@@ -20,25 +20,17 @@
 	const table = getContext<DataTableContext<any>>('data-table');
 
 	onMount(() => {
+		if (!children) return;
+
 		const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-') || crypto.randomUUID();
 
 		return table.register({
 			id,
-			get label() {
-				return label;
-			},
-			get firstData() {
-				return firstData;
-			},
-			get class() {
-				return className || undefined;
-			},
-			get filterText() {
-				return filterText;
-			},
-			get children() {
-				return children;
-			}
+			label,
+			firstData,
+			class: className || undefined,
+			filterText,
+			children
 		});
 	});
 </script>

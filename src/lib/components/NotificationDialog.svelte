@@ -181,6 +181,11 @@
 								{#snippet pending()}
 									<span class="loading loading-spinner loading-sm"></span>
 								{/snippet}
+								{#snippet failed()}
+									<select class="select select-bordered select-error w-full max-w-md" disabled>
+										<option>Failed to load sounds</option>
+									</select>
+								{/snippet}
 							</svelte:boundary>
 						</td>
 					</tr>

@@ -3,6 +3,7 @@ import {
 	DEFAULT_APP_SETTINGS,
 	type AppBranding
 } from '$lib/constants/app-settings';
+import { getPortalThemePolicy } from '$lib/server/services/portal-theme-config';
 import type { LayoutServerLoad } from './$types';
 
 function parseBrandingCookie(raw: string | undefined): AppBranding | undefined {
@@ -27,8 +28,13 @@ function parseBrandingCookie(raw: string | undefined): AppBranding | undefined {
 	}
 }
 
-export const load: LayoutServerLoad = async ({ cookies }) => {
+export const load: LayoutServerLoad = async ({ cookies, locals }) => {
 	const appBranding = parseBrandingCookie(cookies.get(APP_BRANDING_COOKIE));
+	const portalThemePolicy = await getPortalThemePolicy();
 
-	return { appBranding };
+	return {
+		appBranding,
+		portalThemePolicy,
+		user: locals.user ?? null
+	};
 };

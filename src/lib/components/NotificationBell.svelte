@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { Bell, Volume2, VolumeX } from 'lucide-svelte';
+	import { Bell, Volume2, VolumeX } from '@lucide/svelte';
 	import type { PublicNotification } from '$lib/schemas/notification';
 	import { NOTIFICATIONS_ROUTE } from '$lib/constants/notification';
 	import NotificationListItem from '$lib/components/NotificationListItem.svelte';
@@ -113,15 +113,16 @@
 </script>
 
 <div class="dropdown dropdown-end">
-	<div tabindex="0" role="button" class="btn btn-ghost btn-square" aria-label="Notifications">
+	<button type="button" class="btn btn-ghost btn-square" aria-label="Notifications">
 		<div class="indicator">
 			<Bell class="h-5 w-5" />
 			{#if unreadCount > 0}
 				<span class="badge badge-primary badge-xs indicator-item">{unreadCount > 99 ? '99+' : unreadCount}</span>
 			{/if}
 		</div>
-	</div>
+	</button>
 	<div
+		role="menu"
 		tabindex="0"
 		class="dropdown-content z-50 mt-2 w-80 rounded-box border border-base-300 bg-base-100 shadow-lg"
 	>

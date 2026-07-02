@@ -1,6 +1,6 @@
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
-	import { setContext } from 'svelte';
+	import { onDestroy, setContext } from 'svelte';
 	import { filterRows } from '$lib/utils/table-filter';
 	import type { DataTableColumnHandle, DataTableContext } from '$lib/components/data-table.types';
 
@@ -26,29 +26,26 @@
 	let columns = $state<DataTableColumnHandle<T>[]>([]);
 	let filters = $state<Record<string, string>>({});
 	let currentPageSize = $state(20);
+	let didInitPageSize = $state(false);
 	let currentPage = $state(1);
-	let syncQueued = false;
 
-	if (pageSize !== 20) {
+	$effect(() => {
+		if (didInitPageSize) return;
 		currentPageSize = pageSize;
-	}
+		didInitPageSize = true;
+	});
 
-	function syncColumns() {
-		if (syncQueued) return;
-		syncQueued = true;
-		queueMicrotask(() => {
-			columns = Array.from(columnRegistry.values());
-			syncQueued = false;
-		});
+	function refreshColumns() {
+		columns = Array.from(columnRegistry.values());
 	}
 
 	setContext<DataTableContext<T>>('data-table', {
 		register(column) {
 			columnRegistry.set(column.id, column);
-			syncColumns();
+			refreshColumns();
 			return () => {
 				columnRegistry.delete(column.id);
-				syncColumns();
+				refreshColumns();
 			};
 		}
 	});
@@ -58,8 +55,15 @@
 		tooltipPlacement: 'tooltip-right' as const
 	});
 
+	onDestroy(() => {
+		columnRegistry.clear();
+		refreshColumns();
+	});
+
+	const activeColumns = $derived(columns.filter((column) => column.children));
+
 	const filteredRows = $derived.by(() => {
-		const columnFilters = columns.map((column) => ({
+		const columnFilters = activeColumns.map((column) => ({
 			id: column.id,
 			filterText: column.filterText
 		}));
@@ -79,7 +83,7 @@
 		totalFiltered === 0 ? 0 : (safeCurrentPage - 1) * currentPageSize + 1
 	);
 	const rangeEnd = $derived(Math.min(safeCurrentPage * currentPageSize, totalFiltered));
-	const columnCount = $derived(columns.length);
+	const columnCount = $derived(activeColumns.length);
 
 	function resetPage() {
 		currentPage = 1;
@@ -88,7 +92,7 @@
 
 {#if children}
 	<div class="hidden" aria-hidden="true">
-		{@render children()}
+		{@render children?.()}
 	</div>
 {/if}
 
@@ -98,7 +102,7 @@
 			<tr>
 				<th class="sticky-col-actions" scope="col" aria-label="Actions"></th>
 				<th class="sticky-col-serial" scope="col">#</th>
-				{#each columns as column (column.id)}
+				{#each activeColumns as column (column.id)}
 					<th
 						scope="col"
 						class={column.class}
@@ -123,18 +127,16 @@
 			{#each paginatedRows as row, index (rowKey(row))}
 				<tr>
 					<td class="sticky-col-actions">
-						{#if actions}
-							<div class="flex flex-nowrap gap-1">
-								{@render actions({ row })}
-							</div>
-						{/if}
+						<div class="flex flex-nowrap gap-1">
+							{@render actions?.({ row })}
+						</div>
 					</td>
 					<td class="sticky-col-serial text-base-content/70">
 						{(safeCurrentPage - 1) * currentPageSize + index + 1}
 					</td>
-					{#each columns as column (column.id)}
+					{#each activeColumns as column (column.id)}
 						<td class={column.class} class:sticky-col-first={column.firstData}>
-							{@render column.children({ row })}
+							{@render column.children?.({ row })}
 						</td>
 					{/each}
 				</tr>

@@ -10,9 +10,16 @@ import {
 	type PublicNotification,
 	type UpdateNotificationInput
 } from '$lib/schemas/notification';
+import { isOptionalFeatureDbError } from '$lib/server/db/errors';
 import { publishNotification } from '$lib/server/notification-bus';
 import { getDefaultNotificationSound } from '$lib/server/services/notification-sound';
 import { canAccessSettings, type UserPermissions } from '$lib/server/permissions';
+
+const emptyPublicNotifications = {
+	notifications: [] as PublicNotification[],
+	dismissedIds: [] as string[],
+	defaultSoundUrl: null as string | null
+};
 
 function requireSettingsAccess(perms: UserPermissions) {
 	if (!canAccessSettings(perms)) error(403, 'Forbidden');
@@ -68,22 +75,30 @@ export async function listNotifications(perms: UserPermissions) {
 }
 
 export async function listPublicNotifications(userId: string | null) {
-	const defaultMp3Url = await getDefaultMp3Url();
-	const dismissedIds = userId ? await listDismissedIds(userId) : [];
+	try {
+		const defaultMp3Url = await getDefaultMp3Url();
+		const dismissedIds = userId ? await listDismissedIds(userId) : [];
 
-	const rows = await db.query.notification.findMany({
-		with: { sound: true },
-		...(dismissedIds.length > 0
-			? { where: notInArray(notification.id, dismissedIds) }
-			: {}),
-		orderBy: [desc(notification.createdAt)]
-	});
+		const rows = await db.query.notification.findMany({
+			with: { sound: true },
+			...(dismissedIds.length > 0
+				? { where: notInArray(notification.id, dismissedIds) }
+				: {}),
+			orderBy: [desc(notification.createdAt)]
+		});
 
-	return {
-		notifications: rows.map((row) => toPublicNotification(row, defaultMp3Url)),
-		dismissedIds,
-		defaultSoundUrl: defaultMp3Url
-	};
+		return {
+			notifications: rows.map((row) => toPublicNotification(row, defaultMp3Url)),
+			dismissedIds,
+			defaultSoundUrl: defaultMp3Url
+		};
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) {
+			console.error('[notifications] skipped — database unavailable:', err);
+			return emptyPublicNotifications;
+		}
+		throw err;
+	}
 }
 
 export async function getNotification(perms: UserPermissions, id: string) {

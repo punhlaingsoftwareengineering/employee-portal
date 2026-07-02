@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Globe } from 'lucide-svelte';
+	import { Globe } from '@lucide/svelte';
 
 	let {
 		iconUrl = null,

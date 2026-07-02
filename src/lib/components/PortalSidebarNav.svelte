@@ -2,8 +2,10 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 	import { appSettings } from '$lib/app-settings.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import PortalIcon from '$lib/components/PortalIcon.svelte';
 	import { createFormLoading } from '$lib/form-loading.svelte';
 	import {
 		Users,
@@ -14,8 +16,9 @@
 		UserCog,
 		Settings,
 		LayoutDashboard,
-		Wrench
-	} from 'lucide-svelte';
+		Wrench,
+		Share2
+	} from '@lucide/svelte';
 
 	let {
 		logoutFormId = 'sidebar-logout',
@@ -94,10 +97,12 @@
 	);
 	const toolsNavActive = $derived(
 		page.url.pathname === '/tools' ||
+			page.url.pathname.startsWith('/tools/guide') ||
+			page.url.pathname.startsWith('/tools/learning') ||
 			page.url.pathname.startsWith('/tools/manage') ||
 			page.url.pathname.startsWith('/apps/')
 	);
-	const toolsNavHref = $derived(isAdmin ? '/tools/manage' : '/tools');
+	const toolsNavHref = $derived(isAdmin ? '/tools/manage/services' : '/tools');
 
 	function handleNavigate() {
 		onNavigate?.();
@@ -106,9 +111,13 @@
 
 <div class="portal-sidebar-nav flex h-full min-h-0 flex-col px-3 py-3">
 	<header class="portal-panel-header -mx-3 shrink-0 px-3 pt-0">
-		<h2 class="portal-panel-header__title">
+		<a
+			href={PUBLIC_ROUTES.onboarding}
+			class="btn btn-ghost portal-panel-header__title h-auto min-h-0 w-full justify-start"
+		>
+			<PortalIcon iconUrl={appSettings.iconUrl} class="h-5 w-5" />
 			{appSettings.title}
-		</h2>
+		</a>
 	</header>
 
 	<nav class="menu menu-sm my-2 min-h-0 flex-1 overflow-y-auto px-0">
@@ -124,6 +133,17 @@
 					>
 						<LayoutDashboard class="h-4 w-4" />
 						Dashboard
+					</a>
+				</li>
+				<li>
+					<a
+						href="/community/manage"
+						class:active={page.url.pathname.startsWith('/community/manage')}
+						data-sveltekit-preload-data="hover"
+						onclick={handleNavigate}
+					>
+						<Share2 class="h-4 w-4" />
+						Community
 					</a>
 				</li>
 			{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Building2 } from 'lucide-svelte';
+	import { Building2 } from '@lucide/svelte';
 
 	let {
 		iconUrl = null,

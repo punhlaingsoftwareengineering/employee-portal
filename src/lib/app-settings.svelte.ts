@@ -1,18 +1,24 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
+import {
+	resolveSystemTheme,
+	SYSTEM_THEME_OPTION
+} from '$lib/constants/daisyui-themes';
 import {
 	APP_BRANDING_COOKIE,
 	APP_FONTS,
 	APP_SETTINGS_STORAGE_KEY,
 	APP_THEMES,
 	DEFAULT_APP_SETTINGS,
+	DEFAULT_PORTAL_THEME_POLICY,
+	filterAllowedThemeOptions,
+	type AppBranding,
 	type AppFont,
-	type AppSettings
+	type AppSettings,
+	type PortalThemePolicy
 } from '$lib/constants/app-settings';
 
 const VALID_FONTS = new Set(APP_FONTS.map((f) => f.value));
 const VALID_THEMES = new Set(APP_THEMES.map((t) => t.value));
-
-export type AppBranding = Pick<AppSettings, 'title' | 'iconUrl'>;
 
 function normalizeFont(font: unknown): AppFont {
 	if (typeof font === 'string' && VALID_FONTS.has(font as AppFont)) {
@@ -75,11 +81,36 @@ function persistSettings(settings: AppSettings) {
 	persistBrandingCookie(settings);
 }
 
-export const appSettings = $state<AppSettings>({ ...DEFAULT_APP_SETTINGS });
+function themeAttributeValue(theme: AppSettings['theme']): string {
+	if (theme === SYSTEM_THEME_OPTION) {
+		const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		return resolveSystemTheme(prefersDark);
+	}
+	return theme;
+}
 
-/** Seed title/icon during SSR from the branding cookie (see +layout.server.ts). */
+export const appSettings = $state<AppSettings>({ ...DEFAULT_APP_SETTINGS });
+export const portalThemePolicy = $state<PortalThemePolicy>({ ...DEFAULT_PORTAL_THEME_POLICY });
+
+export function getAllowedThemeOptions() {
+	return filterAllowedThemeOptions(portalThemePolicy.allowedThemes);
+}
+
+export function initPortalThemePolicyFromServer(policy?: PortalThemePolicy) {
+	if (!policy) return;
+	portalThemePolicy.allowedThemes = [...policy.allowedThemes];
+	portalThemePolicy.defaultTheme = policy.defaultTheme;
+}
+
+function clampThemeToPolicy() {
+	if (!portalThemePolicy.allowedThemes.includes(appSettings.theme)) {
+		appSettings.theme = portalThemePolicy.defaultTheme;
+	}
+}
+
+/** Seed title/icon from layout load data (cookie branding). Safe on server and during hydration. */
 export function initAppSettingsFromServer(branding?: Partial<AppBranding>) {
-	if (browser || !branding) return;
+	if (!branding) return;
 
 	Object.assign(appSettings, {
 		title:
@@ -99,6 +130,7 @@ export function hydrateAppSettingsFromStorage() {
 
 	const loaded = loadSettings();
 	Object.assign(appSettings, loaded);
+	clampThemeToPolicy();
 	persistBrandingCookie(appSettings);
 }
 
@@ -106,24 +138,37 @@ export function applyAppSettings(settings: AppSettings = appSettings) {
 	if (!browser) return;
 
 	const root = document.documentElement;
-
-	if (settings.theme === 'system') {
-		root.removeAttribute('data-theme');
-	} else {
-		root.setAttribute('data-theme', settings.theme);
-	}
-
+	root.setAttribute('data-theme', themeAttributeValue(settings.theme));
 	root.dataset.appFont = settings.font;
 }
 
 export function updateAppSettings(partial: Partial<AppSettings>) {
+	if (partial.theme && !portalThemePolicy.allowedThemes.includes(partial.theme)) {
+		partial.theme = portalThemePolicy.defaultTheme;
+	}
 	Object.assign(appSettings, partial);
 	persistSettings(appSettings);
 	applyAppSettings(appSettings);
 }
 
 export function resetAppSettings() {
-	Object.assign(appSettings, DEFAULT_APP_SETTINGS);
+	Object.assign(appSettings, {
+		...DEFAULT_APP_SETTINGS,
+		theme: portalThemePolicy.defaultTheme,
+		title: appSettings.title,
+		iconUrl: appSettings.iconUrl
+	});
 	persistSettings(appSettings);
 	applyAppSettings(appSettings);
+}
+
+export function watchSystemThemePreference(onChange: () => void) {
+	if (!browser) return () => {};
+
+	const media = window.matchMedia('(prefers-color-scheme: dark)');
+	const handler = () => {
+		if (appSettings.theme === SYSTEM_THEME_OPTION) onChange();
+	};
+	media.addEventListener('change', handler);
+	return () => media.removeEventListener('change', handler);
 }

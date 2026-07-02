@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, EyeOff } from 'lucide-svelte';
+	import { Eye, EyeOff } from '@lucide/svelte';
 
 	type Props = {
 		name: string;

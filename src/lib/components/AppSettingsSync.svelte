@@ -1,23 +1,31 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import type { AppBranding } from '$lib/app-settings.svelte';
+	import { onMount } from 'svelte';
+	import type { AppBranding, PortalThemePolicy } from '$lib/constants/app-settings';
 	import {
 		appSettings,
 		applyAppSettings,
 		hydrateAppSettingsFromStorage,
-		initAppSettingsFromServer
+		initAppSettingsFromServer,
+		initPortalThemePolicyFromServer,
+		watchSystemThemePreference
 	} from '$lib/app-settings.svelte';
 
-	let { branding }: { branding?: AppBranding } = $props();
+	let {
+		branding,
+		themePolicy
+	}: {
+		branding?: AppBranding;
+		themePolicy?: PortalThemePolicy;
+	} = $props();
 
-	if (browser) {
+	$effect(() => {
+		initAppSettingsFromServer(branding);
+		initPortalThemePolicyFromServer(themePolicy);
+	});
+
+	onMount(() => {
 		hydrateAppSettingsFromStorage();
-	}
-
-	$effect.pre(() => {
-		if (!browser) {
-			initAppSettingsFromServer(branding);
-		}
 		applyAppSettings(appSettings);
+		return watchSystemThemePreference(() => applyAppSettings(appSettings));
 	});
 </script>

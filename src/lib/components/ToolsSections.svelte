@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { Search, Globe, Smartphone } from 'lucide-svelte';
+	import { Search, Globe, Smartphone, Pin } from '@lucide/svelte';
 	import AppCard from '$lib/components/AppCard.svelte';
+	import SectionHead from '$lib/components/SectionHead.svelte';
 	import ServiceCard from '$lib/components/ServiceCard.svelte';
+	import { dashboardPins } from '$lib/dashboard-pins.svelte';
 	import { getServiceLinkStatuses } from '$lib/remotes/service.remote';
 	import { matchesColumnFilter } from '$lib/utils/table-filter';
+	import { ONBOARDING_SECTION_IDS } from '$lib/constants/onboarding';
 	import type { AppSummary } from '$lib/schemas/app';
 	import type { ServiceSummary } from '$lib/schemas/service';
 
@@ -13,7 +16,9 @@
 		appHref,
 		showEmpty = false,
 		emptyMessage = 'No public tools available yet.',
-		gridMaxCols = 7
+		gridMaxCols = 7,
+		sectionHeadStyle = 'default',
+		enablePins = false
 	}: {
 		services?: ServiceSummary[];
 		apps?: AppSummary[];
@@ -21,6 +26,8 @@
 		showEmpty?: boolean;
 		emptyMessage?: string;
 		gridMaxCols?: 5 | 7;
+		sectionHeadStyle?: 'default' | 'onboarding';
+		enablePins?: boolean;
 	} = $props();
 
 	const serviceGridClass = $derived(
@@ -50,8 +57,38 @@
 	const filteredApps = $derived(
 		apps.filter((item) => matchesColumnFilter(appSearchText(item), searchQuery))
 	);
-	const hasFilteredTools = $derived(filteredServices.length > 0 || filteredApps.length > 0);
-	const filteredServiceIds = $derived(filteredServices.map((item) => item.id));
+	const pinnedServices = $derived(
+		enablePins
+			? filteredServices.filter((item) => dashboardPins.isPinned('service', item.id))
+			: []
+	);
+	const unpinnedServices = $derived(
+		enablePins
+			? filteredServices.filter((item) => !dashboardPins.isPinned('service', item.id))
+			: filteredServices
+	);
+	const pinnedApps = $derived(
+		enablePins ? filteredApps.filter((item) => dashboardPins.isPinned('app', item.id)) : []
+	);
+	const unpinnedApps = $derived(
+		enablePins ? filteredApps.filter((item) => !dashboardPins.isPinned('app', item.id)) : filteredApps
+	);
+	const hasPinnedTools = $derived(pinnedServices.length > 0 || pinnedApps.length > 0);
+	const hasFilteredTools = $derived(
+		pinnedServices.length > 0 ||
+			pinnedApps.length > 0 ||
+			unpinnedServices.length > 0 ||
+			unpinnedApps.length > 0
+	);
+	const pinnedServiceIds = $derived(pinnedServices.map((item) => item.id));
+	const unpinnedServiceIds = $derived(unpinnedServices.map((item) => item.id));
+	const searchPlaceholder = $derived(
+		services.length > 0 && apps.length === 0
+			? 'Search services…'
+			: services.length === 0 && apps.length > 0
+				? 'Search apps…'
+				: 'Search services and apps…'
+	);
 
 	function linkStatusFor(
 		serviceId: string,
@@ -78,7 +115,7 @@
 		<input
 			type="search"
 			class="grow focus:outline-none focus:ring-0 focus:ring-offset-0"
-			placeholder="Search services and apps…"
+			placeholder={searchPlaceholder}
 			bind:value={searchQuery}
 		/>
 	</label>
@@ -86,16 +123,125 @@
 	{#if !hasFilteredTools}
 		<p class="text-base-content/70">No tools match your search.</p>
 	{:else}
-		{#if filteredServices.length > 0}
-			<section class="mb-10">
-				<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-					<Globe class="h-5 w-5" />
-					Services
-				</h2>
+		{#if hasPinnedTools}
+			<section class="mb-10 scroll-mt-24">
+				<SectionHead
+					icon={Pin}
+					title="Pinned"
+					description="Your favorite services and apps, always at the top of the dashboard."
+				/>
+
+				{#if pinnedServices.length > 0}
+					<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-base-content/80">
+						<Globe class="h-4 w-4" />
+						Services
+					</h3>
+					<svelte:boundary>
+						{@const linkStatuses = await getServiceLinkStatuses(pinnedServiceIds)}
+						<div class="{serviceGridClass} mb-6">
+							{#each pinnedServices as item (item.id)}
+								<ServiceCard
+									name={item.name}
+									description={item.description}
+									link={item.link}
+									iconUrl={item.iconUrl}
+									category={item.category}
+									accentColor={item.accentColor}
+									linkStatus={linkStatusFor(item.id, linkStatuses, 'down')}
+									showPin={enablePins}
+									pinned={true}
+									onPinToggle={() => dashboardPins.toggle('service', item.id)}
+								/>
+							{/each}
+						</div>
+
+						{#snippet pending()}
+							<div class="{serviceGridClass} mb-6">
+								{#each pinnedServices as item (item.id)}
+									<ServiceCard
+										name={item.name}
+										description={item.description}
+										link={item.link}
+										iconUrl={item.iconUrl}
+										category={item.category}
+										accentColor={item.accentColor}
+										linkStatus="checking"
+										showPin={enablePins}
+										pinned={true}
+										onPinToggle={() => dashboardPins.toggle('service', item.id)}
+									/>
+								{/each}
+							</div>
+						{/snippet}
+
+						{#snippet failed()}
+							<div class="{serviceGridClass} mb-6">
+								{#each pinnedServices as item (item.id)}
+									<ServiceCard
+										name={item.name}
+										description={item.description}
+										link={item.link}
+										iconUrl={item.iconUrl}
+										category={item.category}
+										accentColor={item.accentColor}
+										linkStatus="down"
+										showPin={enablePins}
+										pinned={true}
+										onPinToggle={() => dashboardPins.toggle('service', item.id)}
+									/>
+								{/each}
+							</div>
+						{/snippet}
+					</svelte:boundary>
+				{/if}
+
+				{#if pinnedApps.length > 0}
+					<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-base-content/80">
+						<Smartphone class="h-4 w-4" />
+						Apps
+					</h3>
+					<div class={appGridClass}>
+						{#each pinnedApps as item (item.id)}
+							<AppCard
+								href={appHref(item.id)}
+								name={item.name}
+								tagline={item.tagline}
+								description={item.description}
+								iconUrl={item.iconUrl}
+								category={item.category}
+								developer={item.developer}
+								version={item.version}
+								showPin={enablePins}
+								pinned={true}
+								onPinToggle={() => dashboardPins.toggle('app', item.id)}
+							/>
+						{/each}
+					</div>
+				{/if}
+			</section>
+		{/if}
+
+		{#if unpinnedServices.length > 0}
+			<section
+				class="mb-10 scroll-mt-24"
+				id={sectionHeadStyle === 'onboarding' ? ONBOARDING_SECTION_IDS.services : undefined}
+			>
+				{#if sectionHeadStyle === 'onboarding'}
+					<SectionHead
+						icon={Globe}
+						title="Services"
+						description="Browse web-based tools and integrations available to everyone."
+					/>
+				{:else}
+					<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Globe class="h-5 w-5" />
+						Services
+					</h2>
+				{/if}
 				<svelte:boundary>
-					{@const linkStatuses = await getServiceLinkStatuses(filteredServiceIds)}
+					{@const linkStatuses = await getServiceLinkStatuses(unpinnedServiceIds)}
 					<div class={serviceGridClass}>
-						{#each filteredServices as item (item.id)}
+						{#each unpinnedServices as item (item.id)}
 							<ServiceCard
 								name={item.name}
 								description={item.description}
@@ -104,13 +250,16 @@
 								category={item.category}
 								accentColor={item.accentColor}
 								linkStatus={linkStatusFor(item.id, linkStatuses, 'down')}
+								showPin={enablePins}
+								pinned={false}
+								onPinToggle={() => dashboardPins.toggle('service', item.id)}
 							/>
 						{/each}
 					</div>
 
 					{#snippet pending()}
 						<div class={serviceGridClass}>
-							{#each filteredServices as item (item.id)}
+							{#each unpinnedServices as item (item.id)}
 								<ServiceCard
 									name={item.name}
 									description={item.description}
@@ -119,6 +268,9 @@
 									category={item.category}
 									accentColor={item.accentColor}
 									linkStatus="checking"
+									showPin={enablePins}
+									pinned={false}
+									onPinToggle={() => dashboardPins.toggle('service', item.id)}
 								/>
 							{/each}
 						</div>
@@ -126,7 +278,7 @@
 
 					{#snippet failed()}
 						<div class={serviceGridClass}>
-							{#each filteredServices as item (item.id)}
+							{#each unpinnedServices as item (item.id)}
 								<ServiceCard
 									name={item.name}
 									description={item.description}
@@ -135,6 +287,9 @@
 									category={item.category}
 									accentColor={item.accentColor}
 									linkStatus="down"
+									showPin={enablePins}
+									pinned={false}
+									onPinToggle={() => dashboardPins.toggle('service', item.id)}
 								/>
 							{/each}
 						</div>
@@ -143,14 +298,25 @@
 			</section>
 		{/if}
 
-		{#if filteredApps.length > 0}
-			<section>
-				<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-					<Smartphone class="h-5 w-5" />
-					Apps
-				</h2>
+		{#if unpinnedApps.length > 0}
+			<section
+				class="scroll-mt-24"
+				id={sectionHeadStyle === 'onboarding' ? ONBOARDING_SECTION_IDS.apps : undefined}
+			>
+				{#if sectionHeadStyle === 'onboarding'}
+					<SectionHead
+						icon={Smartphone}
+						title="Apps"
+						description="Explore our mobile applications for staff and patients."
+					/>
+				{:else}
+					<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Smartphone class="h-5 w-5" />
+						Apps
+					</h2>
+				{/if}
 				<div class={appGridClass}>
-					{#each filteredApps as item (item.id)}
+					{#each unpinnedApps as item (item.id)}
 						<AppCard
 							href={appHref(item.id)}
 							name={item.name}
@@ -160,6 +326,9 @@
 							category={item.category}
 							developer={item.developer}
 							version={item.version}
+							showPin={enablePins}
+							pinned={false}
+							onPinToggle={() => dashboardPins.toggle('app', item.id)}
 						/>
 					{/each}
 				</div>

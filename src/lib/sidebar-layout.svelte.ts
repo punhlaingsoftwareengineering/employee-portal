@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import {
 	DEFAULT_SIDEBAR_WIDTH,
 	MAX_SIDEBAR_WIDTH,
@@ -27,7 +27,8 @@ function readStoredWidth(): number {
 }
 
 class SidebarLayout {
-	width = $state(readStoredWidth());
+	/** Default on SSR and first client paint — hydrated from localStorage after mount. */
+	width = $state(DEFAULT_SIDEBAR_WIDTH);
 	resizing = $state(false);
 
 	setWidth(px: number) {
@@ -46,3 +47,9 @@ class SidebarLayout {
 }
 
 export const sidebarLayout = new SidebarLayout();
+
+/** Call from client onMount so SSR HTML matches the initial hydration pass. */
+export function hydrateSidebarLayout() {
+	if (!browser) return;
+	sidebarLayout.width = readStoredWidth();
+}

@@ -1,5 +1,7 @@
 import { getActiveAnnouncement } from '$lib/server/services/announcement';
+import { listPublicApps } from '$lib/server/services/app';
 import { listPublicNotifications } from '$lib/server/services/notification';
+import { listPublicServices } from '$lib/server/services/service';
 import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 import type { LayoutServerLoad } from './$types';
 
@@ -9,9 +11,13 @@ function isOnboardingPath(pathname: string) {
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const userId = locals.user?.id ?? null;
-	const [announcement, notificationData] = await Promise.all([
-		isOnboardingPath(url.pathname) ? getActiveAnnouncement() : Promise.resolve(null),
-		listPublicNotifications(userId)
+	const onOnboarding = isOnboardingPath(url.pathname);
+
+	const [announcement, notificationData, publicServices, publicApps] = await Promise.all([
+		onOnboarding ? getActiveAnnouncement() : Promise.resolve(null),
+		listPublicNotifications(userId),
+		listPublicServices(),
+		listPublicApps()
 	]);
 
 	return {
@@ -19,6 +25,10 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		notifications: notificationData.notifications,
 		dismissedNotificationIds: notificationData.dismissedIds,
 		defaultSoundUrl: notificationData.defaultSoundUrl,
-		user: locals.user ?? null
+		user: locals.user ?? null,
+		onboardingSections: {
+			hasServices: publicServices.length > 0,
+			hasApps: publicApps.length > 0
+		}
 	};
 };

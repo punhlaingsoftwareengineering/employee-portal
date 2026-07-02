@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Pencil, Trash2 } from 'lucide-svelte';
+	import { Plus, Pencil, Trash2 } from '@lucide/svelte';
 	import RoleDialog from '$lib/components/RoleDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
@@ -11,6 +11,7 @@
 	import { getAccessRoles, deleteAccessRole } from '$lib/remotes/access-role.remote';
 	import { getServices } from '$lib/remotes/service.remote';
 	import { getApps } from '$lib/remotes/app.remote';
+	import { getCommunityLinks } from '$lib/remotes/community-link.remote';
 	import type { AccessRole } from '$lib/server/db/schema/access-role';
 
 	let roleDialog = $state<RoleDialog | null>(null);
@@ -32,8 +33,9 @@
 	{@const roles = await getAccessRoles()}
 	{@const allServices = await getServices()}
 	{@const allApps = await getApps()}
+	{@const allCommunityLinks = await getCommunityLinks()}
 
-	<RoleDialog bind:this={roleDialog} {allServices} {allApps} />
+	<RoleDialog bind:this={roleDialog} {allServices} {allApps} {allCommunityLinks} />
 
 	<PrivatePageHeader title="Roles" />
 

@@ -1,5 +1,6 @@
 import { eq, asc, inArray, sql, and } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
+import { isBuiltinServiceId } from '$lib/constants/builtin-services';
 import { db } from '$lib/server/db';
 import { service } from '$lib/server/db/schema/service';
 import { accessRoleService } from '$lib/server/db/schema/access-role-service';
@@ -15,10 +16,15 @@ import {
 	mapWithConcurrency,
 	type ServiceLinkHealth
 } from '$lib/server/services/service-link-health';
+import {
+	ensureBuiltinServicesOnce,
+	isBuiltinPortalServiceLink
+} from '$lib/server/services/builtin-service';
 
 export type ServiceLinkStatusMap = Record<string, ServiceLinkHealth>;
 
 export async function listServices() {
+	await ensureBuiltinServicesOnce();
 	return db.query.service.findMany({ orderBy: [asc(service.name)] });
 }
 
@@ -78,6 +84,9 @@ export async function updateService(input: UpdateServiceInput) {
 }
 
 export async function deleteService(id: string) {
+	if (isBuiltinServiceId(id)) {
+		error(400, 'Built-in portal services cannot be deleted');
+	}
 	await getService(id);
 	await db.delete(service).where(eq(service.id, id));
 }
@@ -128,6 +137,8 @@ export async function getServiceCountsByRole(): Promise<Map<string, number>> {
 }
 
 export async function getServicesForUser(permissions: UserPermissions) {
+	await ensureBuiltinServicesOnce();
+
 	if (permissions.isAdmin) {
 		return listServices();
 	}
@@ -215,10 +226,16 @@ export async function getServiceLinkStatuses(
 	}
 
 	const uniqueUrls = [...urlToIds.keys()];
-	const healthResults = await mapWithConcurrency(uniqueUrls, 5, async (url) => ({
-		url,
-		health: await checkServiceLinkHealth(url)
-	}));
+	const healthResults = await mapWithConcurrency(uniqueUrls, 5, async (url) => {
+		const serviceIds = urlToIds.get(url) ?? [];
+		if (serviceIds.some((id) => isBuiltinPortalServiceLink(id, url))) {
+			return { url, health: 'up' as const };
+		}
+		return {
+			url,
+			health: await checkServiceLinkHealth(url)
+		};
+	});
 
 	for (const { url, health } of healthResults) {
 		for (const id of urlToIds.get(url) ?? []) {

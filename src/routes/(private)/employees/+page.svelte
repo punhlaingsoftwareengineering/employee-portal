@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, Eye } from 'lucide-svelte';
+	import { Plus, Eye } from '@lucide/svelte';
 	import EmployeeDialog from '$lib/components/EmployeeDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';

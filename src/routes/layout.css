@@ -9,9 +9,7 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @plugin 'daisyui' {
-	themes:
-		winter --default,
-		night --prefersdark;
+	themes: all;
 }
 
 @theme {
@@ -21,6 +19,7 @@
 
 html {
 	font-family: var(--font-maple-mono);
+	scroll-behavior: smooth;
 }
 
 html[data-app-font='maple-mono'] {
@@ -210,8 +209,7 @@ body.sidebar-resizing {
 }
 
 .portal-sticky-page-header {
-	@apply sticky z-10 -mx-6 shrink-0 border-b border-base-content/10 bg-base-100 px-6 pt-3 pb-2;
-	top: var(--portal-navbar-height, 4rem);
+	@apply z-10 -mx-6 shrink-0 border-b border-base-content/10 bg-base-100 px-6 pt-3 pb-2;
 }
 
 .portal-private-main {
@@ -220,6 +218,7 @@ body.sidebar-resizing {
 
 @media (min-width: 1024px) {
 	.portal-sticky-page-header {
+		@apply sticky;
 		top: 0;
 	}
 }

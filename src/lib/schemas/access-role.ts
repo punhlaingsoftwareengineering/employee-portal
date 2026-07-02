@@ -26,6 +26,7 @@ export const createAccessRoleSchema = z.object({
 	description: z.string().max(300).optional(),
 	serviceIds: z.array(z.string().uuid()).optional(),
 	appIds: z.array(z.string().uuid()).optional(),
+	communityLinkIds: z.array(z.string().uuid()).optional(),
 	...accessRolePermissionsSchema.shape
 });
 

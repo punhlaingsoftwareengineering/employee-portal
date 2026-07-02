@@ -9,7 +9,7 @@ alwaysApply: true
 - **Framework**: SvelteKit 3 + Svelte 5 (runes, experimental async + remote functions)
 - **Database**: Local PostgreSQL via `pg` + Drizzle ORM
 - **Auth**: Better Auth + Drizzle adapter
-- **UI**: Tailwind v4, DaisyUI, Lucide (`lucide-svelte`)
+- **UI**: Tailwind v4, DaisyUI, Lucide (`@lucide/svelte`)
 - **Validation**: Zod (Standard Schema for remotes)
 - **Layer order**: `schema → service → remote → API → routes`
 

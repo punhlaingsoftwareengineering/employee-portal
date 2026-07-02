@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { ChevronLeft, ChevronRight, Download } from 'lucide-svelte';
+	import { browser } from '$app/env';
+	import { ChevronLeft, ChevronRight, Download } from '@lucide/svelte';
 	import { APP_DOWNLOAD_PLATFORM_LABELS } from '$lib/constants/app-download';
 	import ServiceIcon from '$lib/components/ServiceIcon.svelte';
 	import type { App } from '$lib/server/db/schema/app';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 
 	type Slide = {
 		id: string;
@@ -8,7 +8,7 @@
 		imageUrl: string;
 	};
 
-	let { slides }: { slides: Slide[] } = $props();
+	let { slides, showCaption = true }: { slides: Slide[]; showCaption?: boolean } = $props();
 
 	function slideId(index: number): string {
 		return `onboarding-slide-${index + 1}`;
@@ -32,16 +32,18 @@
 				<img
 					src={slide.imageUrl}
 					alt={slide.title}
-					class="h-72 w-full object-cover sm:h-96"
+					class="h-[28rem] w-full object-cover sm:h-[36rem] lg:h-[42rem]"
 				/>
-				<figcaption
-					class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral/80 to-transparent px-6 py-8 text-neutral-content"
-				>
-					<h2 class="text-2xl font-bold sm:text-3xl">{slide.title}</h2>
-					{#if slide.description}
-						<p class="mt-2 max-w-2xl text-sm opacity-90 sm:text-base">{slide.description}</p>
-					{/if}
-				</figcaption>
+				{#if showCaption}
+					<figcaption
+						class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral/80 to-transparent px-6 py-8 text-neutral-content"
+					>
+						<h2 class="text-2xl font-bold sm:text-3xl">{slide.title}</h2>
+						{#if slide.description}
+							<p class="mt-2 max-w-2xl text-sm opacity-90 sm:text-base">{slide.description}</p>
+						{/if}
+					</figcaption>
+				{/if}
 			</figure>
 
 			{#if slides.length > 1}

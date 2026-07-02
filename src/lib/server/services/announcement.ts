@@ -1,5 +1,6 @@
 import { desc, eq, ne } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
+import { isOptionalFeatureDbError } from '$lib/server/db/errors';
 import { db } from '$lib/server/db';
 import { announcement } from '$lib/server/db/schema/announcement';
 import {
@@ -50,10 +51,18 @@ export async function listAnnouncements(_perms: UserPermissions) {
 }
 
 export async function getActiveAnnouncement() {
-	return db.query.announcement.findFirst({
-		where: eq(announcement.isActive, true),
-		orderBy: [desc(announcement.updatedAt)]
-	});
+	try {
+		return await db.query.announcement.findFirst({
+			where: eq(announcement.isActive, true),
+			orderBy: [desc(announcement.updatedAt)]
+		});
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) {
+			console.error('[announcement] skipped — database unavailable:', err);
+			return null;
+		}
+		throw err;
+	}
 }
 
 export async function getAnnouncement(perms: UserPermissions, id: string) {

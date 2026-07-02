@@ -1,26 +1,23 @@
 ---
-description: DaisyUI theme — winter light, night dark
+description: DaisyUI themes — full built-in set, admin policy
 alwaysApply: true
 ---
 
 # DaisyUI Themes
 
-Use **only** these themes — no other DaisyUI theme names:
+The portal enables **all 35 built-in DaisyUI themes** via `themes: all` in [`src/routes/layout.css`](src/routes/layout.css).
 
-| Mode | Theme | When |
-|------|-------|------|
-| Light | `winter` | Default / light color scheme |
-| Dark | `night` | `prefers-color-scheme: dark` |
+Theme names live in [`src/lib/constants/daisyui-themes.ts`](src/lib/constants/daisyui-themes.ts).
 
-Configured in [`src/routes/layout.css`](src/routes/layout.css):
+| Special | Behavior |
+|---------|----------|
+| `system` | Follows OS light/dark → `winter` / `night` |
+| Other names | Set `data-theme` on `<html>` (e.g. `cupcake`, `dracula`) |
 
-```css
-@plugin 'daisyui' {
-	themes: winter --default, night --prefersdark;
-}
-```
+Admins configure **allowed themes** and **default theme** in Settings → **Theme**.
 
-- Do **not** set `data-theme="corporate"` or other themes on layout wrappers
-- Do **not** add theme toggle buttons that switch to other theme names unless they only toggle between `winter` and `night`
+Users pick from allowed themes in Settings or the navbar palette dropdown.
+
+Do **not** hardcode only `winter`/`night` in new theme UI — use `APP_THEMES` / `getAllowedThemeOptions()`.
 
 Skill: `employee-portal-daisyui`

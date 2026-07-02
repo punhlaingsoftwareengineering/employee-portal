@@ -6,7 +6,7 @@ export type DataTableColumnHandle<T> = {
 	readonly firstData: boolean;
 	readonly class?: string;
 	filterText: (row: T) => string;
-	readonly children: Snippet<[{ row: T }]>;
+	readonly children?: Snippet<[{ row: T }]>;
 };
 
 export type DataTableContext<T> = {

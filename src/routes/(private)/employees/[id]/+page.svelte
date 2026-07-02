@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { Pencil, Trash2 } from 'lucide-svelte';
+	import { Pencil, Trash2 } from '@lucide/svelte';
 	import { getEmployee, deleteEmployee } from '$lib/remotes/employee.remote';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';

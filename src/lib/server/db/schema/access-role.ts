@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm';
 import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { accessRoleService } from './access-role-service';
 import { accessRoleApp } from './access-role-app';
+import { accessRoleCommunityLink } from './access-role-community-link';
 
 export const accessRole = pgTable('access_role', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -28,7 +29,8 @@ export const accessRole = pgTable('access_role', {
 
 export const accessRoleRelations = relations(accessRole, ({ many }) => ({
 	serviceAssignments: many(accessRoleService),
-	appAssignments: many(accessRoleApp)
+	appAssignments: many(accessRoleApp),
+	communityLinkAssignments: many(accessRoleCommunityLink)
 }));
 
 export type AccessRole = typeof accessRole.$inferSelect;

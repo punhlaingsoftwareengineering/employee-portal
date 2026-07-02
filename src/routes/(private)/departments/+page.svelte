@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, Pencil, Trash2 } from 'lucide-svelte';
+	import { Plus, Pencil, Trash2 } from '@lucide/svelte';
 	import DepartmentDialog from '$lib/components/DepartmentDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';

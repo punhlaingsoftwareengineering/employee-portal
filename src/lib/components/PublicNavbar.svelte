@@ -4,11 +4,25 @@
 	import NotificationBell from '$lib/components/NotificationBell.svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 	import { DEFAULT_APP_TITLE } from '$lib/constants/app-settings';
-	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { EXTERNAL_NAV_LINKS, PUBLIC_ROUTES } from '$lib/constants/public-routes';
 	import { appSettings } from '$lib/app-settings.svelte';
 
 	const notifications = $derived(page.data.notifications ?? []);
 	const defaultSoundUrl = $derived(page.data.defaultSoundUrl ?? null);
+
+	const onboardingSections = $derived(
+		page.data.onboardingSections ?? { hasServices: false, hasApps: false }
+	);
+	const onTipsPage = $derived(
+		page.url.pathname === PUBLIC_ROUTES.tipsAndTutorials ||
+			page.url.pathname.startsWith(`${PUBLIC_ROUTES.tipsAndTutorials}/`)
+	);
+	const onCommunityPage = $derived(
+		page.url.pathname === PUBLIC_ROUTES.community ||
+			page.url.pathname.startsWith(`${PUBLIC_ROUTES.community}/`)
+	);
+	const onServicesPage = $derived(page.url.pathname === PUBLIC_ROUTES.services);
+	const onAppsPage = $derived(page.url.pathname === PUBLIC_ROUTES.apps);
 </script>
 
 <div class="navbar bg-base-100 border-b border-base-300 shadow-sm">
@@ -22,13 +36,24 @@
 	<div class="navbar-center hidden md:flex">
 		<ul class="menu menu-horizontal px-1">
 			<li>
-				<a
-					href={PUBLIC_ROUTES.onboarding}
-					class:active={page.url.pathname === PUBLIC_ROUTES.onboarding}
-				>
-					Home
-				</a>
+				<a href={EXTERNAL_NAV_LINKS.docs} target="_blank" rel="noopener noreferrer">Docs</a>
 			</li>
+			<li>
+				<a href={PUBLIC_ROUTES.tipsAndTutorials} class:active={onTipsPage}>Tips & Tutorials</a>
+			</li>
+			<li>
+				<a href={PUBLIC_ROUTES.community} class:active={onCommunityPage}>Community</a>
+			</li>
+			{#if onboardingSections.hasServices}
+				<li>
+					<a href={PUBLIC_ROUTES.services} class:active={onServicesPage}>Services</a>
+				</li>
+			{/if}
+			{#if onboardingSections.hasApps}
+				<li>
+					<a href={PUBLIC_ROUTES.apps} class:active={onAppsPage}>Apps</a>
+				</li>
+			{/if}
 		</ul>
 	</div>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, Pencil, Mail, RefreshCw, Ban } from 'lucide-svelte';
+	import { Plus, Pencil, Mail, RefreshCw, Ban } from '@lucide/svelte';
 	import InviteUserDialog from '$lib/components/InviteUserDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';

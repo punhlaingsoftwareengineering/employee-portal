@@ -1,5 +1,5 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import { building } from '$app/environment';
+import { building } from '$app/env';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import type { Handle } from '@sveltejs/kit';

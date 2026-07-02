@@ -1,22 +1,40 @@
 <script lang="ts">
-	import { ArrowRight } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
+	import { Building2 } from '@lucide/svelte';
 	import OnboardingCarousel from '$lib/components/OnboardingCarousel.svelte';
+	import OnboardingFacilityGrid from '$lib/components/OnboardingFacilityGrid.svelte';
+	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SectionHead from '$lib/components/SectionHead.svelte';
 	import ToolsSections from '$lib/components/ToolsSections.svelte';
-	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
+	import { publicAppHref } from '$lib/constants/public-routes';
 
 	let { data } = $props();
+
+	function scrollToHashSection() {
+		const hash = window.location.hash.slice(1);
+		if (!hash) return;
+
+		const target = document.getElementById(hash);
+		target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	onMount(() => {
+		scrollToHashSection();
+		window.addEventListener('hashchange', scrollToHashSection);
+		return () => window.removeEventListener('hashchange', scrollToHashSection);
+	});
+
+	afterNavigate(() => {
+		scrollToHashSection();
+	});
 </script>
+
+<PageTitle />
 
 {#if data.slides.length > 0}
 	<section class="container mx-auto max-w-5xl px-4 py-8">
-		<OnboardingCarousel slides={data.slides} />
-		<div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-			<a href={AUTH_ROUTES.signup} class="btn btn-primary gap-2">
-				Get started
-				<ArrowRight class="h-4 w-4" />
-			</a>
-			<a href={AUTH_ROUTES.login} class="btn btn-outline">Sign in</a>
-		</div>
+		<OnboardingCarousel slides={data.slides} showCaption={false} />
 	</section>
 {:else}
 	<section class="hero py-16">
@@ -26,13 +44,6 @@
 				<p class="py-6 text-lg opacity-80">
 					Onboard your team, organize departments, and keep employee records in one secure place.
 				</p>
-				<div class="flex flex-col justify-center gap-3 sm:flex-row">
-					<a href={AUTH_ROUTES.signup} class="btn btn-primary gap-2">
-						Get started
-						<ArrowRight class="h-4 w-4" />
-					</a>
-					<a href={AUTH_ROUTES.login} class="btn btn-outline">Sign in</a>
-				</div>
 			</div>
 		</div>
 	</section>
@@ -43,8 +54,20 @@
 		<ToolsSections
 			services={data.publicServices}
 			apps={data.publicApps}
-			appHref={(id) => `/onboarding/apps/${id}`}
+			appHref={publicAppHref}
 			gridMaxCols={5}
+			sectionHeadStyle="onboarding"
 		/>
+	</section>
+{/if}
+
+{#if data.facilities.length > 0}
+	<section class="container mx-auto max-w-5xl px-4 pb-16">
+		<SectionHead
+			icon={Building2}
+			title="Our facilities"
+			description="Explore our hospital locations. Hover a card for details."
+		/>
+		<OnboardingFacilityGrid facilities={data.facilities} />
 	</section>
 {/if}

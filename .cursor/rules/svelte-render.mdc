@@ -14,6 +14,7 @@ This project uses **Svelte 5 snippets**. Do **not** use legacy slots anywhere.
 - `slot="…"` on child elements
 - `$$slots`, `let:` on slot content
 - `export let` for component props (use `$props()`)
+- `{#key page.url.pathname}` wrapping layout `{@render children()}` — tears down snippets during route swaps
 
 ## Required patterns
 
@@ -24,8 +25,10 @@ This project uses **Svelte 5 snippets**. Do **not** use legacy slots anywhere.
 	let { children } = $props();
 </script>
 
-{@render children()}
+{@render children?.()}
 ```
+
+Prefer **optional chaining** (`{@render snippet?.()}`) for layout and optional snippets — safer than `{#if snippet}` during navigation and HMR.
 
 Reference: [`src/routes/+layout.svelte`](src/routes/+layout.svelte), [`src/routes/(private)/+layout.svelte`](src/routes/(private)/+layout.svelte)
 
@@ -35,11 +38,11 @@ Reference: [`src/routes/+layout.svelte`](src/routes/+layout.svelte), [`src/route
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	let { label, children }: { label: string; children: Snippet } = $props();
+	let { label, children }: { label: string; children?: Snippet } = $props();
 </script>
 
 <button aria-label={label}>
-	{@render children()}
+	{@render children?.()}
 </button>
 ```
 
@@ -47,7 +50,7 @@ Reference: [`src/lib/components/IconActionButton.svelte`](src/lib/components/Ico
 
 ### Multiple snippets
 
-Pass each region as a typed `Snippet` prop and render with `{@render propName()}`:
+Pass each region as a typed `Snippet` prop and render with optional chaining:
 
 ```svelte
 let {
@@ -57,20 +60,35 @@ let {
 }: {
 	header?: Snippet;
 	footer?: Snippet;
-	children: Snippet;
+	children?: Snippet;
 } = $props();
 ```
 
-Optional snippets: `{#if header}{@render header()}{/if}`
+```svelte
+{@render header?.()}
+{@render children?.()}
+{@render footer?.()}
+```
+
+Never bare `{@render prop()}` on optional props.
 
 ### Boundaries and control flow
 
 Use `{#snippet name()}…{/snippet}` for `svelte:boundary` pending/failed handlers — not slots.
 
+Every `svelte:boundary` with async content (`await` in markup) **must** define both:
+
+- `{#snippet pending()}…{/snippet}`
+- `{#snippet failed(error)}…{/snippet}` (or `{#snippet failed()}…{/snippet}`)
+
+Without `failed`, async errors throw `invalid_snippet` at runtime.
+
 ## When editing
 
-- New layout or wrapper → `children: Snippet` + `{@render children()}`
+- New layout or wrapper → `{@render children?.()}`
+- Optional named snippet prop → `{@render prop?.()}`
 - New component with injectable markup → `Snippet` props, never `<slot>`
 - Converting legacy code → replace slots with snippet props and update call sites to `{#snippet …}`
+- Import runtime flags from `$app/env` (not deprecated `$app/environment`)
 
 Skill: `employee-portal-sveltekit-remotes` · Svelte MCP: `svelte/snippet`, `svelte/@render`

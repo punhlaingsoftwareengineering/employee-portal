@@ -11,6 +11,7 @@
 		dismissAllNotifications,
 		dismissNotification
 	} from '$lib/remotes/notification.remote';
+	import PageTitle from '$lib/components/PageTitle.svelte';
 
 	let { data } = $props();
 
@@ -51,6 +52,8 @@
 		notifications = notifications.filter((item) => !ids.includes(item.id));
 	}
 </script>
+
+<PageTitle title="Notifications" />
 
 <div class="container mx-auto max-w-3xl px-4 py-8">
 	<div class="mb-6 flex items-center justify-between gap-4">

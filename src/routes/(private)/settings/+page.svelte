@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import PortalIcon from '$lib/components/PortalIcon.svelte';
 	import NewsletterDialog from '$lib/components/NewsletterDialog.svelte';
@@ -6,6 +7,7 @@
 	import AnnouncementDialog from '$lib/components/AnnouncementDialog.svelte';
 	import NotificationSoundDialog from '$lib/components/NotificationSoundDialog.svelte';
 	import NotificationDialog from '$lib/components/NotificationDialog.svelte';
+	import PortalThemePolicyDialog from '$lib/components/PortalThemePolicyDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
@@ -13,12 +15,11 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import {
 		APP_FONTS,
-		APP_THEMES,
 		DEFAULT_APP_TITLE,
 		type AppFont,
 		type AppTheme
 	} from '$lib/constants/app-settings';
-	import { appSettings, resetAppSettings, updateAppSettings } from '$lib/app-settings.svelte';
+	import { appSettings, resetAppSettings, updateAppSettings, getAllowedThemeOptions } from '$lib/app-settings.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteNewsletter, getNewsletters } from '$lib/remotes/newsletter.remote';
 	import {
@@ -38,6 +39,17 @@
 		getNotifications
 	} from '$lib/remotes/notification.remote';
 	import {
+		getSupportTickets,
+		updateSupportTicketStatus
+	} from '$lib/remotes/support-ticket.remote';
+	import {
+		SUPPORT_TICKET_STATUS_LABELS,
+		SUPPORT_TICKET_STATUS_OPTIONS,
+		SUPPORT_TICKET_CATEGORY_LABELS,
+		SUPPORT_TICKET_URGENCY_LABELS,
+		type SupportTicketStatus
+	} from '$lib/constants/support-ticket';
+	import {
 		Bell,
 		ExternalLink,
 		Images,
@@ -48,9 +60,11 @@
 		Plus,
 		RotateCcw,
 		Sparkles,
+		Ticket,
 		Trash2,
+		Type,
 		Volume2
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import SettingsCardTitle from '$lib/components/SettingsCardTitle.svelte';
 
@@ -63,7 +77,10 @@
 	let announcementDialog = $state<AnnouncementDialog | null>(null);
 	let notificationSoundDialog = $state<NotificationSoundDialog | null>(null);
 	let notificationDialog = $state<NotificationDialog | null>(null);
+	let themePolicyDialog = $state<PortalThemePolicyDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
+	const ticketStatusLoading = createKeyedLoading();
+	const allowedThemeOptions = $derived(getAllowedThemeOptions());
 
 	function setTheme(theme: AppTheme) {
 		updateAppSettings({ theme });
@@ -71,6 +88,26 @@
 
 	function setFont(font: AppFont) {
 		updateAppSettings({ font });
+	}
+
+	function ticketSubmitterName(ticket: {
+		user?: { name: string; email: string } | null;
+		guestName: string | null;
+	}): string {
+		return ticket.user?.name ?? ticket.guestName ?? '—';
+	}
+
+	function ticketSubmitterEmail(ticket: {
+		user?: { name: string; email: string } | null;
+		guestEmail: string | null;
+	}): string {
+		return ticket.user?.email ?? ticket.guestEmail ?? '—';
+	}
+
+	async function handleTicketStatusChange(id: string, status: SupportTicketStatus) {
+		await ticketStatusLoading.run(id, async () => {
+			await updateSupportTicketStatus({ id, status });
+		});
 	}
 
 	function saveTitle() {
@@ -90,6 +127,11 @@
 		title = appSettings.title;
 		iconUrl = appSettings.iconUrl ?? '';
 	}
+
+	onMount(() => {
+		title = appSettings.title;
+		iconUrl = appSettings.iconUrl ?? '';
+	});
 </script>
 
 <PrivatePageHeader title="Settings" />
@@ -97,30 +139,62 @@
 <div class="card-masonry">
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">
-			<SettingsCardTitle icon={Palette} title="Appearance" />
-			<p class="text-sm text-base-content/70">Theme and typography for this device.</p>
+			{#if isAdmin}
+				<PortalThemePolicyDialog bind:this={themePolicyDialog} />
+			{/if}
+
+			<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+				<div>
+					<SettingsCardTitle icon={Palette} title="Theme" />
+					<p class="text-sm text-base-content/70">
+						{#if isAdmin}
+							Configure portal-wide DaisyUI theme options, then pick your personal theme for this
+							device.
+						{:else}
+							Choose your theme for this device from the themes allowed by your administrator.
+						{/if}
+					</p>
+				</div>
+				{#if isAdmin}
+					<button
+						type="button"
+						class="btn btn-outline btn-sm"
+						onclick={() => themePolicyDialog?.open()}
+					>
+						Theme policy
+					</button>
+				{/if}
+			</div>
+
 			<table class="form-table">
 				<tbody>
 					<tr>
-						<td class="form-table-label">Theme</td>
+						<td class="form-table-label">Your theme</td>
 						<td class="form-table-field">
-							<div class="flex flex-wrap gap-2">
-								{#each APP_THEMES as option (option.value)}
-									<button
-										type="button"
-										class="btn btn-sm {appSettings.theme === option.value
-											? 'btn-primary'
-											: 'btn-outline'}"
-										onclick={() => setTheme(option.value)}
-									>
-										{option.label}
-									</button>
+							<select
+								class="select select-bordered select-sm w-full max-w-md"
+								value={appSettings.theme}
+								onchange={(event) => setTheme(event.currentTarget.value as AppTheme)}
+							>
+								{#each allowedThemeOptions as option (option.value)}
+									<option value={option.value}>{option.label}</option>
 								{/each}
-							</div>
+							</select>
 						</td>
 					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="card bg-base-100 shadow-sm">
+		<div class="card-body">
+			<SettingsCardTitle icon={Type} title="Font" />
+			<p class="text-sm text-base-content/70">Typography for this device.</p>
+			<table class="form-table">
+				<tbody>
 					<tr>
-						<td class="form-table-label">Font</td>
+						<td class="form-table-label">Font family</td>
 						<td class="form-table-field">
 							<div class="flex flex-wrap gap-2">
 								{#each APP_FONTS as option (option.value)}
@@ -201,7 +275,7 @@
 
 				<NewsletterDialog bind:this={newsletterDialog} />
 
-				<div class="mb-4 flex items-start justify-between gap-4">
+				<div class="mb-4 flex items-center justify-between gap-4">
 					<div>
 						<SettingsCardTitle icon={Newspaper} title="Newsletters" />
 						<p class="text-sm text-base-content/70">
@@ -212,14 +286,12 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<button
-							type="button"
-							class="btn btn-primary btn-sm gap-2"
+						<IconActionButton
+							label="Add newsletter"
 							onclick={() => newsletterDialog?.open()}
 						>
 							<Plus class="h-4 w-4" />
-							Add newsletter
-						</button>
+						</IconActionButton>
 					{/if}
 				</div>
 
@@ -296,6 +368,137 @@
 		</div>
 	</div>
 
+	{#if isAdmin}
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body">
+				<svelte:boundary>
+					{@const tickets = await getSupportTickets()}
+
+					<div class="mb-4">
+						<SettingsCardTitle icon={Ticket} title="Support tickets" />
+						<p class="text-sm text-base-content/70">
+							Review and update tickets submitted from the support button.
+						</p>
+					</div>
+
+					{#if tickets.length === 0}
+						<p class="text-sm text-base-content/60">No support tickets yet.</p>
+					{:else}
+						<DataTable
+							rows={tickets}
+							rowKey={(item) => item.id}
+							emptyMessage="No support tickets yet."
+						>
+							<DataTableColumn
+								label="Subject"
+								firstData
+								filterText={(item) =>
+									[
+										item.subject,
+										item.description,
+										SUPPORT_TICKET_CATEGORY_LABELS[item.category],
+										SUPPORT_TICKET_URGENCY_LABELS[item.urgency],
+										ticketSubmitterName(item),
+										ticketSubmitterEmail(item)
+									]
+										.filter(Boolean)
+										.join(' ')}
+							>
+								{#snippet children({ row: item })}
+									<div class="max-w-xs">
+										<p class="font-medium">{item.subject}</p>
+										<p class="mt-1 line-clamp-2 text-xs text-base-content/60">
+											{item.description}
+										</p>
+									</div>
+								{/snippet}
+							</DataTableColumn>
+
+							<DataTableColumn
+								label="Submitter"
+								filterText={(item) =>
+									[ticketSubmitterName(item), ticketSubmitterEmail(item)].join(' ')}
+							>
+								{#snippet children({ row: item })}
+									<div>
+										<p>{ticketSubmitterName(item)}</p>
+										<p class="text-xs text-base-content/60">{ticketSubmitterEmail(item)}</p>
+									</div>
+								{/snippet}
+							</DataTableColumn>
+
+							<DataTableColumn
+								label="Category"
+								filterText={(item) => SUPPORT_TICKET_CATEGORY_LABELS[item.category]}
+							>
+								{#snippet children({ row: item })}
+									<span class="text-sm">{SUPPORT_TICKET_CATEGORY_LABELS[item.category]}</span>
+								{/snippet}
+							</DataTableColumn>
+
+							<DataTableColumn
+								label="Urgency"
+								filterText={(item) => SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
+							>
+								{#snippet children({ row: item })}
+									<span class="badge badge-outline badge-sm">
+										{SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
+									</span>
+								{/snippet}
+							</DataTableColumn>
+
+							<DataTableColumn
+								label="Status"
+								filterText={(item) => SUPPORT_TICKET_STATUS_LABELS[item.status]}
+							>
+								{#snippet children({ row: item })}
+									<select
+										class="select select-bordered select-xs w-full max-w-[9.5rem]"
+										value={item.status}
+										disabled={ticketStatusLoading.isPending(item.id)}
+										onchange={(event) =>
+											handleTicketStatusChange(
+												item.id,
+												event.currentTarget.value as SupportTicketStatus
+											)}
+									>
+										{#each SUPPORT_TICKET_STATUS_OPTIONS as option (option.value)}
+											<option value={option.value}>{option.label}</option>
+										{/each}
+									</select>
+								{/snippet}
+							</DataTableColumn>
+
+							<DataTableColumn
+								label="Created"
+								filterText={(item) => new Date(item.createdAt).toLocaleString()}
+							>
+								{#snippet children({ row: item })}
+									<span class="text-sm whitespace-nowrap">
+										{new Date(item.createdAt).toLocaleString()}
+									</span>
+								{/snippet}
+							</DataTableColumn>
+						</DataTable>
+					{/if}
+
+					{#snippet pending()}
+						<SettingsCardTitle icon={Ticket} title="Support tickets" class="mb-4" />
+						<LoadingCenter />
+					{/snippet}
+
+					{#snippet failed(error)}
+						<div class="alert alert-error">
+							<span>
+								{error instanceof Error ? error.message : 'Failed to load support tickets'}
+							</span>
+						</div>
+					{/snippet}
+				</svelte:boundary>
+			</div>
+		</div>
+	{/if}
+
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">
 			<svelte:boundary>
@@ -303,7 +506,7 @@
 
 				<OnboardingSlideDialog bind:this={onboardingSlideDialog} />
 
-				<div class="mb-4 flex items-start justify-between gap-4">
+				<div class="mb-4 flex items-center justify-between gap-4">
 					<div>
 						<SettingsCardTitle icon={Images} title="Onboarding carousel" />
 						<p class="text-sm text-base-content/70">
@@ -314,14 +517,12 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<button
-							type="button"
-							class="btn btn-primary btn-sm gap-2"
+						<IconActionButton
+							label="Add slide"
 							onclick={() => onboardingSlideDialog?.open()}
 						>
 							<Plus class="h-4 w-4" />
-							Add slide
-						</button>
+						</IconActionButton>
 					{/if}
 				</div>
 
@@ -412,7 +613,7 @@
 
 				<AnnouncementDialog bind:this={announcementDialog} />
 
-				<div class="mb-4 flex items-start justify-between gap-4">
+				<div class="mb-4 flex items-center justify-between gap-4">
 					<div>
 						<SettingsCardTitle icon={Megaphone} title="Announcements" />
 						<p class="text-sm text-base-content/70">
@@ -423,14 +624,12 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<button
-							type="button"
-							class="btn btn-primary btn-sm gap-2"
+						<IconActionButton
+							label="Add announcement"
 							onclick={() => announcementDialog?.open()}
 						>
 							<Plus class="h-4 w-4" />
-							Add announcement
-						</button>
+						</IconActionButton>
 					{/if}
 				</div>
 
@@ -525,21 +724,19 @@
 
 				<NotificationSoundDialog bind:this={notificationSoundDialog} />
 
-				<div class="mb-4 flex items-start justify-between gap-4">
+				<div class="mb-4 flex items-center justify-between gap-4">
 					<div>
 						<SettingsCardTitle icon={Volume2} title="Sounds" />
 						<p class="text-sm text-base-content/70">
 							MP3, WAV, or other direct audio URLs played when new notifications arrive. One can be marked as the portal default.
 						</p>
 					</div>
-					<button
-						type="button"
-						class="btn btn-primary btn-sm gap-2"
+					<IconActionButton
+						label="Add sound"
 						onclick={() => notificationSoundDialog?.open()}
 					>
 						<Plus class="h-4 w-4" />
-						Add sound
-					</button>
+					</IconActionButton>
 				</div>
 
 				{#if sounds.length === 0}
@@ -626,21 +823,19 @@
 
 				<NotificationDialog bind:this={notificationDialog} />
 
-				<div class="mb-4 flex items-start justify-between gap-4">
+				<div class="mb-4 flex items-center justify-between gap-4">
 					<div>
 						<SettingsCardTitle icon={Bell} title="Notifications" />
 						<p class="text-sm text-base-content/70">
 							Bell dropdown on public pages. New items are pushed in real time via SSE.
 						</p>
 					</div>
-					<button
-						type="button"
-						class="btn btn-primary btn-sm gap-2"
+					<IconActionButton
+						label="Add notification"
 						onclick={() => notificationDialog?.open()}
 					>
 						<Plus class="h-4 w-4" />
-						Add notification
-					</button>
+					</IconActionButton>
 				</div>
 
 				{#if portalNotifications.length === 0}

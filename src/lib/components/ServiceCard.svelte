@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ExternalLink, Globe } from 'lucide-svelte';
+	import { ExternalLink, Globe, Pin } from '@lucide/svelte';
 	import ServiceLinkStatus from '$lib/components/ServiceLinkStatus.svelte';
 	import { accentGradientBackground } from '$lib/utils/accent-gradient';
 
@@ -10,7 +10,10 @@
 		iconUrl = null,
 		category = null,
 		accentColor = null,
-		linkStatus = 'checking'
+		linkStatus = 'checking',
+		pinned = false,
+		showPin = false,
+		onPinToggle
 	}: {
 		name: string;
 		description?: string | null;
@@ -19,13 +22,37 @@
 		category?: string | null;
 		accentColor?: string | null;
 		linkStatus?: 'checking' | 'up' | 'down';
+		pinned?: boolean;
+		showPin?: boolean;
+		onPinToggle?: () => void;
 	} = $props();
 
 	let imageFailed = $state(false);
 
 	const categoryLabel = $derived((category?.trim() || 'SERVICE').toUpperCase());
 	const cardBackground = $derived(accentGradientBackground(accentColor));
+
+	function handlePinClick(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		onPinToggle?.();
+	}
 </script>
+
+<div class="relative w-full">
+	{#if showPin}
+		<button
+			type="button"
+			class="btn btn-circle btn-xs absolute top-2 right-2 z-20 border border-base-300 bg-base-100/90 shadow-sm backdrop-blur-sm"
+			class:btn-primary={pinned}
+			class:btn-ghost={!pinned}
+			aria-label={pinned ? 'Unpin from dashboard' : 'Pin to dashboard'}
+			aria-pressed={pinned}
+			onclick={handlePinClick}
+		>
+			<Pin class="h-3.5 w-3.5 {pinned ? 'fill-current' : ''}" />
+		</button>
+	{/if}
 
 <a
 	href={link}
@@ -85,3 +112,4 @@
 	<div></div>
 	<div></div>
 </a>
+</div>

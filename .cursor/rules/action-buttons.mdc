@@ -30,7 +30,7 @@ Wrap a row's actions in `flex flex-wrap gap-2` when **not** using `DataTable` (l
 
 ```svelte
 <script lang="ts">
-	import { Eye, ExternalLink, Pencil, Trash2 } from 'lucide-svelte';
+	import { Eye, ExternalLink, Pencil, Trash2 } from '@lucide/svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Trash2 } from 'lucide-svelte';
+	import { Plus, Trash2 } from '@lucide/svelte';
 	import { getAccessRoles } from '$lib/remotes/access-role.remote';
 	import {
 		getAllDepartments,
@@ -192,6 +192,16 @@
 		<dialog class="modal modal-open">
 			<div class="modal-box modal-box-fit flex justify-center py-12">
 				<LoadingSpinner size="lg" />
+			</div>
+		</dialog>
+	{/snippet}
+
+	{#snippet failed(error)}
+		<dialog class="modal modal-open">
+			<div class="modal-box modal-box-fit">
+				<div class="alert alert-error">
+					<span>{error instanceof Error ? error.message : 'Failed to load access data'}</span>
+				</div>
 			</div>
 		</dialog>
 	{/snippet}

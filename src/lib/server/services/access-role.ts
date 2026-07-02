@@ -11,6 +11,10 @@ import {
 } from '$lib/schemas/access-role';
 import { getServiceCountsByRole, setRoleServices } from '$lib/server/services/service';
 import { getAppCountsByRole, setRoleApps } from '$lib/server/services/app';
+import {
+	getCommunityLinkCountsByRole,
+	setRoleCommunityLinks
+} from '$lib/server/services/community-link';
 
 const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 	{
@@ -93,12 +97,17 @@ export async function listAccessRoles() {
 	const roles = await db.query.accessRole.findMany({ orderBy: [asc(accessRole.name)] });
 	const serviceCounts = await getServiceCountsByRole();
 	const appCounts = await getAppCountsByRole();
+	const communityLinkCounts = await getCommunityLinkCountsByRole();
 
 	return roles.map((role) => ({
 		...role,
 		serviceCount: serviceCounts.get(role.id) ?? 0,
 		appCount: appCounts.get(role.id) ?? 0,
-		toolCount: (serviceCounts.get(role.id) ?? 0) + (appCounts.get(role.id) ?? 0)
+		communityLinkCount: communityLinkCounts.get(role.id) ?? 0,
+		toolCount:
+			(serviceCounts.get(role.id) ?? 0) +
+			(appCounts.get(role.id) ?? 0) +
+			(communityLinkCounts.get(role.id) ?? 0)
 	}));
 }
 
@@ -112,7 +121,7 @@ export async function getAccessRole(id: string) {
 
 export async function createAccessRole(input: CreateAccessRoleInput) {
 	const data = createAccessRoleSchema.parse(input);
-	const { serviceIds, appIds, ...roleData } = data;
+	const { serviceIds, appIds, communityLinkIds, ...roleData } = data;
 
 	const slugTaken = await db.query.accessRole.findFirst({
 		where: eq(accessRole.slug, roleData.slug)
@@ -129,6 +138,10 @@ export async function createAccessRole(input: CreateAccessRoleInput) {
 		await setRoleApps(record.id, appIds);
 	}
 
+	if (communityLinkIds) {
+		await setRoleCommunityLinks(record.id, communityLinkIds);
+	}
+
 	return record;
 }
 
@@ -143,7 +156,7 @@ export async function updateAccessRole(input: UpdateAccessRoleInput) {
 		if (slugTaken) error(409, 'A role with this slug already exists');
 	}
 
-	const { id, serviceIds, appIds, ...patch } = data;
+	const { id, serviceIds, appIds, communityLinkIds, ...patch } = data;
 	const [record] = await db
 		.update(accessRole)
 		.set({ ...patch, updatedAt: new Date() })
@@ -156,6 +169,10 @@ export async function updateAccessRole(input: UpdateAccessRoleInput) {
 
 	if (appIds !== undefined) {
 		await setRoleApps(id, appIds);
+	}
+
+	if (communityLinkIds !== undefined) {
+		await setRoleCommunityLinks(id, communityLinkIds);
 	}
 
 	return record;

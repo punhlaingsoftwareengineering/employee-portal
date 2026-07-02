@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PublicNotification } from '$lib/schemas/notification';
 	import NotificationIcon from '$lib/components/NotificationIcon.svelte';
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 
 	let {
 		notification,

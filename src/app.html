@@ -14,8 +14,13 @@
 					if (!raw) return;
 					var settings = JSON.parse(raw);
 					var root = document.documentElement;
-					if (settings.theme && settings.theme !== 'system') {
-						root.setAttribute('data-theme', settings.theme);
+					if (settings.theme) {
+						var theme = settings.theme;
+						if (theme === 'system') {
+							var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+							theme = prefersDark ? 'night' : 'winter';
+						}
+						root.setAttribute('data-theme', theme);
 					}
 					if (settings.font) {
 						root.dataset.appFont = settings.font;

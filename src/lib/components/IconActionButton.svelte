@@ -37,7 +37,7 @@
 		type?: 'button' | 'submit';
 		size?: ButtonSize;
 		tooltipPlacement?: TooltipPlacement;
-		children: Snippet;
+		children?: Snippet;
 	} = $props();
 
 	const tableActions = getContext<
@@ -78,7 +78,7 @@
 			target={external ? '_blank' : undefined}
 			rel={external ? 'noopener noreferrer' : undefined}
 		>
-			{@render children()}
+			{@render children?.()}
 		</a>
 	{:else}
 		<button
@@ -93,7 +93,7 @@
 			{onclick}
 			{disabled}
 		>
-			{@render children()}
+			{@render children?.()}
 		</button>
 	{/if}
 </div>

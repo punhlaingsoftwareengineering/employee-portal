@@ -30,3 +30,9 @@ export type UserPermissionsSummary = {
 	isGuest: boolean;
 	departmentRoles: DepartmentRoleAssignment[];
 };
+
+export function canAccessTools(permissions: UserPermissionsSummary | null | undefined): boolean {
+	if (!permissions) return false;
+	if (permissions.isAdmin) return true;
+	return permissions.departmentRoles.some((assignment) => assignment.permissions.navTools);
+}

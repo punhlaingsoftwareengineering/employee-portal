@@ -4,7 +4,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createFormLoading } from '$lib/form-loading.svelte';
-	import { Clock, LogOut } from 'lucide-svelte';
+	import { Clock, LogOut } from '@lucide/svelte';
 
 	const logoutLoading = createFormLoading();
 </script>
