@@ -8,6 +8,7 @@
 		getAnnouncements
 	} from '$lib/remotes/announcement.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingAnnouncement = $state<Announcement | null>(null);
@@ -177,12 +178,13 @@
 						<tr>
 							<td class="form-table-label">Image URL</td>
 							<td class="form-table-field">
-								<input
-									type="url"
+								<DriveMediaUrlField
 									bind:value={imageUrl}
-									class="input input-bordered w-full max-w-md"
+									category="announcements"
+									accept="image/*"
 									required
 									placeholder="https://example.com/banner.png"
+									disabled={submitting}
 								/>
 							</td>
 						</tr>

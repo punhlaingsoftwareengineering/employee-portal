@@ -6,6 +6,7 @@
 		getToolLearnings
 	} from '$lib/remotes/tool-learning.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingItem = $state<ToolLearning | null>(null);
@@ -127,15 +128,16 @@
 					<tr>
 						<td class="form-table-label">Video link</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={videoUrl}
-								class="input input-bordered w-full max-w-md"
+								category="tool-learnings"
+								accept="video/*"
 								required
-								placeholder="https://www.youtube.com/watch?v=…"
+								placeholder="https://example.com/tutorial.mp4"
+								disabled={submitting}
 							/>
 							<p class="mt-1 text-xs text-base-content/60">
-								YouTube, Vimeo, or any direct video URL.
+								Upload to PHH-DRIVE or paste a direct video URL.
 							</p>
 						</td>
 					</tr>

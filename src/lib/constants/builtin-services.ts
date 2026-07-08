@@ -3,6 +3,9 @@ import type { ServiceEmbedMode } from '$lib/constants/service-embed';
 /** Stable ID — upserted by ensureBuiltinServices(). */
 export const E_SIGNATURE_SERVICE_ID = 'c8e4f2a1-9b3d-4e5f-a1b2-3c4d5e6f7081';
 
+/** Stable ID — link synced from DRIVE_ORIGIN env on startup. */
+export const PHH_DRIVE_SERVICE_ID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+
 export const E_SIGNATURE_SERVICE_PATH = '/tools/e-signature';
 
 export type BuiltinServiceDefinition = {
@@ -29,7 +32,10 @@ export const BUILTIN_SERVICES: readonly BuiltinServiceDefinition[] = [
 	}
 ] as const;
 
-const BUILTIN_SERVICE_IDS = new Set(BUILTIN_SERVICES.map((item) => item.id));
+const BUILTIN_SERVICE_IDS = new Set([
+	...BUILTIN_SERVICES.map((item) => item.id),
+	PHH_DRIVE_SERVICE_ID
+]);
 
 export function isBuiltinServiceId(id: string): boolean {
 	return BUILTIN_SERVICE_IDS.has(id);

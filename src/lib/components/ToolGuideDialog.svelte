@@ -6,6 +6,7 @@
 		getToolGuides
 	} from '$lib/remotes/tool-guide.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingGuide = $state<ToolGuide | null>(null);
@@ -122,12 +123,13 @@
 					<tr>
 						<td class="form-table-label">PDF link</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={pdfUrl}
-								class="input input-bordered w-full max-w-md"
+								category="tool-guides"
+								accept="application/pdf"
 								required
 								placeholder="https://example.com/guide.pdf"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>

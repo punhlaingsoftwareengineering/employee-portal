@@ -26,6 +26,8 @@ test-results
 # Archives
 *.tar
 
+Caddyfile.generated
+
 # Paraglide
 src/lib/paraglide
 project.inlang/cache/

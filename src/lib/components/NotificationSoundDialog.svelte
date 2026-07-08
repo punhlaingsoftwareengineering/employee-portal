@@ -6,6 +6,7 @@
 		getNotificationSounds
 	} from '$lib/remotes/notification-sound.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 	import { isNotificationSoundUrl, normalizeNotificationSoundUrl } from '$lib/constants/notification';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
@@ -101,15 +102,16 @@
 					<tr>
 						<td class="form-table-label">Audio URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={mp3Url}
-								class="input input-bordered w-full max-w-md"
+								category="notification-sounds"
+								accept="audio/*"
 								required
-								placeholder="http://10.100.100.67:1025/BselWBq_7FNV"
+								placeholder="https://example.com/sound.mp3"
+								disabled={submitting}
 							/>
 							<p class="mt-1 text-xs text-base-content/60">
-								Direct http(s) link to audio (MP3, WAV, or extensionless if the server returns audio).
+								Upload to PHH-DRIVE or paste a direct audio URL.
 							</p>
 						</td>
 					</tr>

@@ -19,11 +19,16 @@ export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
 		const password = formData.get('password')?.toString() ?? '';
+		const confirmPassword = formData.get('confirmPassword')?.toString() ?? '';
 		const token =
 			formData.get('token')?.toString() ?? event.url.searchParams.get('token')?.toString() ?? '';
 
 		if (!token) {
 			return fail(400, { message: 'Missing reset token' });
+		}
+
+		if (password !== confirmPassword) {
+			return fail(400, { message: 'Passwords do not match' });
 		}
 
 		try {

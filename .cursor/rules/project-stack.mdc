@@ -1,11 +1,11 @@
 ---
-description: Employee Portal stack, deno commands, and documentation index
+description: Employee Portal stack, pnpm commands, and documentation index
 alwaysApply: true
 ---
 
 # Project Stack
 
-- **Runtime**: TypeScript, Deno (`deno task …`, not npm directly)
+- **Runtime**: TypeScript, pnpm (`pnpm …`)
 - **Framework**: SvelteKit 3 + Svelte 5 (runes, experimental async + remote functions)
 - **Database**: Local PostgreSQL via `pg` + Drizzle ORM
 - **Auth**: Better Auth + Drizzle adapter
@@ -13,16 +13,16 @@ alwaysApply: true
 - **Validation**: Zod (Standard Schema for remotes)
 - **Layer order**: `schema → service → remote → API → routes`
 
-## Deno tasks
+## pnpm scripts
 
 ```sh
-deno task dev          # dev server
-deno task build        # production build
-deno task check        # svelte-check
-deno task lint         # prettier + eslint
-deno task format       # prettier --write
-deno task db:push      # push schema to local Postgres
-deno task auth:schema  # regenerate auth.schema.ts (if auth config changed)
+pnpm dev          # dev server
+pnpm build        # production build
+pnpm check        # svelte-check
+pnpm lint         # prettier + eslint
+pnpm format       # prettier --write
+pnpm db:push      # push schema to local Postgres
+pnpm auth:schema  # regenerate auth.schema.ts (if auth config changed)
 ```
 
 ## Deep reference (personal skills)

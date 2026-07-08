@@ -13,6 +13,6 @@ alwaysApply: false
 
 **drizzle-kit cannot resolve `$lib` aliases** — use relative imports in schema files (e.g. `../../../constants/employee-status`).
 
-After changes: `deno task db:push` or `db:generate` + `db:migrate`.
+After changes: `pnpm db:push` or `db:generate` + `db:migrate`.
 
 Skill: `employee-portal-drizzle`

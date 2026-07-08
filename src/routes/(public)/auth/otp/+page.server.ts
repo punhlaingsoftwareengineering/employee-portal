@@ -1,11 +1,15 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { auth } from '$lib/server/auth';
+import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = ({ url }) => {
 	const email = url.searchParams.get('email') ?? '';
-	const redirectTo = url.searchParams.get('redirectTo') ?? '/dashboard';
+	const redirectTo = resolveSafeRedirectTo(
+		url.searchParams.get('redirectTo') ?? '/dashboard',
+		url.origin
+	);
 
 	return { email, redirectTo };
 };
@@ -15,7 +19,10 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
 		const otp = formData.get('otp')?.toString() ?? '';
-		const redirectTo = formData.get('redirectTo')?.toString() ?? '/dashboard';
+		const redirectTo = resolveSafeRedirectTo(
+			formData.get('redirectTo')?.toString() ?? '/dashboard',
+			event.url.origin
+		);
 
 		try {
 			await auth.api.verifyEmailOTP({

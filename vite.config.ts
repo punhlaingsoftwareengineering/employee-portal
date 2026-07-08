@@ -5,8 +5,15 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { loadAppEnv, viteAllowedHosts } from './vite.allowed-hosts';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+	const env = loadAppEnv(mode);
+
+	return {
+	server: {
+		allowedHosts: viteAllowedHosts(env)
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
@@ -61,4 +68,5 @@ export default defineConfig({
 			}
 		]
 	}
+	};
 });

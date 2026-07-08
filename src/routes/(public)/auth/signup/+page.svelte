@@ -71,7 +71,10 @@
 
 		<p class="mt-4 text-center text-sm">
 			Already have an account?
-			<a href={AUTH_ROUTES.login} class="link link-hover">Sign in</a>
+			<a
+				href="{AUTH_ROUTES.login}{redirectTo !== '/dashboard' ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}"
+				class="link link-hover">Sign in</a
+			>
 		</p>
 	</div>
 </div>

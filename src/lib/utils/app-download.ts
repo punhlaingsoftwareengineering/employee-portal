@@ -38,7 +38,7 @@ export function listDownloadEntries(
 export function detectDownloadPlatform(): AppDownloadPlatform | null {
 	if (!browser) return null;
 
-	const uaData = navigator.userAgentData;
+	const uaData = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData;
 	if (uaData?.platform) {
 		const platform = uaData.platform.toLowerCase();
 		if (platform.includes('win')) return 'windows';

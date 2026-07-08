@@ -7,8 +7,10 @@ import { accessRoleService } from '$lib/server/db/schema/access-role-service';
 import {
 	createServiceSchema,
 	updateServiceSchema,
+	serviceEmbedModeSchema,
 	type CreateServiceInput,
-	type UpdateServiceInput
+	type UpdateServiceInput,
+	type ServiceSummary
 } from '$lib/schemas/service';
 import type { UserPermissions } from '$lib/server/permissions';
 import {
@@ -28,11 +30,31 @@ export async function listServices() {
 	return db.query.service.findMany({ orderBy: [asc(service.name)] });
 }
 
-export async function listPublicServices() {
+async function listPublicServiceRows() {
 	return db.query.service.findMany({
 		where: eq(service.isPublic, true),
 		orderBy: [asc(service.name)]
 	});
+}
+
+export async function listPublicServices(): Promise<ServiceSummary[]> {
+	const rows = await listPublicServiceRows();
+	return rows.map(toServiceSummary);
+}
+
+function toServiceSummary(row: typeof service.$inferSelect): ServiceSummary {
+	const embedMode = serviceEmbedModeSchema.safeParse(row.embedMode);
+	return {
+		id: row.id,
+		name: row.name,
+		description: row.description,
+		category: row.category,
+		accentColor: row.accentColor,
+		link: row.link,
+		iconUrl: row.iconUrl,
+		embedMode: embedMode.success ? embedMode.data : 'external',
+		isPublic: row.isPublic
+	};
 }
 
 function mergeServicesByName(
@@ -143,7 +165,7 @@ export async function getServicesForUser(permissions: UserPermissions) {
 		return listServices();
 	}
 
-	const publicServices = await listPublicServices();
+	const publicServices = await listPublicServiceRows();
 
 	const roleIds = [...new Set(permissions.departmentRoles.map((assignment) => assignment.roleId))];
 	if (roleIds.length === 0) return publicServices;

@@ -1,72 +1,8 @@
 @font-face {
 	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-100-italic.ttf') format('truetype');
-	font-weight: 100;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-100-normal.ttf') format('truetype');
-	font-weight: 100;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-200-italic.ttf') format('truetype');
-	font-weight: 200;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-200-normal.ttf') format('truetype');
-	font-weight: 200;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-300-italic.ttf') format('truetype');
-	font-weight: 300;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-300-normal.ttf') format('truetype');
-	font-weight: 300;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-400-italic.ttf') format('truetype');
-	font-weight: 400;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
 	src: url('./maple-mono/maple-mono-latin-400-normal.ttf') format('truetype');
 	font-weight: 400;
 	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-500-italic.ttf') format('truetype');
-	font-weight: 500;
-	font-style: italic;
 	font-display: swap;
 }
 
@@ -80,14 +16,6 @@
 
 @font-face {
 	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-600-italic.ttf') format('truetype');
-	font-weight: 600;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
 	src: url('./maple-mono/maple-mono-latin-600-normal.ttf') format('truetype');
 	font-weight: 600;
 	font-style: normal;
@@ -96,89 +24,9 @@
 
 @font-face {
 	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-700-italic.ttf') format('truetype');
-	font-weight: 700;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
 	src: url('./maple-mono/maple-mono-latin-700-normal.ttf') format('truetype');
 	font-weight: 700;
 	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-800-italic.ttf') format('truetype');
-	font-weight: 800;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Maple Mono';
-	src: url('./maple-mono/maple-mono-latin-800-normal.ttf') format('truetype');
-	font-weight: 800;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-100-italic.ttf') format('truetype');
-	font-weight: 100;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-100-normal.ttf') format('truetype');
-	font-weight: 100;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-200-italic.ttf') format('truetype');
-	font-weight: 200;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-200-normal.ttf') format('truetype');
-	font-weight: 200;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-300-italic.ttf') format('truetype');
-	font-weight: 300;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-300-normal.ttf') format('truetype');
-	font-weight: 300;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-400-italic.ttf') format('truetype');
-	font-weight: 400;
-	font-style: italic;
 	font-display: swap;
 }
 
@@ -192,25 +40,9 @@
 
 @font-face {
 	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-500-italic.ttf') format('truetype');
-	font-weight: 500;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
 	src: url('./adwaita-sans/adwaita-sans-latin-500-normal.ttf') format('truetype');
 	font-weight: 500;
 	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-600-italic.ttf') format('truetype');
-	font-weight: 600;
-	font-style: italic;
 	font-display: swap;
 }
 
@@ -224,14 +56,6 @@
 
 @font-face {
 	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-700-italic.ttf') format('truetype');
-	font-weight: 700;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
 	src: url('./adwaita-sans/adwaita-sans-latin-700-normal.ttf') format('truetype');
 	font-weight: 700;
 	font-style: normal;
@@ -239,33 +63,65 @@
 }
 
 @font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-800-italic.ttf') format('truetype');
-	font-weight: 800;
-	font-style: italic;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-800-normal.ttf') format('truetype');
-	font-weight: 800;
+	font-family: 'Adwaita Mono';
+	src: url('./adwaita-mono/adwaita-mono-latin-400-normal.woff2') format('woff2');
+	font-weight: 400;
 	font-style: normal;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-900-italic.ttf') format('truetype');
-	font-weight: 900;
-	font-style: italic;
+	font-family: 'Adwaita Mono';
+	src: url('./adwaita-mono/adwaita-mono-latin-500-normal.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Adwaita Sans';
-	src: url('./adwaita-sans/adwaita-sans-latin-900-normal.ttf') format('truetype');
-	font-weight: 900;
+	font-family: 'Adwaita Mono';
+	src: url('./adwaita-mono/adwaita-mono-latin-600-normal.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Adwaita Mono';
+	src: url('./adwaita-mono/adwaita-mono-latin-700-normal.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('./roboto/roboto-latin-400-normal.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('./roboto/roboto-latin-500-normal.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('./roboto/roboto-latin-600-normal.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('./roboto/roboto-latin-700-normal.woff2') format('woff2');
+	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
 }

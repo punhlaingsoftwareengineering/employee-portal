@@ -1,42 +1,66 @@
-# sv
+# Employee Portal
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit app for the PHH employee portal. Uses **pnpm** for all scripts and dependencies.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Setup
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-deno run npm:sv@0.16.1 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" playwright tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:node" drizzle="database:postgresql+postgresql:neon" better-auth="demo:password,github" mdsvex paraglide="languageTags:en, my, ja+demo:no" experimental="versions:kit+features:remoteFunctions,explicitEnvironmentVariables,handleRenderingErrors,async,forkPreloads" mcp="ide:cursor+setup:local" --install deno employee-portal
+pnpm install
+cp .env.example .env   # if present; configure DATABASE_URL, ORIGIN, BETTER_AUTH_SECRET, etc.
 ```
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm dev
 ```
+
+Dev server: `http://localhost:1027` (or your `ORIGIN` behind Caddy for SSO).
 
 ## Building
 
-To create a production version of your app:
-
 ```sh
-npm run build
+pnpm build
+pnpm preview   # preview production build locally
+pnpm start     # run production build (node build/index.js)
 ```
 
-You can preview the production build with `npm run preview`.
+## Database
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+pnpm db:push       # push schema to Postgres
+pnpm db:generate   # generate migrations
+pnpm db:migrate    # run migrations
+pnpm auth:schema   # regenerate auth.schema.ts after Better Auth config changes
+```
+
+## Quality
+
+```sh
+pnpm check   # svelte-check
+pnpm lint    # prettier + eslint
+pnpm test    # unit + e2e
+```
+
+## Shared SSO with PHH-DRIVE
+
+employee-portal is the main app and runs the local Caddy reverse proxy.
+
+```sh
+# One-time (Administrator PowerShell)
+powershell -ExecutionPolicy Bypass -File scripts/setup-local-sso-hosts.ps1
+
+# Dev stack: portal + drive apps, then proxy
+pnpm dev              # this repo (:1027)
+pnpm caddy:dev        # proxy ORIGIN + DRIVE_ORIGIN from .env
+```
+
+PHH-DRIVE (`../drive`) also needs `pnpm dev` on port 1025.
+
+See [docs/shared-auth-sso.md](docs/shared-auth-sso.md).
+
+## Docker
+
+```sh
+docker compose up --build
+```

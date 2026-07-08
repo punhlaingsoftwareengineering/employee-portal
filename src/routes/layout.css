@@ -15,6 +15,10 @@
 @theme {
 	--font-maple-mono: 'Maple Mono', ui-monospace, monospace;
 	--font-adwaita-sans: 'Adwaita Sans', ui-sans-serif, system-ui, sans-serif;
+	--font-adwaita-mono: 'Adwaita Mono', ui-monospace, monospace;
+	--font-roboto: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+	--font-arial: Arial, Helvetica, sans-serif;
+	--font-times-new-roman: 'Times New Roman', Times, serif;
 }
 
 html {
@@ -28,6 +32,22 @@ html[data-app-font='maple-mono'] {
 
 html[data-app-font='adwaita-sans'] {
 	font-family: var(--font-adwaita-sans);
+}
+
+html[data-app-font='adwaita-mono'] {
+	font-family: var(--font-adwaita-mono);
+}
+
+html[data-app-font='roboto'] {
+	font-family: var(--font-roboto);
+}
+
+html[data-app-font='arial'] {
+	font-family: var(--font-arial);
+}
+
+html[data-app-font='times-new-roman'] {
+	font-family: var(--font-times-new-roman);
 }
 
 @layer components {

@@ -5,6 +5,7 @@
 	import { createService, updateService, getServices } from '$lib/remotes/service.remote';
 	import { DEFAULT_SERVICE_ACCENT, accentGradientBackground } from '$lib/utils/accent-gradient';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingService = $state<Service | null>(null);
@@ -154,11 +155,12 @@
 					<tr>
 						<td class="form-table-label">Icon URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={iconUrl}
-								class="input input-bordered w-full max-w-md"
+								category="services"
+								accept="image/*"
 								placeholder="https://example.com/icon.png"
+								disabled={submitting}
 							/>
 							<p class="mt-1 text-xs text-base-content/60">
 								Shown large on the bottom-right of the service card.

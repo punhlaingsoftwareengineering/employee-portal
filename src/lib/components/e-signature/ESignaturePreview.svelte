@@ -35,7 +35,7 @@
 		<table
 			class="e-signature-banner"
 			width={E_SIGNATURE_PNG_SIZE.width}
-			height={E_SIGNATURE_PNG_SIZE.height}
+			style:height="{E_SIGNATURE_PNG_SIZE.height}px"
 			cellpadding="0"
 			cellspacing="0"
 			bgcolor="#FFFFFF"

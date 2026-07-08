@@ -25,8 +25,14 @@ export const APP_THEMES = APP_THEME_VALUES.map((value) => ({
 
 export const APP_FONTS = [
 	{ value: 'maple-mono', label: 'Maple Mono' },
-	{ value: 'adwaita-sans', label: 'Adwaita Sans' }
+	{ value: 'adwaita-sans', label: 'Adwaita Sans' },
+	{ value: 'adwaita-mono', label: 'Adwaita Mono' },
+	{ value: 'roboto', label: 'Roboto' },
+	{ value: 'arial', label: 'Arial' },
+	{ value: 'times-new-roman', label: 'Times New Roman' }
 ] as const;
+
+export const APP_FONT_VALUES = APP_FONTS.map((font) => font.value);
 
 export type AppFont = (typeof APP_FONTS)[number]['value'];
 
@@ -51,6 +57,20 @@ export const DEFAULT_PORTAL_THEME_POLICY: PortalThemePolicy = {
 
 export function filterAllowedThemeOptions(allowedThemes: AppTheme[]) {
 	return APP_THEMES.filter((option) => allowedThemes.includes(option.value));
+}
+
+export type PortalFontPolicy = {
+	allowedFonts: AppFont[];
+	defaultFont: AppFont;
+};
+
+export const DEFAULT_PORTAL_FONT_POLICY: PortalFontPolicy = {
+	allowedFonts: [...APP_FONT_VALUES],
+	defaultFont: 'maple-mono'
+};
+
+export function filterAllowedFontOptions(allowedFonts: AppFont[]) {
+	return APP_FONTS.filter((option) => allowedFonts.includes(option.value));
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {

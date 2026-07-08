@@ -5,13 +5,12 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 	import { createFormLoading } from '$lib/form-loading.svelte';
-	import type { ActionData, PageData } from './$types';
+	import type { ActionData } from './$types';
 
-	let { form, data }: { form: ActionData; data: PageData } = $props();
+	let { form }: { form: ActionData } = $props();
 
 	const redirectTo = $derived(page.url.searchParams.get('redirectTo') ?? '/dashboard');
 	const signInLoading = createFormLoading();
-	const githubLoading = createFormLoading();
 </script>
 
 <h1 class="text-2xl font-bold">Sign in</h1>
@@ -60,7 +59,10 @@
 		<p class="mt-4 text-center text-sm">
 			<a href={AUTH_ROUTES.forgetPassword} class="link link-hover">Forgot password?</a>
 			<span class="mx-2">·</span>
-			<a href={AUTH_ROUTES.signup} class="link link-hover">Create account</a>
+			<a
+				href="{AUTH_ROUTES.signup}{redirectTo !== '/dashboard' ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}"
+				class="link link-hover">Create account</a
+			>
 		</p>
 	</div>
 </div>
@@ -68,29 +70,5 @@
 {#if form?.message}
 	<div class="alert alert-error">
 		<span>{form.message}</span>
-	</div>
-{/if}
-
-{#if data.githubEnabled}
-	<div class="card bg-base-100 shadow-sm">
-		<div class="card-body">
-			<h2 class="card-title">Social</h2>
-			<form method="post" action="?/signInSocial" use:enhance={githubLoading.enhanceSubmit}>
-				<input type="hidden" name="provider" value="github" />
-				<input type="hidden" name="callbackURL" value={redirectTo} />
-				<div class="form-actions">
-					<button
-						type="submit"
-						class="btn btn-neutral gap-2"
-						disabled={githubLoading.submitting}
-					>
-						{#if githubLoading.submitting}
-							<LoadingSpinner size="sm" />
-						{/if}
-						Sign in with GitHub
-					</button>
-				</div>
-			</form>
-		</div>
 	</div>
 {/if}

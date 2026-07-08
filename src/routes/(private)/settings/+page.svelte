@@ -8,18 +8,21 @@
 	import NotificationSoundDialog from '$lib/components/NotificationSoundDialog.svelte';
 	import NotificationDialog from '$lib/components/NotificationDialog.svelte';
 	import PortalThemePolicyDialog from '$lib/components/PortalThemePolicyDialog.svelte';
+	import PortalFontPolicyDialog from '$lib/components/PortalFontPolicyDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 	import {
 		APP_FONTS,
+		APP_THEMES,
 		DEFAULT_APP_TITLE,
 		type AppFont,
 		type AppTheme
 	} from '$lib/constants/app-settings';
-	import { appSettings, resetAppSettings, updateAppSettings, getAllowedThemeOptions } from '$lib/app-settings.svelte';
+	import { appSettings, portalFontPolicy, portalThemePolicy, resetAppSettings, updateAppSettings } from '$lib/app-settings.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteNewsletter, getNewsletters } from '$lib/remotes/newsletter.remote';
 	import {
@@ -49,6 +52,7 @@
 		SUPPORT_TICKET_URGENCY_LABELS,
 		type SupportTicketStatus
 	} from '$lib/constants/support-ticket';
+	import type { AdminSupportTicketRow } from '$lib/schemas/support-ticket';
 	import {
 		Bell,
 		ExternalLink,
@@ -78,17 +82,22 @@
 	let notificationSoundDialog = $state<NotificationSoundDialog | null>(null);
 	let notificationDialog = $state<NotificationDialog | null>(null);
 	let themePolicyDialog = $state<PortalThemePolicyDialog | null>(null);
+	let fontPolicyDialog = $state<PortalFontPolicyDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 	const ticketStatusLoading = createKeyedLoading();
-	const allowedThemeOptions = $derived(getAllowedThemeOptions());
 
-	function setTheme(theme: AppTheme) {
-		updateAppSettings({ theme });
+	function themeLabel(value: AppTheme): string {
+		return APP_THEMES.find((option) => option.value === value)?.label ?? value;
 	}
 
-	function setFont(font: AppFont) {
-		updateAppSettings({ font });
+	function fontLabel(value: AppFont): string {
+		return APP_FONTS.find((option) => option.value === value)?.label ?? value;
 	}
+
+	const defaultThemeLabel = $derived(themeLabel(portalThemePolicy.defaultTheme));
+	const allowedThemeCount = $derived(portalThemePolicy.allowedThemes.length);
+	const defaultFontLabel = $derived(fontLabel(portalFontPolicy.defaultFont));
+	const allowedFontCount = $derived(portalFontPolicy.allowedFonts.length);
 
 	function ticketSubmitterName(ticket: {
 		user?: { name: string; email: string } | null;
@@ -137,84 +146,95 @@
 <PrivatePageHeader title="Settings" />
 
 <div class="card-masonry">
-	<div class="card bg-base-100 shadow-sm">
-		<div class="card-body">
-			{#if isAdmin}
+	{#if isAdmin}
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body">
 				<PortalThemePolicyDialog bind:this={themePolicyDialog} />
-			{/if}
 
-			<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
-				<div>
-					<SettingsCardTitle icon={Palette} title="Theme" />
-					<p class="text-sm text-base-content/70">
-						{#if isAdmin}
-							Configure portal-wide DaisyUI theme options, then pick your personal theme for this
-							device.
-						{:else}
-							Choose your theme for this device from the themes allowed by your administrator.
-						{/if}
-					</p>
-				</div>
-				{#if isAdmin}
-					<button
-						type="button"
-						class="btn btn-outline btn-sm"
-						onclick={() => themePolicyDialog?.open()}
-					>
-						Theme policy
-					</button>
-				{/if}
-			</div>
+				<SettingsCardTitle icon={Palette} title="Theme" />
+				<p class="mb-4 text-sm text-base-content/70">
+					Configure which themes users can pick from the FAB, and the default for visitors who have
+					not chosen one yet.
+				</p>
 
-			<table class="form-table">
-				<tbody>
-					<tr>
-						<td class="form-table-label">Your theme</td>
-						<td class="form-table-field">
-							<select
-								class="select select-bordered select-sm w-full max-w-md"
-								value={appSettings.theme}
-								onchange={(event) => setTheme(event.currentTarget.value as AppTheme)}
-							>
-								{#each allowedThemeOptions as option (option.value)}
-									<option value={option.value}>{option.label}</option>
-								{/each}
-							</select>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
-
-	<div class="card bg-base-100 shadow-sm">
-		<div class="card-body">
-			<SettingsCardTitle icon={Type} title="Font" />
-			<p class="text-sm text-base-content/70">Typography for this device.</p>
-			<table class="form-table">
-				<tbody>
-					<tr>
-						<td class="form-table-label">Font family</td>
-						<td class="form-table-field">
-							<div class="flex flex-wrap gap-2">
-								{#each APP_FONTS as option (option.value)}
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<td class="form-table-label">Theme policy</td>
+							<td class="form-table-field">
+								<div class="flex flex-wrap items-center gap-3">
+									<span class="text-sm">
+										{allowedThemeCount} theme{allowedThemeCount === 1 ? '' : 's'} allowed
+									</span>
 									<button
 										type="button"
-										class="btn btn-sm {appSettings.font === option.value
-											? 'btn-primary'
-											: 'btn-outline'}"
-										onclick={() => setFont(option.value)}
+										class="btn btn-outline btn-sm"
+										onclick={() => themePolicyDialog?.open()}
 									>
-										{option.label}
+										Edit theme policy
 									</button>
-								{/each}
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="form-table-label">Default theme</td>
+							<td class="form-table-field">
+								<span class="badge badge-outline">{defaultThemeLabel}</span>
+								<p class="mt-1 text-xs text-base-content/60">
+									Shown to new visitors and anyone who has not picked a theme from the FAB.
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
-	</div>
+	{/if}
+
+	{#if isAdmin}
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body">
+				<PortalFontPolicyDialog bind:this={fontPolicyDialog} />
+
+				<SettingsCardTitle icon={Type} title="Font" />
+				<p class="mb-4 text-sm text-base-content/70">
+					Configure which fonts users can pick from the FAB, and the default for visitors who have
+					not chosen one yet.
+				</p>
+
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<td class="form-table-label">Font policy</td>
+							<td class="form-table-field">
+								<div class="flex flex-wrap items-center gap-3">
+									<span class="text-sm">
+										{allowedFontCount} font{allowedFontCount === 1 ? '' : 's'} allowed
+									</span>
+									<button
+										type="button"
+										class="btn btn-outline btn-sm"
+										onclick={() => fontPolicyDialog?.open()}
+									>
+										Edit font policy
+									</button>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="form-table-label">Default font</td>
+							<td class="form-table-field">
+								<span class="badge badge-outline">{defaultFontLabel}</span>
+								<p class="mt-1 text-xs text-base-content/60">
+									Shown to new visitors and anyone who has not picked a font from the FAB.
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
 
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">
@@ -240,10 +260,10 @@
 					<tr>
 						<td class="form-table-label">Icon link</td>
 						<td class="form-table-field">
-							<input
-								type="url"
-								class="input input-bordered w-full max-w-md"
+							<DriveMediaUrlField
 								bind:value={iconUrl}
+								category="branding"
+								accept="image/*"
 								placeholder="https://example.com/logo.png"
 								onchange={saveIconUrl}
 							/>
@@ -392,7 +412,7 @@
 							<DataTableColumn
 								label="Subject"
 								firstData
-								filterText={(item) =>
+								filterText={(item: AdminSupportTicketRow) =>
 									[
 										item.subject,
 										item.description,
@@ -416,7 +436,7 @@
 
 							<DataTableColumn
 								label="Submitter"
-								filterText={(item) =>
+								filterText={(item: AdminSupportTicketRow) =>
 									[ticketSubmitterName(item), ticketSubmitterEmail(item)].join(' ')}
 							>
 								{#snippet children({ row: item })}
@@ -429,18 +449,20 @@
 
 							<DataTableColumn
 								label="Category"
-								filterText={(item) => SUPPORT_TICKET_CATEGORY_LABELS[item.category]}
+								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_CATEGORY_LABELS[item.category]}
 							>
-								{#snippet children({ row: item })}
+								{#snippet children({ row }: { row: AdminSupportTicketRow })}
+									{@const item = row}
 									<span class="text-sm">{SUPPORT_TICKET_CATEGORY_LABELS[item.category]}</span>
 								{/snippet}
 							</DataTableColumn>
 
 							<DataTableColumn
 								label="Urgency"
-								filterText={(item) => SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
+								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
 							>
-								{#snippet children({ row: item })}
+								{#snippet children({ row }: { row: AdminSupportTicketRow })}
+									{@const item = row}
 									<span class="badge badge-outline badge-sm">
 										{SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
 									</span>
@@ -449,7 +471,7 @@
 
 							<DataTableColumn
 								label="Status"
-								filterText={(item) => SUPPORT_TICKET_STATUS_LABELS[item.status]}
+								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_STATUS_LABELS[item.status]}
 							>
 								{#snippet children({ row: item })}
 									<select

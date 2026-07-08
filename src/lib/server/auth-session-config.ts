@@ -1,9 +1,11 @@
 import {
+	AUTH_COOKIE_DOMAIN,
 	AUTH_SESSION_COOKIE_CACHE_ENABLED,
 	AUTH_SESSION_COOKIE_CACHE_MAX_AGE,
 	AUTH_SESSION_EXPIRES_IN,
 	AUTH_SESSION_SECURE_COOKIES,
-	AUTH_SESSION_UPDATE_AGE
+	AUTH_SESSION_UPDATE_AGE,
+	ORIGIN
 } from '$app/env/private';
 
 const DURATION_REGEX =
@@ -107,10 +109,25 @@ function parseOptionalBooleanEnv(value: string | undefined): boolean | undefined
 
 export function getAuthSessionOptions() {
 	const expiresIn = parseDurationSeconds(AUTH_SESSION_EXPIRES_IN, '7d');
-	const updateAge = parseDurationSeconds(AUTH_SESSION_UPDATE_AGE, '1d');
+	const updateAge = parseDurationSeconds(AUTH_SESSION_UPDATE_AGE, '30m');
 	const cookieCacheEnabled = parseBooleanEnv(AUTH_SESSION_COOKIE_CACHE_ENABLED, true);
-	const cookieCacheMaxAge = parseDurationSeconds(AUTH_SESSION_COOKIE_CACHE_MAX_AGE, '5m');
+	const cookieCacheMaxAge = parseDurationSeconds(AUTH_SESSION_COOKIE_CACHE_MAX_AGE, '30m');
 	const secureCookies = parseOptionalBooleanEnv(AUTH_SESSION_SECURE_COOKIES);
+	const cookieDomain = AUTH_COOKIE_DOMAIN?.trim();
+
+	const advanced: {
+		useSecureCookies?: boolean;
+		crossSubDomainCookies?: { enabled: boolean; domain: string };
+	} = {};
+
+	if (secureCookies !== undefined) {
+		advanced.useSecureCookies = secureCookies;
+	} else if (ORIGIN?.trim().startsWith('https://')) {
+		advanced.useSecureCookies = true;
+	}
+	if (cookieDomain) {
+		advanced.crossSubDomainCookies = { enabled: true, domain: cookieDomain };
+	}
 
 	return {
 		session: {
@@ -121,7 +138,6 @@ export function getAuthSessionOptions() {
 				maxAge: cookieCacheMaxAge
 			}
 		},
-		advanced:
-			secureCookies === undefined ? {} : { useSecureCookies: secureCookies }
+		advanced
 	};
 }

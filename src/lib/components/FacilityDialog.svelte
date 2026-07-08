@@ -6,6 +6,7 @@
 		getFacilities
 	} from '$lib/remotes/facility.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingFacility = $state<Facility | null>(null);
@@ -128,11 +129,12 @@
 					<tr>
 						<td class="form-table-label">Image URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={imageUrl}
-								class="input input-bordered w-full max-w-md"
+								category="facilities"
+								accept="image/*"
 								placeholder="https://example.com/facility.jpg"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>

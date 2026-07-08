@@ -21,3 +21,16 @@ export const updateSupportTicketStatusSchema = z.object({
 
 export type CreateSupportTicketInput = z.infer<typeof createSupportTicketSchema>;
 export type UpdateSupportTicketStatusInput = z.infer<typeof updateSupportTicketStatusSchema>;
+
+export type AdminSupportTicketRow = {
+	id: string;
+	category: import('$lib/constants/support-ticket').SupportTicketCategory;
+	urgency: import('$lib/constants/support-ticket').SupportTicketUrgency;
+	status: import('$lib/constants/support-ticket').SupportTicketStatus;
+	subject: string;
+	description: string;
+	userId: string | null;
+	guestName: string | null;
+	guestEmail: string | null;
+	user?: { id: string; name: string; email: string } | null;
+};

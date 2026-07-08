@@ -33,6 +33,12 @@
 								<PasswordInput name="password" autocomplete="new-password" required />
 							</td>
 						</tr>
+						<tr>
+							<td class="form-table-label">Confirm password</td>
+							<td class="form-table-field">
+								<PasswordInput name="confirmPassword" autocomplete="new-password" required />
+							</td>
+						</tr>
 					</tbody>
 				</table>
 

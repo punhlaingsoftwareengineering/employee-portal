@@ -5,22 +5,42 @@ const optionalString = z.string().optional();
 
 export const variables = defineEnvVars({
 	DATABASE_URL: { description: 'The database connection string.' },
+	AUTH_DATABASE_URL: {
+		description:
+			'Shared Better Auth database (user, session, account, verification). Defaults to DATABASE_URL when unset.',
+		schema: optionalString
+	},
+	AUTH_COOKIE_DOMAIN: {
+		description:
+			'Parent cookie domain for cross-subdomain SSO (e.g. `.phh.com` or `.local.test`). Unset = host-only cookies.',
+		schema: optionalString
+	},
+	PORTAL_TRUSTED_REDIRECT_ORIGINS: {
+		description:
+			'Comma-separated origins allowed for post-login redirectTo. Defaults to DRIVE_ORIGIN when unset.',
+		schema: optionalString
+	},
+	DRIVE_ORIGIN: {
+		description:
+			'PHH-DRIVE public URL (e.g. `https://office.drive.phh.com` or `http://drive.local.test`). Used for SSO redirects and Caddy.',
+		schema: optionalString
+	},
+	DRIVE_TEAM_API_KEY: {
+		description:
+			'Team-scoped PHH-DRIVE API key (`znltv_…`) for server-side portal media uploads. Never expose to the browser.',
+		schema: optionalString
+	},
+	DRIVE_STORAGE_PROVIDER: {
+		description: 'Storage provider for portal media uploads (`local` or `tigris`). Default: `local`.',
+		schema: optionalString
+	},
 	ORIGIN: {
-		description: 'The app origin (base URL), e.g. `http://localhost:1027`.'
+		description:
+			'Portal public URL (e.g. `https://phh.com` or `http://portal.local.test`). Must match the browser address.'
 	},
 	BETTER_AUTH_SECRET: {
 		description:
 			'Secret used to sign tokens. For production use 32 characters generated with high entropy. See [Better Auth installation](https://www.better-auth.com/docs/installation).'
-	},
-	GITHUB_CLIENT_ID: {
-		description:
-			'GitHub OAuth client ID. See [Better Auth GitHub provider](https://www.better-auth.com/docs/authentication/github).',
-		schema: optionalString
-	},
-	GITHUB_CLIENT_SECRET: {
-		description:
-			'GitHub OAuth client secret. See [Better Auth GitHub provider](https://www.better-auth.com/docs/authentication/github).',
-		schema: optionalString
 	},
 	SMTP_HOST: {
 		description: 'SMTP server host for auth emails (OTP, verification).',

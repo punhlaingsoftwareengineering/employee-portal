@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { app } from '$lib/server/db/schema/app';
 import { accessRoleApp } from '$lib/server/db/schema/access-role-app';
+import type { AppSummary } from '$lib/schemas/app';
 import {
 	createAppSchema,
 	updateAppSchema,
@@ -20,11 +21,34 @@ export async function listApps() {
 	return db.query.app.findMany({ orderBy: [asc(app.name)] });
 }
 
-export async function listPublicApps() {
+async function listPublicAppRows() {
 	return db.query.app.findMany({
 		where: eq(app.isPublic, true),
 		orderBy: [asc(app.name)]
 	});
+}
+
+export async function listPublicApps(): Promise<AppSummary[]> {
+	const rows = await listPublicAppRows();
+	return rows.map(toAppSummary);
+}
+
+function toAppSummary(row: typeof app.$inferSelect): AppSummary {
+	return {
+		id: row.id,
+		name: row.name,
+		tagline: row.tagline,
+		description: row.description,
+		iconUrl: row.iconUrl,
+		bannerUrl: row.bannerUrl,
+		downloadUrl: row.downloadUrl,
+		downloadUrls: normalizeDownloadUrls(row.downloadUrls),
+		version: row.version,
+		developer: row.developer,
+		category: row.category,
+		screenshotUrls: row.screenshotUrls ?? [],
+		isPublic: row.isPublic
+	};
 }
 
 function mergeAppsByName(...lists: (typeof app.$inferSelect)[][]): (typeof app.$inferSelect)[] {
@@ -143,7 +167,7 @@ export async function getAppsForUser(permissions: UserPermissions) {
 		return listApps();
 	}
 
-	const publicApps = await listPublicApps();
+	const publicApps = await listPublicAppRows();
 
 	const roleIds = [...new Set(permissions.departmentRoles.map((assignment) => assignment.roleId))];
 	if (roleIds.length === 0) return publicApps;

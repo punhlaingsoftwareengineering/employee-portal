@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Eye, EyeOff } from '@lucide/svelte';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	type Props = {
 		name: string;
 		required?: boolean;
-		autocomplete?: string;
+		autocomplete?: HTMLInputAttributes['autocomplete'];
 		minlength?: number;
 	};
 

@@ -27,6 +27,6 @@ schema → service → remote → API → routes
 After schema changes:
 
 ```sh
-deno task auth:schema   # if auth config changed
-deno task db:push       # or db:generate + db:migrate
+pnpm auth:schema   # if auth config changed
+pnpm db:push       # or db:generate + db:migrate
 ```

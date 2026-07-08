@@ -1,11 +1,13 @@
 import { and, eq } from 'drizzle-orm';
-import { ORIGIN } from '$app/env/private';
+import { DRIVE_ORIGIN, ORIGIN } from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
+	PHH_DRIVE_SERVICE_ID,
 	getBuiltinServiceDefinition,
 	isBuiltinServiceId,
 	type BuiltinServiceDefinition
 } from '$lib/constants/builtin-services';
+import type { ServiceEmbedMode } from '$lib/constants/service-embed';
 import { db } from '$lib/server/db';
 import { accessRole } from '$lib/server/db/schema/access-role';
 import { accessRoleService } from '$lib/server/db/schema/access-role-service';
@@ -41,48 +43,89 @@ async function assignBuiltinServiceToToolsRoles(serviceId: string) {
 	}
 }
 
-async function upsertBuiltinService(definition: BuiltinServiceDefinition, origin: string) {
-	const link = builtinServiceLink(definition, origin);
+async function upsertServiceRow(input: {
+	id: string;
+	name: string;
+	description: string;
+	category: string;
+	accentColor: string;
+	link: string;
+	embedMode: ServiceEmbedMode;
+	isPublic: boolean;
+	assignToolsRoles?: boolean;
+}) {
 	const existing = await db.query.service.findFirst({
-		where: eq(service.id, definition.id)
+		where: eq(service.id, input.id)
 	});
 
 	if (existing) {
 		await db
 			.update(service)
 			.set({
-				name: definition.name,
-				description: definition.description,
-				category: definition.category,
-				accentColor: definition.accentColor,
-				link,
-				embedMode: definition.embedMode,
-				isPublic: definition.isPublic,
+				name: input.name,
+				description: input.description,
+				category: input.category,
+				accentColor: input.accentColor,
+				link: input.link,
+				embedMode: input.embedMode,
+				isPublic: input.isPublic,
 				updatedAt: new Date()
 			})
-			.where(eq(service.id, definition.id));
+			.where(eq(service.id, input.id));
 		return;
 	}
 
 	await db.insert(service).values({
+		id: input.id,
+		name: input.name,
+		description: input.description,
+		category: input.category,
+		accentColor: input.accentColor,
+		link: input.link,
+		iconUrl: null,
+		embedMode: input.embedMode,
+		isPublic: input.isPublic
+	});
+
+	if (input.assignToolsRoles !== false) {
+		await assignBuiltinServiceToToolsRoles(input.id);
+	}
+}
+
+async function upsertBuiltinService(definition: BuiltinServiceDefinition, origin: string) {
+	await upsertServiceRow({
 		id: definition.id,
 		name: definition.name,
 		description: definition.description,
 		category: definition.category,
 		accentColor: definition.accentColor,
-		link,
-		iconUrl: null,
+		link: builtinServiceLink(definition, origin),
 		embedMode: definition.embedMode,
 		isPublic: definition.isPublic
 	});
+}
 
-	await assignBuiltinServiceToToolsRoles(definition.id);
+async function upsertDriveService() {
+	const driveOrigin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
+	if (!driveOrigin) return;
+
+	await upsertServiceRow({
+		id: PHH_DRIVE_SERVICE_ID,
+		name: 'PHH-DRIVE',
+		description: 'Team file storage and sharing',
+		category: 'Productivity',
+		accentColor: '#0B2D5C',
+		link: driveOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
 }
 
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
 	}
+	await upsertDriveService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -95,6 +138,16 @@ export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void
 
 export function isBuiltinPortalServiceLink(serviceId: string, link: string, origin: string = ORIGIN): boolean {
 	if (!isBuiltinServiceId(serviceId)) return false;
+
+	if (serviceId === PHH_DRIVE_SERVICE_ID) {
+		const driveOrigin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
+		if (!driveOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(driveOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
 
 	const definition = getBuiltinServiceDefinition(serviceId);
 	if (!definition) return false;

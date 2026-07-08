@@ -9,11 +9,14 @@ import {
 	APP_SETTINGS_STORAGE_KEY,
 	APP_THEMES,
 	DEFAULT_APP_SETTINGS,
+	DEFAULT_PORTAL_FONT_POLICY,
 	DEFAULT_PORTAL_THEME_POLICY,
+	filterAllowedFontOptions,
 	filterAllowedThemeOptions,
 	type AppBranding,
 	type AppFont,
 	type AppSettings,
+	type PortalFontPolicy,
 	type PortalThemePolicy
 } from '$lib/constants/app-settings';
 
@@ -25,7 +28,8 @@ function normalizeFont(font: unknown): AppFont {
 		return font as AppFont;
 	}
 	if (font === 'mono') return 'maple-mono';
-	if (font === 'sans' || font === 'serif') return 'adwaita-sans';
+	if (font === 'sans') return 'adwaita-sans';
+	if (font === 'serif') return 'times-new-roman';
 	return DEFAULT_APP_SETTINGS.font;
 }
 
@@ -91,9 +95,14 @@ function themeAttributeValue(theme: AppSettings['theme']): string {
 
 export const appSettings = $state<AppSettings>({ ...DEFAULT_APP_SETTINGS });
 export const portalThemePolicy = $state<PortalThemePolicy>({ ...DEFAULT_PORTAL_THEME_POLICY });
+export const portalFontPolicy = $state<PortalFontPolicy>({ ...DEFAULT_PORTAL_FONT_POLICY });
 
 export function getAllowedThemeOptions() {
 	return filterAllowedThemeOptions(portalThemePolicy.allowedThemes);
+}
+
+export function getAllowedFontOptions() {
+	return filterAllowedFontOptions(portalFontPolicy.allowedFonts);
 }
 
 export function initPortalThemePolicyFromServer(policy?: PortalThemePolicy) {
@@ -102,9 +111,21 @@ export function initPortalThemePolicyFromServer(policy?: PortalThemePolicy) {
 	portalThemePolicy.defaultTheme = policy.defaultTheme;
 }
 
+export function initPortalFontPolicyFromServer(policy?: PortalFontPolicy) {
+	if (!policy) return;
+	portalFontPolicy.allowedFonts = [...policy.allowedFonts];
+	portalFontPolicy.defaultFont = policy.defaultFont;
+}
+
 function clampThemeToPolicy() {
 	if (!portalThemePolicy.allowedThemes.includes(appSettings.theme)) {
 		appSettings.theme = portalThemePolicy.defaultTheme;
+	}
+}
+
+function clampFontToPolicy() {
+	if (!portalFontPolicy.allowedFonts.includes(appSettings.font)) {
+		appSettings.font = portalFontPolicy.defaultFont;
 	}
 }
 
@@ -131,6 +152,7 @@ export function hydrateAppSettingsFromStorage() {
 	const loaded = loadSettings();
 	Object.assign(appSettings, loaded);
 	clampThemeToPolicy();
+	clampFontToPolicy();
 	persistBrandingCookie(appSettings);
 }
 
@@ -146,6 +168,9 @@ export function updateAppSettings(partial: Partial<AppSettings>) {
 	if (partial.theme && !portalThemePolicy.allowedThemes.includes(partial.theme)) {
 		partial.theme = portalThemePolicy.defaultTheme;
 	}
+	if (partial.font && !portalFontPolicy.allowedFonts.includes(partial.font)) {
+		partial.font = portalFontPolicy.defaultFont;
+	}
 	Object.assign(appSettings, partial);
 	persistSettings(appSettings);
 	applyAppSettings(appSettings);
@@ -155,6 +180,7 @@ export function resetAppSettings() {
 	Object.assign(appSettings, {
 		...DEFAULT_APP_SETTINGS,
 		theme: portalThemePolicy.defaultTheme,
+		font: portalFontPolicy.defaultFont,
 		title: appSettings.title,
 		iconUrl: appSettings.iconUrl
 	});

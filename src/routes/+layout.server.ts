@@ -4,6 +4,7 @@ import {
 	type AppBranding
 } from '$lib/constants/app-settings';
 import { getPortalThemePolicy } from '$lib/server/services/portal-theme-config';
+import { getPortalFontPolicy } from '$lib/server/services/portal-font-config';
 import type { LayoutServerLoad } from './$types';
 
 function parseBrandingCookie(raw: string | undefined): AppBranding | undefined {
@@ -30,11 +31,15 @@ function parseBrandingCookie(raw: string | undefined): AppBranding | undefined {
 
 export const load: LayoutServerLoad = async ({ cookies, locals }) => {
 	const appBranding = parseBrandingCookie(cookies.get(APP_BRANDING_COOKIE));
-	const portalThemePolicy = await getPortalThemePolicy();
+	const [portalThemePolicy, portalFontPolicy] = await Promise.all([
+		getPortalThemePolicy(),
+		getPortalFontPolicy()
+	]);
 
 	return {
 		appBranding,
 		portalThemePolicy,
+		portalFontPolicy,
 		user: locals.user ?? null
 	};
 };

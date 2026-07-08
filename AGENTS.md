@@ -1,7 +1,7 @@
 ## Project Configuration
 
 - **Language**: TypeScript
-- **Package Manager**: Deno (`deno task …`)
+- **Package Manager**: pnpm (`pnpm …`)
 - **Database**: Local PostgreSQL via `pg` + Drizzle ORM
 - **Stack**: SvelteKit 3, Svelte 5 (runes, async, remote functions), DaisyUI, Lucide, Zod, UUID, Better Auth, Paraglide, Prettier, ESLint, Vitest, Playwright
 
@@ -22,7 +22,7 @@
 
 | Rule                                                           | Scope                                         |
 | -------------------------------------------------------------- | --------------------------------------------- |
-| [`project-stack.mdc`](.cursor/rules/project-stack.mdc)         | Always on — stack, deno tasks                 |
+| [`project-stack.mdc`](.cursor/rules/project-stack.mdc)         | Always on — stack, pnpm scripts               |
 | [`crud-workflow.mdc`](.cursor/rules/crud-workflow.mdc)         | Always on — layer order                       |
 | [`daisyui-theme.mdc`](.cursor/rules/daisyui-theme.mdc)         | Always on — `winter` light, `night` dark      |
 | [`auth-routes.mdc`](.cursor/rules/auth-routes.mdc)             | Always on — auth pages under `/auth/*`        |
@@ -52,7 +52,7 @@
 | `employee-portal-better-auth`       | Login, hooks, OAuth, session guards                    |
 | `employee-portal-lucide`            | Icons in Svelte components                             |
 | `employee-portal-eslint-prettier`   | Lint/format before commit                              |
-| `employee-portal-deno`              | Package install, deno tasks                            |
+| `employee-portal-pnpm`              | Package install, pnpm scripts                          |
 | `employee-portal-playwright`        | E2E tests                                              |
 | `employee-portal-paraglide`         | i18n / translated strings                              |
 
@@ -67,7 +67,7 @@
 5. **API** — `src/routes/api/{entities}/+server.ts` + `[id]/+server.ts`
 6. **Routes** — `(private)/{entities}/` pages with `{#await remote()}`
 7. **UI** — DaisyUI card + `form-table` layout + Lucide icons; themes `winter` / `night` only
-8. **Validate** — svelte-autofixer, `deno task lint`, `deno task check`
+8. **Validate** — svelte-autofixer, `pnpm lint`, `pnpm check`
 
 ### Reference implementation
 

@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 import { auth } from '$lib/server/auth';
 import { redirectIfAuthenticated } from '$lib/server/auth-guest';
+import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = async (event) => {
@@ -14,7 +15,10 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
 		const password = formData.get('password')?.toString() ?? '';
-		const redirectTo = formData.get('redirectTo')?.toString() ?? '/dashboard';
+		const redirectTo = resolveSafeRedirectTo(
+			formData.get('redirectTo')?.toString() ?? '/dashboard',
+			event.url.origin
+		);
 
 		try {
 			await auth.api.signInEmail({
@@ -45,17 +49,5 @@ export const actions: Actions = {
 		}
 
 		redirect(303, redirectTo);
-	},
-	signInSocial: async (event) => {
-		const formData = await event.request.formData();
-		const provider = formData.get('provider')?.toString() ?? 'github';
-		const redirectTo = formData.get('callbackURL')?.toString() ?? '/dashboard';
-
-		const result = await auth.api.signInSocial({
-			body: { provider: provider as 'github', callbackURL: redirectTo }
-		});
-
-		if (result.url) redirect(302, result.url);
-		return fail(400, { message: 'Social sign-in failed' });
 	}
 };

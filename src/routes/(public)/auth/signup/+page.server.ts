@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 import { auth } from '$lib/server/auth';
 import { redirectIfAuthenticated } from '$lib/server/auth-guest';
+import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = async (event) => {
@@ -16,7 +17,10 @@ export const actions: Actions = {
 		const password = formData.get('password')?.toString() ?? '';
 		const confirmPassword = formData.get('confirmPassword')?.toString() ?? '';
 		const name = formData.get('name')?.toString() ?? '';
-		const redirectTo = formData.get('redirectTo')?.toString() ?? '/dashboard';
+		const redirectTo = resolveSafeRedirectTo(
+			formData.get('redirectTo')?.toString() ?? '/dashboard',
+			event.url.origin
+		);
 
 		if (password !== confirmPassword) {
 			return fail(400, { message: 'Passwords do not match' });

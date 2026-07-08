@@ -39,6 +39,40 @@ export function sendVerificationOtpEmail(data: {
 		});
 }
 
+export function sendPasswordResetEmail(data: { email: string; url: string }): void {
+	const subject = 'Reset your Employee Portal password';
+	const text = `You requested a password reset for your Employee Portal account.
+
+Open this link to choose a new password (expires in 1 hour):
+${data.url}
+
+If you did not request this, you can ignore this email.`;
+
+	if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !SMTP_FROM) {
+		console.info(`[mail] Password reset for ${data.email}: ${data.url}`);
+		return;
+	}
+
+	const port = Number(SMTP_PORT || 587);
+	const transporter = nodemailer.createTransport({
+		host: SMTP_HOST,
+		port,
+		secure: port === 465,
+		auth: { user: SMTP_USER, pass: SMTP_PASS }
+	});
+
+	void transporter
+		.sendMail({
+			from: SMTP_FROM,
+			to: data.email,
+			subject,
+			text
+		})
+		.catch((err) => {
+			console.error('[mail] Failed to send password reset email', err);
+		});
+}
+
 export function sendInviteEmail(data: { email: string; name: string; inviteUrl: string }): void {
 	const subject = 'You are invited to Employee Portal';
 	const text = `Hello ${data.name},

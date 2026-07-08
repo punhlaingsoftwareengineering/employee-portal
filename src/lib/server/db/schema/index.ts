@@ -21,6 +21,7 @@ export * from './notification-sound-relations';
 export * from './notification';
 export * from './notification-read';
 export * from './portal-theme-config';
+export * from './portal-font-config';
 export * from './support-ticket';
 export * from './community-category';
 export * from './community-link';

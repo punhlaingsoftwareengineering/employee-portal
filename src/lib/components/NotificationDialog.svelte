@@ -9,6 +9,7 @@
 	} from '$lib/remotes/notification.remote';
 	import { getNotificationSounds } from '$lib/remotes/notification-sound.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingNotification = $state<Notification | null>(null);
@@ -148,11 +149,12 @@
 					<tr>
 						<td class="form-table-label">Image URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={imageUrl}
-								class="input input-bordered w-full max-w-md"
+								category="notifications"
+								accept="image/*"
 								placeholder="https://example.com/icon.png"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>

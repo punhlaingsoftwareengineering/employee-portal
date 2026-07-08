@@ -7,6 +7,8 @@
 	import { createApp, updateApp, getApps } from '$lib/remotes/app.remote';
 	import { normalizeDownloadUrls } from '$lib/utils/app-download';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import DriveMediaAppendButton from '$lib/components/drive/DriveMediaAppendButton.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingApp = $state<App | null>(null);
@@ -67,6 +69,17 @@
 			linux: downloadLinux.trim() || undefined,
 			zip: downloadZip.trim() || undefined
 		});
+	}
+
+	function appendScreenshotUrl(url: string) {
+		const lines = screenshotUrlsText
+			.split('\n')
+			.map((line) => line.trim())
+			.filter(Boolean);
+		if (lines.length >= 8) return;
+		if (!lines.includes(url)) {
+			screenshotUrlsText = [...lines, url].join('\n');
+		}
 	}
 
 	export function open(existing?: App | null) {
@@ -179,22 +192,24 @@
 					<tr>
 						<td class="form-table-label">Icon URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={iconUrl}
-								class="input input-bordered w-full max-w-md"
+								category="apps"
+								accept="image/*"
 								placeholder="https://example.com/icon.png"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>
 					<tr>
 						<td class="form-table-label">Banner URL</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={bannerUrl}
-								class="input input-bordered w-full max-w-md"
+								category="apps"
+								accept="image/*"
 								placeholder="https://example.com/banner.png"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>
@@ -304,6 +319,14 @@
 								rows="3"
 								placeholder="One image URL per line (max 8)"
 							></textarea>
+							<div class="mt-2">
+								<DriveMediaAppendButton
+									category="apps"
+									accept="image/*"
+									disabled={submitting}
+									onAppend={appendScreenshotUrl}
+								/>
+							</div>
 						</td>
 					</tr>
 					<tr>

@@ -6,6 +6,7 @@
 		getNewsletters
 	} from '$lib/remotes/newsletter.remote';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingNewsletter = $state<Newsletter | null>(null);
@@ -91,12 +92,13 @@
 					<tr>
 						<td class="form-table-label">PDF link</td>
 						<td class="form-table-field">
-							<input
-								type="url"
+							<DriveMediaUrlField
 								bind:value={pdfUrl}
-								class="input input-bordered w-full max-w-md"
+								category="newsletters"
+								accept="application/pdf"
 								required
 								placeholder="https://example.com/newsletter.pdf"
+								disabled={submitting}
 							/>
 						</td>
 					</tr>
