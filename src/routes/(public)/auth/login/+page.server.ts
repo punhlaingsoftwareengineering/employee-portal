@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 import { auth } from '$lib/server/auth';
 import { redirectIfAuthenticated } from '$lib/server/auth-guest';
-import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
+import { redirectSafe, resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = async (event) => {
@@ -48,6 +48,6 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		redirect(303, redirectTo);
+		redirectSafe(303, redirectTo);
 	}
 };

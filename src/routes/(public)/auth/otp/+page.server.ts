@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { auth } from '$lib/server/auth';
-import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
+import { redirectSafe, resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = ({ url }) => {
@@ -36,7 +36,7 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		redirect(303, redirectTo);
+		redirectSafe(303, redirectTo);
 	},
 	resend: async (event) => {
 		const formData = await event.request.formData();

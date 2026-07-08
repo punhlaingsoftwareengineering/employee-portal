@@ -1,5 +1,5 @@
 # Run this script in an elevated PowerShell (Run as administrator).
-# Adds 127.0.0.1 entries for portal/drive hostnames from .env (local dev only).
+# Adds 127.0.0.1 entries for portal/drive/docs hostnames from .env (local dev only).
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -11,6 +11,7 @@ $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
 $envVars = Read-DotEnv $envPath
 $portalOrigin = Get-EnvValue $envVars @('ORIGIN', 'PORTAL_ORIGIN')
 $driveOrigin = Get-EnvValue $envVars @('DRIVE_ORIGIN')
+$docsOrigin = Get-EnvValue $envVars @('DOCS_ORIGIN')
 
 if (-not $portalOrigin -or -not $driveOrigin) {
 	throw 'Set ORIGIN and DRIVE_ORIGIN in .env before running hosts setup.'
@@ -20,6 +21,10 @@ $entries = @(
 	"127.0.0.1 $((Get-OriginUri $portalOrigin).Host)",
 	"127.0.0.1 $((Get-OriginUri $driveOrigin).Host)"
 )
+
+if ($docsOrigin) {
+	$entries += "127.0.0.1 $((Get-OriginUri $docsOrigin).Host)"
+}
 
 $content = Get-Content $hostsPath -Raw
 foreach ($entry in $entries) {

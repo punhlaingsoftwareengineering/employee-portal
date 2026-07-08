@@ -1,4 +1,5 @@
-import { DRIVE_ORIGIN, ORIGIN, PORTAL_TRUSTED_REDIRECT_ORIGINS } from '$app/env/private';
+import { redirect } from '@sveltejs/kit';
+import { DOCS_ORIGIN, DRIVE_ORIGIN, ORIGIN, PORTAL_TRUSTED_REDIRECT_ORIGINS } from '$app/env/private';
 
 function parseTrustedOrigins(): Set<string> {
 	const trusted = new Set<string>();
@@ -7,6 +8,9 @@ function parseTrustedOrigins(): Set<string> {
 
 	const driveOrigin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
 	if (driveOrigin) trusted.add(driveOrigin);
+
+	const docsOrigin = DOCS_ORIGIN?.trim().replace(/\/$/, '');
+	if (docsOrigin) trusted.add(docsOrigin);
 
 	const raw = PORTAL_TRUSTED_REDIRECT_ORIGINS?.trim();
 	if (raw) {
@@ -41,4 +45,19 @@ export function resolveSafeRedirectTo(redirectTo: string, portalOrigin: string):
 
 	void portalOrigin;
 	return '/dashboard';
+}
+
+function isExternalLocation(location: string): boolean {
+	return /^https?:\/\//i.test(location);
+}
+
+/** Redirect after auth; passes SvelteKit external allowlist for SSO targets (drive, docs). */
+export function redirectSafe(
+	status: 301 | 302 | 303 | 307 | 308,
+	location: string
+): never {
+	if (isExternalLocation(location)) {
+		redirect(status, location, { external: [...trustedOrigins] });
+	}
+	redirect(status, location);
 }

@@ -25,6 +25,11 @@ export const variables = defineEnvVars({
 			'PHH-DRIVE public URL (e.g. `https://office.drive.phh.com` or `http://drive.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
+	DOCS_ORIGIN: {
+		description:
+			'Documentation site public URL (e.g. `https://docs.phh.com` or `http://docs.local.test`). Used for SSO redirects and Caddy.',
+		schema: optionalString
+	},
 	DRIVE_TEAM_API_KEY: {
 		description:
 			'Team-scoped PHH-DRIVE API key (`znltv_…`) for server-side portal media uploads. Never expose to the browser.',

@@ -22,7 +22,11 @@
 		"db:studio": "drizzle-kit studio",
 		"auth:schema": "better-auth generate --config src/lib/server/auth.ts --output src/lib/server/db/schema/auth.schema.ts --yes",
 		"caddy:render": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/render-caddyfile.ps1",
-		"caddy:dev": "pnpm caddy:render && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-caddy-dev.ps1"
+		"caddy:dev": "pnpm caddy:render && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-caddy-dev.ps1",
+		"docker:up": "docker compose up --build",
+		"docker:build:local": "docker build -t employee-portal:latest .",
+		"docker:build": "docker build -t ghcr.io/punhlaingsoftwareengineering/employee-portal:latest .",
+		"docker:push": "docker push ghcr.io/punhlaingsoftwareengineering/employee-portal:latest"
 	},
 	"dependencies": {
 		"@lucide/svelte": "^1.22.0",

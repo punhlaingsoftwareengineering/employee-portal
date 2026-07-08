@@ -28,6 +28,8 @@ test-results
 
 Caddyfile.generated
 
+scripts/docker-ghcr.env
+
 # Paraglide
 src/lib/paraglide
 project.inlang/cache/

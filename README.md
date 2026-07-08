@@ -62,5 +62,10 @@ See [docs/shared-auth-sso.md](docs/shared-auth-sso.md).
 ## Docker
 
 ```sh
-docker compose up --build
+pnpm docker:up              # local Postgres + app (docker compose up --build)
+pnpm docker:build:local     # image: employee-portal:latest
+pnpm docker:build           # image: ghcr.io/punhlaingsoftwareengineering/employee-portal:latest
+pnpm docker:push            # push to GHCR (after docker login)
 ```
+
+For tagged GHCR builds, copy `scripts/docker-ghcr.env.example` → `scripts/docker-ghcr.env`, then run `scripts/docker-build.ps1` / `scripts/docker-push.ps1` (or `.sh` on Linux/macOS).

@@ -2,11 +2,15 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getUserPermissions } from '$lib/server/services/portal-user';
 import { hasAppAccess } from '$lib/server/permissions';
+import { redirectSafe, resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 
 export async function redirectIfAuthenticated(event: RequestEvent) {
 	if (!event.locals.user) return;
 
-	const redirectTo = event.url.searchParams.get('redirectTo');
+	const redirectTo = resolveSafeRedirectTo(
+		event.url.searchParams.get('redirectTo') ?? '/dashboard',
+		event.url.origin
+	);
 	const permissions = await getUserPermissions(event.locals.user.id);
 
 	if (permissions.isGuest) {
@@ -17,5 +21,5 @@ export async function redirectIfAuthenticated(event: RequestEvent) {
 		redirect(303, '/pending');
 	}
 
-	redirect(303, redirectTo ?? '/dashboard');
+	redirectSafe(303, redirectTo);
 }

@@ -1,7 +1,8 @@
 import { and, eq } from 'drizzle-orm';
-import { DRIVE_ORIGIN, ORIGIN } from '$app/env/private';
+import { DOCS_ORIGIN, DRIVE_ORIGIN, ORIGIN } from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
+	DOCS_SERVICE_ID,
 	PHH_DRIVE_SERVICE_ID,
 	getBuiltinServiceDefinition,
 	isBuiltinServiceId,
@@ -121,11 +122,28 @@ async function upsertDriveService() {
 	});
 }
 
+async function upsertDocsService() {
+	const docsOrigin = DOCS_ORIGIN?.trim().replace(/\/$/, '');
+	if (!docsOrigin) return;
+
+	await upsertServiceRow({
+		id: DOCS_SERVICE_ID,
+		name: 'Documentation',
+		description: 'Software documentation and CMS',
+		category: 'Productivity',
+		accentColor: '#0B2D5C',
+		link: docsOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
 	}
 	await upsertDriveService();
+	await upsertDocsService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -144,6 +162,16 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 		if (!driveOrigin) return false;
 		try {
 			return new URL(link).origin === new URL(driveOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === DOCS_SERVICE_ID) {
+		const docsOrigin = DOCS_ORIGIN?.trim().replace(/\/$/, '');
+		if (!docsOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(docsOrigin).origin;
 		} catch {
 			return false;
 		}
