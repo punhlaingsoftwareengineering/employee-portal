@@ -114,6 +114,8 @@ export function getAuthSessionOptions() {
 	const cookieCacheMaxAge = parseDurationSeconds(AUTH_SESSION_COOKIE_CACHE_MAX_AGE, '30m');
 	const secureCookies = parseOptionalBooleanEnv(AUTH_SESSION_SECURE_COOKIES);
 	const cookieDomain = AUTH_COOKIE_DOMAIN?.trim();
+	const origin = ORIGIN?.trim() ?? '';
+	const originIsHttps = origin.startsWith('https://');
 
 	const advanced: {
 		useSecureCookies?: boolean;
@@ -121,8 +123,9 @@ export function getAuthSessionOptions() {
 	} = {};
 
 	if (secureCookies !== undefined) {
-		advanced.useSecureCookies = secureCookies;
-	} else if (ORIGIN?.trim().startsWith('https://')) {
+		// Secure cookies are ignored on plain HTTP — browsers will not store them.
+		advanced.useSecureCookies = originIsHttps ? secureCookies : false;
+	} else if (originIsHttps) {
 		advanced.useSecureCookies = true;
 	}
 	if (cookieDomain) {

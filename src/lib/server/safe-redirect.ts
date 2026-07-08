@@ -1,28 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import { DOCS_ORIGIN, DRIVE_ORIGIN, ORIGIN, PORTAL_TRUSTED_REDIRECT_ORIGINS } from '$app/env/private';
+import { getAuthTrustedOrigins } from '$lib/server/auth-trusted-origins';
 
-function parseTrustedOrigins(): Set<string> {
-	const trusted = new Set<string>();
-	const portalOrigin = ORIGIN?.trim().replace(/\/$/, '');
-	if (portalOrigin) trusted.add(portalOrigin);
-
-	const driveOrigin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
-	if (driveOrigin) trusted.add(driveOrigin);
-
-	const docsOrigin = DOCS_ORIGIN?.trim().replace(/\/$/, '');
-	if (docsOrigin) trusted.add(docsOrigin);
-
-	const raw = PORTAL_TRUSTED_REDIRECT_ORIGINS?.trim();
-	if (raw) {
-		for (const part of raw.split(',')) {
-			const o = part.trim().replace(/\/$/, '');
-			if (o) trusted.add(o);
-		}
-	}
-	return trusted;
-}
-
-const trustedOrigins = parseTrustedOrigins();
+const trustedOrigins = new Set(getAuthTrustedOrigins());
 
 /** Safe redirect target after login: same portal path or allowlisted external origin. */
 export function resolveSafeRedirectTo(redirectTo: string, portalOrigin: string): string {

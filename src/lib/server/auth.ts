@@ -13,12 +13,14 @@ import {
 	findValidPendingInviteByEmail
 } from '$lib/server/services/portal-user';
 import { getAuthSessionOptions } from '$lib/server/auth-session-config';
+import { getAuthTrustedOrigins } from '$lib/server/auth-trusted-origins';
 
 const { session, advanced } = getAuthSessionOptions();
 
 export const auth = betterAuth({
 	baseURL: ORIGIN,
 	secret: BETTER_AUTH_SECRET,
+	trustedOrigins: getAuthTrustedOrigins(),
 	database: drizzleAdapter(authDb, { provider: 'pg' }),
 	session,
 	advanced,
