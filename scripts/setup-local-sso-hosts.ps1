@@ -12,6 +12,7 @@ $envVars = Read-DotEnv $envPath
 $portalOrigin = Get-EnvValue $envVars @('ORIGIN', 'PORTAL_ORIGIN')
 $driveOrigin = Get-EnvValue $envVars @('DRIVE_ORIGIN')
 $docsOrigin = Get-EnvValue $envVars @('DOCS_ORIGIN')
+$orderResendOrigin = Get-EnvValue $envVars @('ORDER_RESEND_ORIGIN')
 
 if (-not $portalOrigin -or -not $driveOrigin) {
 	throw 'Set ORIGIN and DRIVE_ORIGIN in .env before running hosts setup.'
@@ -24,6 +25,10 @@ $entries = @(
 
 if ($docsOrigin) {
 	$entries += "127.0.0.1 $((Get-OriginUri $docsOrigin).Host)"
+}
+
+if ($orderResendOrigin) {
+	$entries += "127.0.0.1 $((Get-OriginUri $orderResendOrigin).Host)"
 }
 
 $content = Get-Content $hostsPath -Raw

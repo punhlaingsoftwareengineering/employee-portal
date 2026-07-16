@@ -101,7 +101,7 @@
 		<thead>
 			<tr>
 				<th class="sticky-col-actions" scope="col" aria-label="Actions"></th>
-				<th class="sticky-col-serial" scope="col">#</th>
+				<th class="sticky-col-serial" scope="col">No.</th>
 				{#each activeColumns as column (column.id)}
 					<th
 						scope="col"

@@ -478,7 +478,7 @@
 							{:else}
 								{#each serviceRows as row, rowIndex (rowIndex)}
 									<tr>
-										{#each padRow(row, 3) as item (item?.id ?? `empty-${rowIndex}`)}
+										{#each padRow(row, 3) as item, colIndex (item?.id ?? `empty-service-${rowIndex}-${colIndex}`)}
 											<td>
 												{#if item}
 													<label class="role-dialog-checkbox">
@@ -540,7 +540,7 @@
 							{:else}
 								{#each appRows as row, rowIndex (rowIndex)}
 									<tr>
-										{#each padRow(row, 3) as item (item?.id ?? `empty-${rowIndex}`)}
+										{#each padRow(row, 3) as item, colIndex (item?.id ?? `empty-app-${rowIndex}-${colIndex}`)}
 											<td>
 												{#if item}
 													<label class="role-dialog-checkbox">

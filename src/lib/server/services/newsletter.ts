@@ -20,6 +20,14 @@ export async function listNewsletters(_perms: UserPermissions) {
 	});
 }
 
+/** Newest newsletters for the public onboarding page (max `limit`). */
+export async function listPublicNewsletters(limit = 8) {
+	return db.query.newsletter.findMany({
+		orderBy: [desc(newsletter.createdAt)],
+		limit
+	});
+}
+
 export async function getNewsletter(perms: UserPermissions, id: string) {
 	const record = await db.query.newsletter.findFirst({
 		where: eq(newsletter.id, id)

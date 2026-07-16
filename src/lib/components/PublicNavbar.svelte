@@ -4,11 +4,12 @@
 	import NotificationBell from '$lib/components/NotificationBell.svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 	import { DEFAULT_APP_TITLE } from '$lib/constants/app-settings';
-	import { EXTERNAL_NAV_LINKS, PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 	import { appSettings } from '$lib/app-settings.svelte';
 
 	const notifications = $derived(page.data.notifications ?? []);
 	const defaultSoundUrl = $derived(page.data.defaultSoundUrl ?? null);
+	const docsHref = $derived(page.data.docsHref ?? null);
 
 	const onboardingSections = $derived(
 		page.data.onboardingSections ?? { hasServices: false, hasApps: false }
@@ -35,9 +36,11 @@
 
 	<div class="navbar-center hidden md:flex">
 		<ul class="menu menu-horizontal px-1">
-			<li>
-				<a href={EXTERNAL_NAV_LINKS.docs} target="_blank" rel="noopener noreferrer">Docs</a>
-			</li>
+			{#if docsHref}
+				<li>
+					<a href={docsHref} target="_blank" rel="noopener noreferrer">Docs</a>
+				</li>
+			{/if}
 			<li>
 				<a href={PUBLIC_ROUTES.tipsAndTutorials} class:active={onTipsPage}>Tips & Tutorials</a>
 			</li>

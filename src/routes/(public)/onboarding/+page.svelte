@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { Building2 } from '@lucide/svelte';
+	import { Building2, Newspaper } from '@lucide/svelte';
 	import OnboardingCarousel from '$lib/components/OnboardingCarousel.svelte';
 	import OnboardingFacilityGrid from '$lib/components/OnboardingFacilityGrid.svelte';
+	import OnboardingNewsletterGrid from '$lib/components/OnboardingNewsletterGrid.svelte';
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
 	import ToolsSections from '$lib/components/ToolsSections.svelte';
+	import { ONBOARDING_SECTION_IDS } from '$lib/constants/onboarding';
 	import { publicAppHref } from '$lib/constants/public-routes';
 
 	let { data } = $props();
@@ -34,7 +36,11 @@
 
 {#if data.slides.length > 0}
 	<section class="container mx-auto max-w-5xl px-4 py-8">
-		<OnboardingCarousel slides={data.slides} showCaption={false} />
+		<OnboardingCarousel
+			slides={data.slides}
+			showCaption={false}
+			intervalMs={data.carouselIntervalMs}
+		/>
 	</section>
 {:else}
 	<section class="hero py-16">
@@ -58,6 +64,20 @@
 			gridMaxCols={5}
 			sectionHeadStyle="onboarding"
 		/>
+	</section>
+{/if}
+
+{#if data.newsletters.length > 0}
+	<section
+		id={ONBOARDING_SECTION_IDS.newsletters}
+		class="container mx-auto max-w-5xl scroll-mt-24 px-4 pb-16"
+	>
+		<SectionHead
+			icon={Newspaper}
+			title="Newsletters"
+			description="Latest PDF newsletters. Open a paper to read the full edition."
+		/>
+		<OnboardingNewsletterGrid newsletters={data.newsletters} />
 	</section>
 {/if}
 

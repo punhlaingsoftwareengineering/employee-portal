@@ -9,7 +9,8 @@ export const PORTAL_DRIVE_CATEGORIES = [
 	'notification-sounds',
 	'apps',
 	'services',
-	'branding'
+	'branding',
+	'documentation'
 ] as const;
 
 export type PortalDriveCategory = (typeof PORTAL_DRIVE_CATEGORIES)[number];

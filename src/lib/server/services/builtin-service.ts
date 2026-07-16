@@ -1,8 +1,16 @@
 import { and, eq } from 'drizzle-orm';
-import { DOCS_ORIGIN, DRIVE_ORIGIN, ORIGIN } from '$app/env/private';
+import {
+	DOCS_ORIGIN,
+	DRIVE_ORIGIN,
+	MARI_CHATBOT_ORIGIN,
+	ORDER_RESEND_ORIGIN,
+	ORIGIN
+} from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
 	DOCS_SERVICE_ID,
+	MARI_CHATBOT_SERVICE_ID,
+	ORDER_RESEND_SERVICE_ID,
 	PHH_DRIVE_SERVICE_ID,
 	getBuiltinServiceDefinition,
 	isBuiltinServiceId,
@@ -138,12 +146,46 @@ async function upsertDocsService() {
 	});
 }
 
+async function upsertOrderResendService() {
+	const orderResendOrigin = ORDER_RESEND_ORIGIN?.trim().replace(/\/$/, '');
+	if (!orderResendOrigin) return;
+
+	await upsertServiceRow({
+		id: ORDER_RESEND_SERVICE_ID,
+		name: 'OmegaAi Order Resend',
+		description: 'Search and resend RIS lab results to PACS',
+		category: 'Clinical',
+		accentColor: '#0B2D5C',
+		link: orderResendOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
+async function upsertMariChatbotService() {
+	const mariOrigin = MARI_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
+	if (!mariOrigin) return;
+
+	await upsertServiceRow({
+		id: MARI_CHATBOT_SERVICE_ID,
+		name: 'Mari Chatbot',
+		description: 'AI chatbots powered by n8n workflows',
+		category: 'Productivity',
+		accentColor: '#0B2D5C',
+		link: mariOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
 	}
 	await upsertDriveService();
 	await upsertDocsService();
+	await upsertOrderResendService();
+	await upsertMariChatbotService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -172,6 +214,26 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 		if (!docsOrigin) return false;
 		try {
 			return new URL(link).origin === new URL(docsOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === ORDER_RESEND_SERVICE_ID) {
+		const orderResendOrigin = ORDER_RESEND_ORIGIN?.trim().replace(/\/$/, '');
+		if (!orderResendOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(orderResendOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === MARI_CHATBOT_SERVICE_ID) {
+		const mariOrigin = MARI_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
+		if (!mariOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(mariOrigin).origin;
 		} catch {
 			return false;
 		}

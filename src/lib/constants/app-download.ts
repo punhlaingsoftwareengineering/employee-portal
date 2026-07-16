@@ -10,3 +10,12 @@ export const APP_DOWNLOAD_PLATFORM_LABELS: Record<AppDownloadPlatform, string> =
 	linux: 'Linux',
 	zip: 'ZIP'
 };
+
+/** File picker accept strings for drive uploads per platform. */
+export const APP_DOWNLOAD_ACCEPT: Record<AppDownloadPlatform, string> = {
+	windows: '.exe,.msi,.msix,application/x-msdownload,application/vnd.ms-msi',
+	macos: '.dmg,.pkg,application/x-apple-diskimage',
+	android: '.apk,application/vnd.android.package-archive',
+	linux: '.AppImage,.deb,.rpm,.run,.tar.gz,.tgz,.zip',
+	zip: '.zip,application/zip,application/x-zip-compressed'
+};

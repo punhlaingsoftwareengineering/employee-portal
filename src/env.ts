@@ -25,9 +25,24 @@ export const variables = defineEnvVars({
 			'PHH-DRIVE public URL (e.g. `https://office.drive.phh.com` or `http://drive.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
+	DRIVE_INTERNAL_ORIGIN: {
+		description:
+			'PHH-DRIVE URL for server-side API calls (e.g. `http://host.docker.internal:1025` or `http://phh-drive:1025`). Falls back to DRIVE_ORIGIN when unset.',
+		schema: optionalString
+	},
 	DOCS_ORIGIN: {
 		description:
 			'Documentation site public URL (e.g. `https://docs.phh.com` or `http://docs.local.test`). Used for SSO redirects and Caddy.',
+		schema: optionalString
+	},
+	ORDER_RESEND_ORIGIN: {
+		description:
+			'OmegaAi Order Resend public URL (e.g. `https://order-resend.office.phh.com` or `http://order-resend.local.test`). Used for SSO redirects and Caddy.',
+		schema: optionalString
+	},
+	MARI_CHATBOT_ORIGIN: {
+		description:
+			'Mari Chatbot public URL (e.g. `http://mari.oai.phh.com` or `http://mari.local.test`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	DRIVE_TEAM_API_KEY: {

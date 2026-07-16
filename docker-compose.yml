@@ -35,6 +35,10 @@ services:
       AUTH_SESSION_COOKIE_CACHE_ENABLED: ${AUTH_SESSION_COOKIE_CACHE_ENABLED:-true}
       AUTH_SESSION_COOKIE_CACHE_MAX_AGE: ${AUTH_SESSION_COOKIE_CACHE_MAX_AGE:-5m}
       AUTH_SESSION_SECURE_COOKIES: ${AUTH_SESSION_SECURE_COOKIES:-}
+      # DRIVE_ORIGIN: http://drive.local.test
+      # DRIVE_INTERNAL_ORIGIN: http://host.docker.internal:1025
+      # DRIVE_TEAM_API_KEY: znltv_...
+      # DRIVE_STORAGE_PROVIDER: local
     depends_on:
       db:
         condition: service_healthy

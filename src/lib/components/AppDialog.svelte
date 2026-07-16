@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { App } from '$lib/server/db/schema/app';
 	import {
+		APP_DOWNLOAD_ACCEPT,
 		APP_DOWNLOAD_PLATFORM_LABELS
 	} from '$lib/constants/app-download';
 	import { createApp, updateApp, getApps } from '$lib/remotes/app.remote';
@@ -217,64 +218,76 @@
 						<td class="form-table-label align-top">Download URLs</td>
 						<td class="form-table-field">
 							<p class="mb-3 text-sm text-base-content/70">
-								Add a link for each platform you support, or a ZIP archive (at least one required).
+								Paste a link or upload an installer or ZIP to PHH-DRIVE (<code
+									class="text-xs">portal/apps</code
+								>). At least one platform is required.
 							</p>
 							<div class="space-y-3">
-								<label class="form-control w-full max-w-md">
+								<div class="form-control w-full max-w-md">
 									<span class="label py-0">
 										<span class="label-text">{APP_DOWNLOAD_PLATFORM_LABELS.windows}</span>
 									</span>
-									<input
-										type="url"
+									<DriveMediaUrlField
 										bind:value={downloadWindows}
-										class="input input-bordered w-full"
+										category="apps"
+										accept={APP_DOWNLOAD_ACCEPT.windows}
 										placeholder="https://example.com/app-setup.exe"
+										inputClass="input input-bordered w-full"
+										disabled={submitting}
 									/>
-								</label>
-								<label class="form-control w-full max-w-md">
+								</div>
+								<div class="form-control w-full max-w-md">
 									<span class="label py-0">
 										<span class="label-text">{APP_DOWNLOAD_PLATFORM_LABELS.macos}</span>
 									</span>
-									<input
-										type="url"
+									<DriveMediaUrlField
 										bind:value={downloadMacos}
-										class="input input-bordered w-full"
+										category="apps"
+										accept={APP_DOWNLOAD_ACCEPT.macos}
 										placeholder="https://example.com/app.dmg"
+										inputClass="input input-bordered w-full"
+										disabled={submitting}
 									/>
-								</label>
-								<label class="form-control w-full max-w-md">
+								</div>
+								<div class="form-control w-full max-w-md">
 									<span class="label py-0">
 										<span class="label-text">{APP_DOWNLOAD_PLATFORM_LABELS.android}</span>
 									</span>
-									<input
-										type="url"
+									<DriveMediaUrlField
 										bind:value={downloadAndroid}
-										class="input input-bordered w-full"
+										category="apps"
+										accept={APP_DOWNLOAD_ACCEPT.android}
 										placeholder="https://example.com/app.apk"
+										inputClass="input input-bordered w-full"
+										disabled={submitting}
 									/>
-								</label>
-								<label class="form-control w-full max-w-md">
+								</div>
+								<div class="form-control w-full max-w-md">
 									<span class="label py-0">
 										<span class="label-text">{APP_DOWNLOAD_PLATFORM_LABELS.linux}</span>
 									</span>
-									<input
-										type="url"
+									<DriveMediaUrlField
 										bind:value={downloadLinux}
-										class="input input-bordered w-full"
+										category="apps"
+										accept={APP_DOWNLOAD_ACCEPT.linux}
 										placeholder="https://example.com/app.AppImage"
+										inputClass="input input-bordered w-full"
+										disabled={submitting}
 									/>
-								</label>
-								<label class="form-control w-full max-w-md">
+								</div>
+								<div class="form-control w-full max-w-md">
 									<span class="label py-0">
 										<span class="label-text">{APP_DOWNLOAD_PLATFORM_LABELS.zip}</span>
 									</span>
-									<input
-										type="url"
+									<DriveMediaUrlField
 										bind:value={downloadZip}
-										class="input input-bordered w-full"
+										category="apps"
+										accept={APP_DOWNLOAD_ACCEPT.zip}
 										placeholder="https://example.com/app.zip"
+										inputClass="input input-bordered w-full"
+										disabled={submitting}
 									/>
-								</label>
+								</div>
 							</div>
 						</td>
 					</tr>

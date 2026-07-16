@@ -1,4 +1,11 @@
-import { DOCS_ORIGIN, DRIVE_ORIGIN, ORIGIN, PORTAL_TRUSTED_REDIRECT_ORIGINS } from '$app/env/private';
+import {
+	DOCS_ORIGIN,
+	DRIVE_ORIGIN,
+	MARI_CHATBOT_ORIGIN,
+	ORDER_RESEND_ORIGIN,
+	ORIGIN,
+	PORTAL_TRUSTED_REDIRECT_ORIGINS
+} from '$app/env/private';
 
 function normalizeOrigin(value: string): string {
 	return value.trim().replace(/\/$/, '');
@@ -42,6 +49,8 @@ export function getAuthTrustedOrigins(): string[] {
 	addOrigin(trusted, ORIGIN);
 	addOrigin(trusted, DRIVE_ORIGIN);
 	addOrigin(trusted, DOCS_ORIGIN);
+	addOrigin(trusted, ORDER_RESEND_ORIGIN);
+	addOrigin(trusted, MARI_CHATBOT_ORIGIN);
 	addOriginsList(trusted, PORTAL_TRUSTED_REDIRECT_ORIGINS);
 
 	return [...trusted];

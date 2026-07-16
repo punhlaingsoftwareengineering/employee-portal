@@ -1,4 +1,5 @@
 import {
+	DRIVE_INTERNAL_ORIGIN,
 	DRIVE_ORIGIN,
 	DRIVE_STORAGE_PROVIDER,
 	DRIVE_TEAM_API_KEY
@@ -45,10 +46,16 @@ export type PortalDriveMediaFile = {
 
 const categoryFolderCache = new Map<PortalDriveCategory, string>();
 
-function driveOrigin(): string {
+function drivePublicOrigin(): string {
 	const origin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
 	if (!origin) throw new DrivePortalNotConfiguredError();
 	return origin;
+}
+
+function driveApiOrigin(): string {
+	const internal = DRIVE_INTERNAL_ORIGIN?.trim().replace(/\/$/, '');
+	if (internal) return internal;
+	return drivePublicOrigin();
 }
 
 function apiKey(): string {
@@ -71,14 +78,20 @@ export function buildDriveAuthHeaders(extra?: HeadersInit): Headers {
 
 export function absolutizeDriveUrl(url: string): string {
 	if (/^https?:\/\//i.test(url)) return url;
-	const origin = driveOrigin();
+	const origin = drivePublicOrigin();
 	return `${origin}${url.startsWith('/') ? url : `/${url}`}`;
 }
 
 async function driveFetch(path: string, init?: RequestInit): Promise<Response> {
-	const res = await fetch(`${driveOrigin()}${path}`, {
+	const apiOrigin = driveApiOrigin();
+	const headers = buildDriveAuthHeaders(init?.headers);
+	const publicHost = new URL(drivePublicOrigin()).host;
+	if (new URL(apiOrigin).host !== publicHost) {
+		headers.set('Host', publicHost);
+	}
+	const res = await fetch(`${apiOrigin}${path}`, {
 		...init,
-		headers: buildDriveAuthHeaders(init?.headers)
+		headers
 	});
 	return res;
 }
@@ -120,7 +133,10 @@ async function ensureFolder(parentId: string | null, name: string): Promise<stri
 	const children = await listChildren(parentId);
 	const existing = findFolder(children, name);
 	if (existing) return existing.id;
-	return createFolder(name, parentId);
+	const createdId = await createFolder(name, parentId);
+	const afterCreate = await listChildren(parentId);
+	const raced = findFolder(afterCreate, name);
+	return raced?.id ?? createdId;
 }
 
 export async function ensureCategoryFolder(category: PortalDriveCategory): Promise<string> {

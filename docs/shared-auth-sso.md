@@ -1,4 +1,4 @@
-# Shared Better Auth SSO (employee-portal ↔ PHH-DRIVE ↔ docs)
+# Shared Better Auth SSO (employee-portal ↔ PHH-DRIVE ↔ docs ↔ OmegaAi Order Resend)
 
 All apps must use the **same** values for:
 
@@ -18,16 +18,21 @@ Per-app public URLs (must match the browser address):
 | employee-portal | `ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 | employee-portal | `DRIVE_ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
 | employee-portal | `DOCS_ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
+| employee-portal | `ORDER_RESEND_ORIGIN` | `http://order-resend.local.test` | `https://order-resend.office.phh.com` |
 | PHH-DRIVE | `ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
 | PHH-DRIVE | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 | docs | `ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
 | docs | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
+| OmegaAi Order Resend | `ORIGIN` | `http://order-resend.local.test` | `https://order-resend.office.phh.com` |
+| OmegaAi Order Resend | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 
 Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting `DRIVE_ORIGIN` and `DOCS_ORIGIN` when set).
 
 `DRIVE_ORIGIN` syncs the **PHH-DRIVE** service tile link on portal startup (no manual SQL when env is set).
 
 `DOCS_ORIGIN` syncs the **Docs** service tile link on portal startup. Grant CMS access via **Settings → Access roles** (assign Docs service).
+
+`ORDER_RESEND_ORIGIN` syncs the **OmegaAi Order Resend** service tile on portal startup. Grant access via **Settings → Access roles** (assign OmegaAi Order Resend service).
 
 Portal admin media uploads (images, PDFs, video, audio) use `DRIVE_TEAM_API_KEY` server-side — see [drive-media-integration.md](./drive-media-integration.md).
 
@@ -39,8 +44,10 @@ employee-portal owns the reverse proxy. Domains come from `.env`:
 ORIGIN=http://portal.local.test
 DRIVE_ORIGIN=http://drive.local.test
 DOCS_ORIGIN=http://docs.local.test
+ORDER_RESEND_ORIGIN=http://order-resend.local.test
 AUTH_COOKIE_DOMAIN=.local.test
 CADDY_DOCS_UPSTREAM=localhost:1026
+CADDY_ORDER_RESEND_UPSTREAM=localhost:6002
 ```
 
 1. **Hosts** (Administrator PowerShell, one-time):
@@ -52,16 +59,17 @@ CADDY_DOCS_UPSTREAM=localhost:1026
 
 2. **Install Caddy** (if needed): `winget install -e --id CaddyServer.Caddy`
 
-3. **Start apps** (four terminals):
+3. **Start apps** (five terminals):
 
    ```powershell
    cd employee-portal && pnpm dev
    cd drive && pnpm dev
    cd docs && pnpm dev
+   cd OmegaAi_Order_Resend && npm run dev
    cd employee-portal && pnpm caddy:dev
    ```
 
-4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, and `DOCS_ORIGIN` (not raw `localhost` ports).
+4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, `DOCS_ORIGIN`, and `ORDER_RESEND_ORIGIN` (not raw `localhost` ports).
 
 `pnpm caddy:dev` renders `Caddyfile.generated` from `.env` then starts Caddy.
 
@@ -75,8 +83,19 @@ Set production URLs in each app's `.env`:
 ORIGIN=https://phh.com
 DRIVE_ORIGIN=https://office.drive.phh.com
 DOCS_ORIGIN=https://docs.example.com
+ORDER_RESEND_ORIGIN=https://order-resend.office.phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 ```
+
+**Docker** (portal container cannot reach public drive hostname for server-side uploads):
+
+```env
+DRIVE_INTERNAL_ORIGIN=http://host.docker.internal:1025
+DRIVE_STORAGE_PROVIDER=tigris
+DRIVE_TEAM_API_KEY=znltv_...
+```
+
+With a shared Docker network, use `DRIVE_INTERNAL_ORIGIN=http://phh-drive:1025` instead. See [drive-media-integration.md](./drive-media-integration.md).
 
 **PHH-DRIVE**
 
@@ -97,6 +116,17 @@ PORTAL_DATABASE_URL=<portal postgres>
 DATABASE_URL=<cms postgres>
 ```
 
+**OmegaAi Order Resend**
+
+```env
+ORIGIN=https://order-resend.office.phh.com
+PORTAL_ORIGIN=https://phh.com
+AUTH_COOKIE_DOMAIN=.phh.com
+AUTH_DATABASE_URL=<portal postgres>
+PORTAL_DATABASE_URL=<portal postgres>
+KOGYITHURA_API_BASE=http://127.0.0.1:5678/webhook
+```
+
 On the portal host:
 
 ```powershell
@@ -112,6 +142,7 @@ Optional Caddy overrides in employee-portal `.env`:
 | `CADDY_PORTAL_UPSTREAM` | `localhost:1027` | Portal backend |
 | `CADDY_DRIVE_UPSTREAM` | `localhost:1025` | Drive backend |
 | `CADDY_DOCS_UPSTREAM` | `localhost:1026` | Docs backend |
+| `CADDY_ORDER_RESEND_UPSTREAM` | `localhost:6002` | OmegaAi Order Resend backend |
 | `CADDY_TLS` | infer from URL scheme | `auto` = HTTPS blocks, `off` = HTTP |
 
 ## Migration

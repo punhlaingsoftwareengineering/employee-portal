@@ -4,6 +4,7 @@
 	import PortalIcon from '$lib/components/PortalIcon.svelte';
 	import NewsletterDialog from '$lib/components/NewsletterDialog.svelte';
 	import OnboardingSlideDialog from '$lib/components/OnboardingSlideDialog.svelte';
+	import OnboardingCarouselSettingsCard from '$lib/components/OnboardingCarouselSettingsCard.svelte';
 	import AnnouncementDialog from '$lib/components/AnnouncementDialog.svelte';
 	import NotificationSoundDialog from '$lib/components/NotificationSoundDialog.svelte';
 	import NotificationDialog from '$lib/components/NotificationDialog.svelte';
@@ -627,6 +628,8 @@
 			</svelte:boundary>
 		</div>
 	</div>
+
+	<OnboardingCarouselSettingsCard />
 
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">

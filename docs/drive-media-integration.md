@@ -14,13 +14,33 @@ DRIVE_STORAGE_PROVIDER=local
 
 | Variable | Required | Description |
 | -------- | -------- | ----------- |
-| `DRIVE_ORIGIN` | Yes | Same as SSO — drive public URL |
+| `DRIVE_ORIGIN` | Yes | Same as SSO — drive public URL (browser-facing links) |
+| `DRIVE_INTERNAL_ORIGIN` | No | Server-side drive API URL when `DRIVE_ORIGIN` is not reachable from the container (Docker). Falls back to `DRIVE_ORIGIN`. |
 | `DRIVE_TEAM_API_KEY` | Yes | Team key (`znltv_…`) with `drive.read`, `drive.write`, `drive.share` |
 | `DRIVE_STORAGE_PROVIDER` | No | `local` (default) or `tigris` — must match the team |
 
 Create the key in **PHH-DRIVE → Team settings → Developer API** (owner/admin + Profile developer mode).
 
 Restart the portal after changing env vars.
+
+## Docker production
+
+When the portal runs in Docker behind Caddy, the container cannot resolve the public drive hostname. Set an internal URL for server-side API calls:
+
+```env
+DRIVE_ORIGIN=http://drive.office.phh.com
+DRIVE_INTERNAL_ORIGIN=http://host.docker.internal:1025
+DRIVE_STORAGE_PROVIDER=local
+DRIVE_TEAM_API_KEY=znltv_...
+```
+
+With a shared Docker network (`phh-net`), prefer container DNS:
+
+```env
+DRIVE_INTERNAL_ORIGIN=http://phh-drive:1025
+```
+
+Keep `DRIVE_ORIGIN` as the browser-facing URL — returned file URLs and SSO redirects use it. Match `DRIVE_STORAGE_PROVIDER` to the team drive (`local` on this host).
 
 ## Folder layout
 
@@ -45,7 +65,7 @@ portal/
 
 Admin forms show a URL field plus **Upload** (opens picker: drag-drop, browse existing, trash). Stored value is the drive public file URL (`{DRIVE_ORIGIN}/api/public/files/{token}`).
 
-External navigation links (announcement link, service link, app store downloads) stay plain URL fields.
+External navigation links (announcement link, service link) stay plain URL fields. App download URLs (`.exe`, `.apk`, `.zip`, etc.) support PHH-DRIVE upload via **Upload** on each platform row in the app admin dialog.
 
 ## API (portal)
 

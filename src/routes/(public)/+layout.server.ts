@@ -1,3 +1,4 @@
+import { DOCS_ORIGIN } from '$app/env/private';
 import { getActiveAnnouncement } from '$lib/server/services/announcement';
 import { listPublicApps } from '$lib/server/services/app';
 import { listPublicNotifications } from '$lib/server/services/notification';
@@ -12,6 +13,7 @@ function isOnboardingPath(pathname: string) {
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const userId = locals.user?.id ?? null;
 	const onOnboarding = isOnboardingPath(url.pathname);
+	const docsHref = DOCS_ORIGIN?.trim().replace(/\/$/, '') || null;
 
 	const [announcement, notificationData, publicServices, publicApps] = await Promise.all([
 		onOnboarding ? getActiveAnnouncement() : Promise.resolve(null),
@@ -26,6 +28,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		dismissedNotificationIds: notificationData.dismissedIds,
 		defaultSoundUrl: notificationData.defaultSoundUrl,
 		user: locals.user ?? null,
+		docsHref,
 		onboardingSections: {
 			hasServices: publicServices.length > 0,
 			hasApps: publicApps.length > 0

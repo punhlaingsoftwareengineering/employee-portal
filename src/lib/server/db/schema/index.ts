@@ -15,6 +15,7 @@ export * from './newsletter';
 export * from './tool-guide';
 export * from './tool-learning';
 export * from './onboarding-slide';
+export * from './onboarding-carousel-config';
 export * from './announcement';
 export * from './notification-sound';
 export * from './notification-sound-relations';

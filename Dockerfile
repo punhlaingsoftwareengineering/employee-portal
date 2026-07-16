@@ -30,7 +30,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
 	HOST=0.0.0.0 \
-	PORT=1027
+	PORT=1027 \
+	BODY_SIZE_LIMIT=1000M
 
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
