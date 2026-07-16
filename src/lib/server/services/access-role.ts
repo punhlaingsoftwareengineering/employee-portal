@@ -15,6 +15,7 @@ import {
 	getCommunityLinkCountsByRole,
 	setRoleCommunityLinks
 } from '$lib/server/services/community-link';
+import { slugifyName } from '$lib/utils/slug';
 
 const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 	{
@@ -73,6 +74,24 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 	}
 ];
 
+async function resolveUniqueSlug(base: string, excludeId?: string): Promise<string> {
+	const normalized = slugifyName(base);
+	let candidate = normalized;
+	let suffix = 2;
+
+	while (true) {
+		const taken = await db.query.accessRole.findFirst({
+			where: eq(accessRole.slug, candidate),
+			columns: { id: true }
+		});
+		if (!taken || (excludeId && taken.id === excludeId)) {
+			return candidate;
+		}
+		const tail = `-${suffix++}`;
+		candidate = `${normalized.slice(0, Math.max(1, 40 - tail.length))}${tail}`;
+	}
+}
+
 export async function ensureDefaultAccessRoles() {
 	const existing = await db.query.accessRole.findMany();
 	if (existing.length > 0) return existing;
@@ -80,6 +99,7 @@ export async function ensureDefaultAccessRoles() {
 	await db.insert(accessRole).values(
 		DEFAULT_ROLES.map((role) => ({
 			...role,
+			slug: role.slug ?? slugifyName(role.name),
 			isSystem: true
 		}))
 	);
@@ -121,14 +141,13 @@ export async function getAccessRole(id: string) {
 
 export async function createAccessRole(input: CreateAccessRoleInput) {
 	const data = createAccessRoleSchema.parse(input);
-	const { serviceIds, appIds, communityLinkIds, ...roleData } = data;
+	const { serviceIds, appIds, communityLinkIds, slug: _slug, ...roleData } = data;
+	const slug = await resolveUniqueSlug(roleData.name);
 
-	const slugTaken = await db.query.accessRole.findFirst({
-		where: eq(accessRole.slug, roleData.slug)
-	});
-	if (slugTaken) error(409, 'A role with this slug already exists');
-
-	const [record] = await db.insert(accessRole).values(roleData).returning();
+	const [record] = await db
+		.insert(accessRole)
+		.values({ ...roleData, slug })
+		.returning();
 
 	if (serviceIds) {
 		await setRoleServices(record.id, serviceIds);
@@ -149,14 +168,17 @@ export async function updateAccessRole(input: UpdateAccessRoleInput) {
 	const data = updateAccessRoleSchema.parse(input);
 	const existing = await getAccessRole(data.id);
 
-	if (data.slug && data.slug !== existing.slug) {
-		const slugTaken = await db.query.accessRole.findFirst({
-			where: eq(accessRole.slug, data.slug)
-		});
-		if (slugTaken) error(409, 'A role with this slug already exists');
+	const { id, serviceIds, appIds, communityLinkIds, slug: _slug, ...rest } = data;
+	const patch: Record<string, unknown> = { ...rest };
+
+	if (
+		data.name !== undefined &&
+		data.name !== existing.name &&
+		!existing.isSystem
+	) {
+		patch.slug = await resolveUniqueSlug(data.name, id);
 	}
 
-	const { id, serviceIds, appIds, communityLinkIds, ...patch } = data;
 	const [record] = await db
 		.update(accessRole)
 		.set({ ...patch, updatedAt: new Date() })

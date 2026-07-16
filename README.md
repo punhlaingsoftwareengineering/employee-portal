@@ -17,6 +17,8 @@ pnpm dev
 
 Dev server: `http://localhost:1027` (or your `ORIGIN` behind Caddy for SSO).
 
+For SSO and sign-in, browse `ORIGIN` (e.g. `http://portal.local.test`), not raw localhost — see [docs/shared-auth-sso.md](docs/shared-auth-sso.md#login-troubleshooting).
+
 ## Building
 
 ```sh

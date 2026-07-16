@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { getContext, onMount } from 'svelte';
 	import type { DataTableContext } from '$lib/components/data-table.types';
+	import { createId } from '$lib/utils/id';
 
 	let {
 		label,
@@ -22,7 +23,7 @@
 	onMount(() => {
 		if (!children) return;
 
-		const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-') || crypto.randomUUID();
+		const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-') || createId();
 
 		return table.register({
 			id,

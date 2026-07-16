@@ -129,7 +129,7 @@
 				<table class="form-table">
 					<tbody>
 						<tr>
-							<td class="form-table-label align-top">Allowed themes</td>
+							<td class="form-table-label form-table-label-required align-top">Allowed themes</td>
 							<td class="form-table-field">
 								<div class="mb-3 flex flex-wrap gap-2">
 									<button type="button" class="btn btn-ghost btn-xs" onclick={selectAllThemes}>

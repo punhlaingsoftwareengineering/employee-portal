@@ -35,6 +35,7 @@
 								<input
 									{...updateEmployee.fields.firstName.as('text', employee.firstName)}
 									class="input input-bordered w-full max-w-md"
+									required
 								/>
 							</td>
 						</tr>
@@ -44,6 +45,7 @@
 								<input
 									{...updateEmployee.fields.lastName.as('text', employee.lastName)}
 									class="input input-bordered w-full max-w-md"
+									required
 								/>
 							</td>
 						</tr>
@@ -53,6 +55,7 @@
 								<input
 									{...updateEmployee.fields.email.as('email', employee.email)}
 									class="input input-bordered w-full max-w-md"
+									required
 								/>
 							</td>
 						</tr>
@@ -62,6 +65,7 @@
 								<select
 									{...updateEmployee.fields.roleId.as('text', employee.roleId)}
 									class="select select-bordered w-full max-w-md"
+									required
 								>
 									{#each roles as role (role.id)}
 										<option value={role.id}>{role.name}</option>
@@ -75,6 +79,7 @@
 								<select
 									{...updateEmployee.fields.departmentId.as('text', employee.departmentId)}
 									class="select select-bordered w-full max-w-md"
+									required
 								>
 									{#each departments as dept (dept.id)}
 										<option value={dept.id}>{dept.name}</option>
@@ -88,6 +93,7 @@
 								<select
 									{...updateEmployee.fields.facilityId.as('text', employee.facilityId)}
 									class="select select-bordered w-full max-w-md"
+									required
 								>
 									{#each facilities as item (item.id)}
 										<option value={item.id}>{item.name}</option>
@@ -101,6 +107,7 @@
 								<select
 									{...updateEmployee.fields.status.as('text', employee.status)}
 									class="select select-bordered w-full max-w-md"
+									required
 								>
 									{#each EMPLOYEE_STATUSES as status (status)}
 										<option value={status}>{status.replace('_', ' ')}</option>

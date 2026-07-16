@@ -34,8 +34,8 @@
 	});
 </script>
 
-<article class="card bg-base-100 shadow-sm transition-shadow hover:shadow-md">
-	<div class="card-body gap-4">
+<article class="card h-full bg-base-100 shadow-sm transition-shadow hover:shadow-md">
+	<div class="card-body flex h-full flex-col gap-4">
 		<div class="flex items-start gap-3">
 			<div
 				class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white {platformColorClass}"
@@ -49,13 +49,13 @@
 						{COMMUNITY_PLATFORM_LABELS[link.platform]}
 					</span>
 				</div>
-				{#if link.description}
-					<p class="mt-2 text-sm leading-relaxed text-base-content/70">{link.description}</p>
-				{/if}
+				<p class="mt-2 line-clamp-2 min-h-11 text-sm leading-relaxed text-base-content/70">
+					{link.description ?? ''}
+				</p>
 			</div>
 		</div>
 
-		<div class="flex flex-wrap items-end justify-between gap-4">
+		<div class="mt-auto flex flex-wrap items-end justify-between gap-4">
 			<a
 				href={link.url}
 				target="_blank"

@@ -38,7 +38,7 @@
 					{:else}
 						<ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{#each section.links as link (link.id)}
-								<li>
+								<li class="h-full">
 									<CommunityLinkCard {link} />
 								</li>
 							{/each}

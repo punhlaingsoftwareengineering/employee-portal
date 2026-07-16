@@ -127,23 +127,26 @@ export async function getRoleAppIds(roleId: string): Promise<string[]> {
 
 export async function setRoleApps(roleId: string, appIds: string[]) {
 	const uniqueIds = [...new Set(appIds)];
+	let assignableIds: string[] = [];
 
 	if (uniqueIds.length > 0) {
 		const existing = await db.query.app.findMany({
 			where: inArray(app.id, uniqueIds),
-			columns: { id: true }
+			columns: { id: true, isPublic: true }
 		});
 		if (existing.length !== uniqueIds.length) {
 			error(400, 'One or more apps do not exist');
 		}
+		// Public apps are available to everyone — no role assignment needed.
+		assignableIds = existing.filter((row) => !row.isPublic).map((row) => row.id);
 	}
 
 	await db.delete(accessRoleApp).where(eq(accessRoleApp.roleId, roleId));
 
-	if (uniqueIds.length === 0) return;
+	if (assignableIds.length === 0) return;
 
 	await db.insert(accessRoleApp).values(
-		uniqueIds.map((appId) => ({
+		assignableIds.map((appId) => ({
 			roleId,
 			appId
 		}))

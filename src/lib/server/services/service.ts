@@ -123,23 +123,26 @@ export async function getRoleServiceIds(roleId: string): Promise<string[]> {
 
 export async function setRoleServices(roleId: string, serviceIds: string[]) {
 	const uniqueIds = [...new Set(serviceIds)];
+	let assignableIds: string[] = [];
 
 	if (uniqueIds.length > 0) {
 		const existing = await db.query.service.findMany({
 			where: inArray(service.id, uniqueIds),
-			columns: { id: true }
+			columns: { id: true, isPublic: true }
 		});
 		if (existing.length !== uniqueIds.length) {
 			error(400, 'One or more services do not exist');
 		}
+		// Public services are available to everyone — no role assignment needed.
+		assignableIds = existing.filter((row) => !row.isPublic).map((row) => row.id);
 	}
 
 	await db.delete(accessRoleService).where(eq(accessRoleService.roleId, roleId));
 
-	if (uniqueIds.length === 0) return;
+	if (assignableIds.length === 0) return;
 
 	await db.insert(accessRoleService).values(
-		uniqueIds.map((serviceId) => ({
+		assignableIds.map((serviceId) => ({
 			roleId,
 			serviceId
 		}))

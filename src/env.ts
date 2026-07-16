@@ -42,7 +42,7 @@ export const variables = defineEnvVars({
 	},
 	MARI_CHATBOT_ORIGIN: {
 		description:
-			'Mari Chatbot public URL (e.g. `http://mari.oai.phh.com` or `http://mari.local.test`). Used for SSO redirects and Tools tile link.',
+			'Mari Chatbot public URL (e.g. `http://chatbot.n8n.phh.com` or `http://chatbot.local.test`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	DRIVE_TEAM_API_KEY: {
