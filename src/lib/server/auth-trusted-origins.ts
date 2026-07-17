@@ -1,9 +1,11 @@
 import {
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
-	MARI_CHATBOT_ORIGIN,
-	ORDER_RESEND_ORIGIN,
+	N8N_CHATBOT_ORIGIN,
+	N8N_MONITOR_ORIGIN,
+	OAI_ORDER_SENDER_ORIGIN,
 	ORIGIN,
+	PHH_CALLTRACKER_DASHBOARD_ORIGIN,
 	PORTAL_TRUSTED_REDIRECT_ORIGINS
 } from '$app/env/private';
 
@@ -49,8 +51,10 @@ export function getAuthTrustedOrigins(): string[] {
 	addOrigin(trusted, ORIGIN);
 	addOrigin(trusted, DRIVE_ORIGIN);
 	addOrigin(trusted, DOCS_ORIGIN);
-	addOrigin(trusted, ORDER_RESEND_ORIGIN);
-	addOrigin(trusted, MARI_CHATBOT_ORIGIN);
+	addOrigin(trusted, OAI_ORDER_SENDER_ORIGIN);
+	addOrigin(trusted, N8N_CHATBOT_ORIGIN);
+	addOrigin(trusted, N8N_MONITOR_ORIGIN);
+	addOrigin(trusted, PHH_CALLTRACKER_DASHBOARD_ORIGIN);
 	addOriginsList(trusted, PORTAL_TRUSTED_REDIRECT_ORIGINS);
 
 	return [...trusted];

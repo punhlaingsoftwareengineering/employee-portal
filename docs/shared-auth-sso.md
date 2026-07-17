@@ -1,4 +1,4 @@
-# Shared Better Auth SSO (employee-portal â†” PHH-DRIVE â†” docs â†” OmegaAi Order Resend â†” Mari Chatbot â†” n8n Monitor â†” Call Tracker)
+# Shared Better Auth SSO (employee-portal ↔ PHH-DRIVE ↔ docs ↔ OAI Order Sender)
 
 All apps must use the **same** values for:
 
@@ -18,20 +18,16 @@ Per-app public URLs (must match the browser address):
 | employee-portal | `ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 | employee-portal | `DRIVE_ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
 | employee-portal | `DOCS_ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
-| employee-portal | `ORDER_RESEND_ORIGIN` | `http://order-resend.local.test` | `https://order-resend.office.phh.com` |
-| employee-portal | `MARI_CHATBOT_ORIGIN` | `http://chatbot.local.test` | `http://chatbot.n8n.phh.com` |
+| employee-portal | `OAI_ORDER_SENDER_ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersender.oai.phh.com` |
+| employee-portal | `N8N_CHATBOT_ORIGIN` | `http://chatbot.local.test` | `https://chatbot.n8n.phh.com` |
+| employee-portal | `N8N_MONITOR_ORIGIN` | `http://monitor.local.test` | `https://monitor.n8n.phh.com` |
+| employee-portal | `PHH_CALLTRACKER_DASHBOARD_ORIGIN` | `http://dashboard.routetracker.local.test` | `https://dashboard.routetracker.phh.com` |
 | PHH-DRIVE | `ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
 | PHH-DRIVE | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 | docs | `ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
 | docs | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| OmegaAi Order Resend | `ORIGIN` | `http://order-resend.local.test` | `https://order-resend.office.phh.com` |
-| OmegaAi Order Resend | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| Mari Chatbot | `ORIGIN` | `http://chatbot.local.test` | `http://chatbot.n8n.phh.com` |
-| Mari Chatbot | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| n8n Monitor | `ORIGIN` | `http://n8n-monitor.local.test` | `http://monitor.n8n.phh.com` |
-| n8n Monitor | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| Call Tracker | `ORIGIN` | `http://calltracker.local.test` | `http://calltracker.office.phh.com` |
-| Call Tracker | `PORTAL_ORIGIN` | `http://portal.local.test` | `http://phh.com` |
+| OAI Order Sender | `ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersender.oai.phh.com` |
+| OAI Order Sender | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 
 Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibling `*_ORIGIN` values when set).
 
@@ -39,7 +35,9 @@ Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibl
 
 `DOCS_ORIGIN` syncs the **Docs** service tile link on portal startup. Grant CMS access via **Settings â†’ Access roles** (assign Docs service).
 
-`ORDER_RESEND_ORIGIN` syncs the **OmegaAi Order Resend** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign OmegaAi Order Resend service).
+`OAI_ORDER_SENDER_ORIGIN` syncs the **OAI Order Sender** service tile on portal startup. Grant access via **Settings → Access roles** (assign OAI Order Sender service).
+
+`N8N_CHATBOT_ORIGIN` syncs the **N8N Chatbot** service tile. `N8N_MONITOR_ORIGIN` syncs **N8N Monitor**. `PHH_CALLTRACKER_DASHBOARD_ORIGIN` syncs **PHH CallTracker Dashboard**.
 
 `MARI_CHATBOT_ORIGIN` syncs the **Mari Chatbot** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign Mari Chatbot service).
 
@@ -57,13 +55,14 @@ employee-portal owns the reverse proxy. Domains come from `.env`:
 ORIGIN=http://portal.local.test
 DRIVE_ORIGIN=http://drive.local.test
 DOCS_ORIGIN=http://docs.local.test
-ORDER_RESEND_ORIGIN=http://order-resend.local.test
-MARI_CHATBOT_ORIGIN=http://chatbot.local.test
+OAI_ORDER_SENDER_ORIGIN=http://oai-order-sender.local.test
+N8N_CHATBOT_ORIGIN=http://chatbot.local.test
+N8N_MONITOR_ORIGIN=http://monitor.local.test
+PHH_CALLTRACKER_DASHBOARD_ORIGIN=http://dashboard.routetracker.local.test
 AUTH_COOKIE_DOMAIN=.local.test
 PORTAL_TRUSTED_REDIRECT_ORIGINS=http://n8n-monitor.local.test
 CADDY_DOCS_UPSTREAM=localhost:1026
-CADDY_ORDER_RESEND_UPSTREAM=localhost:6002
-CADDY_MARI_CHATBOT_UPSTREAM=localhost:5173
+CADDY_OAI_ORDER_SENDER_UPSTREAM=localhost:6002
 ```
 
 1. **Hosts** (Administrator PowerShell, one-time):
@@ -81,13 +80,12 @@ CADDY_MARI_CHATBOT_UPSTREAM=localhost:5173
    cd employee-portal && pnpm dev
    cd drive && pnpm dev
    cd docs && pnpm dev
-   cd OmegaAi_Order_Resend && npm run dev
-   cd mari-chatbot && npm run dev
-   cd n8n-monitor && npm run dev
+   cd OAI_ORDER_SENDER && npm run dev
    cd employee-portal && pnpm caddy:dev
    ```
 
-4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, `DOCS_ORIGIN`, `ORDER_RESEND_ORIGIN`, `MARI_CHATBOT_ORIGIN`, and n8n Monitor `ORIGIN` (not raw `localhost` ports).
+4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, `DOCS_ORIGIN`, and `OAI_ORDER_SENDER_ORIGIN` (not raw `localhost` ports).
+
 `pnpm caddy:dev` renders `Caddyfile.generated` from `.env` then starts Caddy.
 
 ## Login troubleshooting
@@ -107,8 +105,10 @@ Set production URLs in each app's `.env`:
 ORIGIN=https://phh.com
 DRIVE_ORIGIN=https://office.drive.phh.com
 DOCS_ORIGIN=https://docs.example.com
-ORDER_RESEND_ORIGIN=https://order-resend.office.phh.com
-MARI_CHATBOT_ORIGIN=http://chatbot.n8n.phh.com
+OAI_ORDER_SENDER_ORIGIN=https://ordersender.oai.phh.com
+N8N_CHATBOT_ORIGIN=https://chatbot.n8n.phh.com
+N8N_MONITOR_ORIGIN=https://monitor.n8n.phh.com
+PHH_CALLTRACKER_DASHBOARD_ORIGIN=https://dashboard.routetracker.phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 ```
 
@@ -141,10 +141,10 @@ PORTAL_DATABASE_URL=<portal postgres>
 DATABASE_URL=<cms postgres>
 ```
 
-**OmegaAi Order Resend**
+**OAI Order Sender**
 
 ```env
-ORIGIN=https://order-resend.office.phh.com
+ORIGIN=https://ordersender.oai.phh.com
 PORTAL_ORIGIN=https://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -207,8 +207,7 @@ Optional Caddy overrides in employee-portal `.env`:
 | `CADDY_PORTAL_UPSTREAM` | `localhost:1027` | Portal backend |
 | `CADDY_DRIVE_UPSTREAM` | `localhost:1025` | Drive backend |
 | `CADDY_DOCS_UPSTREAM` | `localhost:1026` | Docs backend |
-| `CADDY_ORDER_RESEND_UPSTREAM` | `localhost:6002` | OmegaAi Order Resend backend |
-| `CADDY_MARI_CHATBOT_UPSTREAM` | `localhost:5173` | Mari Chatbot Vite/dev (or `localhost:6001` for Docker) |
+| `CADDY_OAI_ORDER_SENDER_UPSTREAM` | `localhost:6002` | OAI Order Sender backend |
 | `CADDY_TLS` | infer from URL scheme | `auto` = HTTPS blocks, `off` = HTTP |
 
 ## Migration
