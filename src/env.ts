@@ -35,24 +35,24 @@ export const variables = defineEnvVars({
 			'Documentation site public URL (e.g. `https://docs.phh.com` or `http://docs.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
-	ORDER_RESEND_ORIGIN: {
+	OAI_ORDER_SENDER_ORIGIN: {
 		description:
-			'OmegaAi Order Resend public URL (e.g. `https://order-resend.office.phh.com` or `http://order-resend.local.test`). Used for SSO redirects and Caddy.',
+			'OAI Order Sender public URL (e.g. `https://ordersender.oai.phh.com` or `http://oai-order-sender.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
-	MARI_CHATBOT_ORIGIN: {
+	N8N_CHATBOT_ORIGIN: {
 		description:
-			'Mari Chatbot public URL (e.g. `http://chatbot.n8n.phh.com` or `http://mari.local.test`). Used for SSO redirects and Tools tile link.',
+			'N8N Chatbot public URL (e.g. `http://chatbot.n8n.phh.com` or `http://chatbot.local.test`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	N8N_MONITOR_ORIGIN: {
 		description:
-			'n8n Monitor public URL (e.g. `http://monitor.n8n.phh.com`). Used for SSO redirects and Tools tile link.',
+			'N8N Monitor public URL (e.g. `http://monitor.n8n.phh.com`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
-	CALLTRACKER_ORIGIN: {
+	PHH_CALLTRACKER_DASHBOARD_ORIGIN: {
 		description:
-			'3CX Call Tracker public URL (e.g. `http://dashboard.routetracker.phh.com`). Used for SSO redirects and Tools tile link.',
+			'PHH CallTracker Dashboard public URL (e.g. `http://dashboard.routetracker.phh.com`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	DRIVE_TEAM_API_KEY: {

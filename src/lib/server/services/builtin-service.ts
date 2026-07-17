@@ -2,19 +2,19 @@ import { and, eq } from 'drizzle-orm';
 import {
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
-	CALLTRACKER_ORIGIN,
-	MARI_CHATBOT_ORIGIN,
+	N8N_CHATBOT_ORIGIN,
 	N8N_MONITOR_ORIGIN,
-	ORDER_RESEND_ORIGIN,
-	ORIGIN
+	OAI_ORDER_SENDER_ORIGIN,
+	ORIGIN,
+	PHH_CALLTRACKER_DASHBOARD_ORIGIN
 } from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
-	CALLTRACKER_SERVICE_ID,
 	DOCS_SERVICE_ID,
-	MARI_CHATBOT_SERVICE_ID,
+	N8N_CHATBOT_SERVICE_ID,
 	N8N_MONITOR_SERVICE_ID,
-	ORDER_RESEND_SERVICE_ID,
+	OAI_ORDER_SENDER_SERVICE_ID,
+	PHH_CALLTRACKER_DASHBOARD_SERVICE_ID,
 	PHH_DRIVE_SERVICE_ID,
 	getBuiltinServiceDefinition,
 	isBuiltinServiceId,
@@ -150,65 +150,65 @@ async function upsertDocsService() {
 	});
 }
 
-async function upsertOrderResendService() {
-	const orderResendOrigin = ORDER_RESEND_ORIGIN?.trim().replace(/\/$/, '');
-	if (!orderResendOrigin) return;
+async function upsertOaiOrderSenderService() {
+	const origin = OAI_ORDER_SENDER_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
 
 	await upsertServiceRow({
-		id: ORDER_RESEND_SERVICE_ID,
-		name: 'OmegaAi Order Resend',
+		id: OAI_ORDER_SENDER_SERVICE_ID,
+		name: 'OAI Order Sender',
 		description: 'Search and resend RIS lab results to PACS',
 		category: 'Clinical',
 		accentColor: '#0B2D5C',
-		link: orderResendOrigin,
+		link: origin,
 		embedMode: 'external',
 		isPublic: false
 	});
 }
 
-async function upsertMariChatbotService() {
-	const mariOrigin = MARI_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
-	if (!mariOrigin) return;
+async function upsertN8nChatbotService() {
+	const origin = N8N_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
 
 	await upsertServiceRow({
-		id: MARI_CHATBOT_SERVICE_ID,
-		name: 'Mari Chatbot',
+		id: N8N_CHATBOT_SERVICE_ID,
+		name: 'N8N Chatbot',
 		description: 'AI chatbots powered by n8n workflows',
 		category: 'Productivity',
 		accentColor: '#0B2D5C',
-		link: mariOrigin,
+		link: origin,
 		embedMode: 'external',
 		isPublic: false
 	});
 }
 
 async function upsertN8nMonitorService() {
-	const monitorOrigin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
-	if (!monitorOrigin) return;
+	const origin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
 
 	await upsertServiceRow({
 		id: N8N_MONITOR_SERVICE_ID,
-		name: 'n8n Monitor',
+		name: 'N8N Monitor',
 		description: 'Realtime monitor for published n8n workflow executions',
 		category: 'Productivity',
 		accentColor: '#0B2D5C',
-		link: monitorOrigin,
+		link: origin,
 		embedMode: 'external',
 		isPublic: false
 	});
 }
 
-async function upsertCallTrackerService() {
-	const calltrackerOrigin = CALLTRACKER_ORIGIN?.trim().replace(/\/$/, '');
-	if (!calltrackerOrigin) return;
+async function upsertPhhCalltrackerDashboardService() {
+	const origin = PHH_CALLTRACKER_DASHBOARD_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
 
 	await upsertServiceRow({
-		id: CALLTRACKER_SERVICE_ID,
-		name: '3CX Call Tracker',
-		description: 'Dashboard for 3CX route tracker call analytics',
+		id: PHH_CALLTRACKER_DASHBOARD_SERVICE_ID,
+		name: 'PHH CallTracker Dashboard',
+		description: 'Dashboard for PHH CallTracker route and call analytics',
 		category: 'Productivity',
 		accentColor: '#0B2D5C',
-		link: calltrackerOrigin,
+		link: origin,
 		embedMode: 'external',
 		isPublic: false
 	});
@@ -220,10 +220,10 @@ export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	}
 	await upsertDriveService();
 	await upsertDocsService();
-	await upsertOrderResendService();
-	await upsertMariChatbotService();
+	await upsertOaiOrderSenderService();
+	await upsertN8nChatbotService();
 	await upsertN8nMonitorService();
-	await upsertCallTrackerService();
+	await upsertPhhCalltrackerDashboardService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -257,41 +257,41 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 		}
 	}
 
-	if (serviceId === ORDER_RESEND_SERVICE_ID) {
-		const orderResendOrigin = ORDER_RESEND_ORIGIN?.trim().replace(/\/$/, '');
-		if (!orderResendOrigin) return false;
+	if (serviceId === OAI_ORDER_SENDER_SERVICE_ID) {
+		const serviceOrigin = OAI_ORDER_SENDER_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
 		try {
-			return new URL(link).origin === new URL(orderResendOrigin).origin;
+			return new URL(link).origin === new URL(serviceOrigin).origin;
 		} catch {
 			return false;
 		}
 	}
 
-	if (serviceId === MARI_CHATBOT_SERVICE_ID) {
-		const mariOrigin = MARI_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
-		if (!mariOrigin) return false;
+	if (serviceId === N8N_CHATBOT_SERVICE_ID) {
+		const serviceOrigin = N8N_CHATBOT_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
 		try {
-			return new URL(link).origin === new URL(mariOrigin).origin;
+			return new URL(link).origin === new URL(serviceOrigin).origin;
 		} catch {
 			return false;
 		}
 	}
 
 	if (serviceId === N8N_MONITOR_SERVICE_ID) {
-		const monitorOrigin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
-		if (!monitorOrigin) return false;
+		const serviceOrigin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
 		try {
-			return new URL(link).origin === new URL(monitorOrigin).origin;
+			return new URL(link).origin === new URL(serviceOrigin).origin;
 		} catch {
 			return false;
 		}
 	}
 
-	if (serviceId === CALLTRACKER_SERVICE_ID) {
-		const calltrackerOrigin = CALLTRACKER_ORIGIN?.trim().replace(/\/$/, '');
-		if (!calltrackerOrigin) return false;
+	if (serviceId === PHH_CALLTRACKER_DASHBOARD_SERVICE_ID) {
+		const serviceOrigin = PHH_CALLTRACKER_DASHBOARD_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
 		try {
-			return new URL(link).origin === new URL(calltrackerOrigin).origin;
+			return new URL(link).origin === new URL(serviceOrigin).origin;
 		} catch {
 			return false;
 		}
