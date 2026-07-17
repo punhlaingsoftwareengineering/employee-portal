@@ -41,7 +41,7 @@ Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibl
 
 `MARI_CHATBOT_ORIGIN` syncs the **Mari Chatbot** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign Mari Chatbot service).
 
-**n8n Monitor** is not a portal built-in. Create the Tools service manually, set `N8N_MONITOR_SERVICE_ID` on the monitor app to that UUID, add `http://monitor.n8n.phh.com` (UAT: `http://monitor.n8n.uat.phh.com`) to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
+**n8n Monitor** is not a portal built-in. Create the Tools service manually, set `N8N_MONITOR_SERVICE_ID` on the monitor app to that UUID, add `http://monitor.n8n.phh.com` (UAT: `http://uat.monitor.n8n.phh.com`) to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
 
 **Call Tracker** is not a portal built-in. Create the Tools service manually, set `PORTAL_SERVICE_ID` on the calltracker app to that UUID, add `http://calltracker.office.phh.com` to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
 
