@@ -38,6 +38,8 @@ Rules:
 - **Card required**: `card bg-base-100 shadow-sm` + `card-body` wrapping each form (primary border applied globally via `.card` in `layout.css`)
 - **Table inside card**: no `table-zebra`; borderless via `form-table`
 - **Actions**: `form-actions` below the table — full width; one button spans all width; multiple buttons share width equally (`flex-1` each)
+- **Responsive**: On small screens (below `md`), labels stack above fields (handled by `form-table` styles in `src/routes/layout.css`)
+- **Required fields**: add HTML `required` on the control; labels automatically show a red `*` via `.form-table-label` styles. For composite required fields without a single `[required]` control, add `form-table-label-required` to the label cell.
 - **Password fields**: use [`PasswordInput`](src/lib/components/PasswordInput.svelte) — never a bare `type="password"` input; includes eye toggle to show/hide
 - **Sign up**: always include a confirm-password field; validate match server-side
 - Hidden fields (e.g. `id` on edit): inside `<form>` but outside `<table>`

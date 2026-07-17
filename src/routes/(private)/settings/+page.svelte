@@ -43,18 +43,6 @@
 		getNotifications
 	} from '$lib/remotes/notification.remote';
 	import {
-		getSupportTickets,
-		updateSupportTicketStatus
-	} from '$lib/remotes/support-ticket.remote';
-	import {
-		SUPPORT_TICKET_STATUS_LABELS,
-		SUPPORT_TICKET_STATUS_OPTIONS,
-		SUPPORT_TICKET_CATEGORY_LABELS,
-		SUPPORT_TICKET_URGENCY_LABELS,
-		type SupportTicketStatus
-	} from '$lib/constants/support-ticket';
-	import type { AdminSupportTicketRow } from '$lib/schemas/support-ticket';
-	import {
 		Bell,
 		ExternalLink,
 		Images,
@@ -65,7 +53,6 @@
 		Plus,
 		RotateCcw,
 		Sparkles,
-		Ticket,
 		Trash2,
 		Type,
 		Volume2
@@ -85,7 +72,6 @@
 	let themePolicyDialog = $state<PortalThemePolicyDialog | null>(null);
 	let fontPolicyDialog = $state<PortalFontPolicyDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
-	const ticketStatusLoading = createKeyedLoading();
 
 	function themeLabel(value: AppTheme): string {
 		return APP_THEMES.find((option) => option.value === value)?.label ?? value;
@@ -99,26 +85,6 @@
 	const allowedThemeCount = $derived(portalThemePolicy.allowedThemes.length);
 	const defaultFontLabel = $derived(fontLabel(portalFontPolicy.defaultFont));
 	const allowedFontCount = $derived(portalFontPolicy.allowedFonts.length);
-
-	function ticketSubmitterName(ticket: {
-		user?: { name: string; email: string } | null;
-		guestName: string | null;
-	}): string {
-		return ticket.user?.name ?? ticket.guestName ?? '—';
-	}
-
-	function ticketSubmitterEmail(ticket: {
-		user?: { name: string; email: string } | null;
-		guestEmail: string | null;
-	}): string {
-		return ticket.user?.email ?? ticket.guestEmail ?? '—';
-	}
-
-	async function handleTicketStatusChange(id: string, status: SupportTicketStatus) {
-		await ticketStatusLoading.run(id, async () => {
-			await updateSupportTicketStatus({ id, status });
-		});
-	}
 
 	function saveTitle() {
 		const trimmed = title.trim() || DEFAULT_APP_TITLE;
@@ -388,139 +354,6 @@
 			</svelte:boundary>
 		</div>
 	</div>
-
-	{#if isAdmin}
-		<div class="card bg-base-100 shadow-sm">
-			<div class="card-body">
-				<svelte:boundary>
-					{@const tickets = await getSupportTickets()}
-
-					<div class="mb-4">
-						<SettingsCardTitle icon={Ticket} title="Support tickets" />
-						<p class="text-sm text-base-content/70">
-							Review and update tickets submitted from the support button.
-						</p>
-					</div>
-
-					{#if tickets.length === 0}
-						<p class="text-sm text-base-content/60">No support tickets yet.</p>
-					{:else}
-						<DataTable
-							rows={tickets}
-							rowKey={(item) => item.id}
-							emptyMessage="No support tickets yet."
-						>
-							<DataTableColumn
-								label="Subject"
-								firstData
-								filterText={(item: AdminSupportTicketRow) =>
-									[
-										item.subject,
-										item.description,
-										SUPPORT_TICKET_CATEGORY_LABELS[item.category],
-										SUPPORT_TICKET_URGENCY_LABELS[item.urgency],
-										ticketSubmitterName(item),
-										ticketSubmitterEmail(item)
-									]
-										.filter(Boolean)
-										.join(' ')}
-							>
-								{#snippet children({ row: item })}
-									<div class="max-w-xs">
-										<p class="font-medium">{item.subject}</p>
-										<p class="mt-1 line-clamp-2 text-xs text-base-content/60">
-											{item.description}
-										</p>
-									</div>
-								{/snippet}
-							</DataTableColumn>
-
-							<DataTableColumn
-								label="Submitter"
-								filterText={(item: AdminSupportTicketRow) =>
-									[ticketSubmitterName(item), ticketSubmitterEmail(item)].join(' ')}
-							>
-								{#snippet children({ row: item })}
-									<div>
-										<p>{ticketSubmitterName(item)}</p>
-										<p class="text-xs text-base-content/60">{ticketSubmitterEmail(item)}</p>
-									</div>
-								{/snippet}
-							</DataTableColumn>
-
-							<DataTableColumn
-								label="Category"
-								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_CATEGORY_LABELS[item.category]}
-							>
-								{#snippet children({ row }: { row: AdminSupportTicketRow })}
-									{@const item = row}
-									<span class="text-sm">{SUPPORT_TICKET_CATEGORY_LABELS[item.category]}</span>
-								{/snippet}
-							</DataTableColumn>
-
-							<DataTableColumn
-								label="Urgency"
-								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
-							>
-								{#snippet children({ row }: { row: AdminSupportTicketRow })}
-									{@const item = row}
-									<span class="badge badge-outline badge-sm">
-										{SUPPORT_TICKET_URGENCY_LABELS[item.urgency]}
-									</span>
-								{/snippet}
-							</DataTableColumn>
-
-							<DataTableColumn
-								label="Status"
-								filterText={(item: AdminSupportTicketRow) => SUPPORT_TICKET_STATUS_LABELS[item.status]}
-							>
-								{#snippet children({ row: item })}
-									<select
-										class="select select-bordered select-xs w-full max-w-[9.5rem]"
-										value={item.status}
-										disabled={ticketStatusLoading.isPending(item.id)}
-										onchange={(event) =>
-											handleTicketStatusChange(
-												item.id,
-												event.currentTarget.value as SupportTicketStatus
-											)}
-									>
-										{#each SUPPORT_TICKET_STATUS_OPTIONS as option (option.value)}
-											<option value={option.value}>{option.label}</option>
-										{/each}
-									</select>
-								{/snippet}
-							</DataTableColumn>
-
-							<DataTableColumn
-								label="Created"
-								filterText={(item) => new Date(item.createdAt).toLocaleString()}
-							>
-								{#snippet children({ row: item })}
-									<span class="text-sm whitespace-nowrap">
-										{new Date(item.createdAt).toLocaleString()}
-									</span>
-								{/snippet}
-							</DataTableColumn>
-						</DataTable>
-					{/if}
-
-					{#snippet pending()}
-						<SettingsCardTitle icon={Ticket} title="Support tickets" class="mb-4" />
-						<LoadingCenter />
-					{/snippet}
-
-					{#snippet failed(error)}
-						<div class="alert alert-error">
-							<span>
-								{error instanceof Error ? error.message : 'Failed to load support tickets'}
-							</span>
-						</div>
-					{/snippet}
-				</svelte:boundary>
-			</div>
-		</div>
-	{/if}
 
 	<div class="card bg-base-100 shadow-sm">
 		<div class="card-body">

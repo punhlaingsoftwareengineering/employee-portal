@@ -22,7 +22,7 @@
 
 		<p class="mb-4 text-sm opacity-80">Enter the one-time code sent to your email after sign up.</p>
 
-		<form method="post" action="?/verify" use:enhance={verifyLoading.enhanceSubmit}>
+		<form method="post" action="{AUTH_ROUTES.otp}?/verify" use:enhance={verifyLoading.enhanceSubmit}>
 			<input type="hidden" name="redirectTo" value={data.redirectTo} />
 
 			<table class="form-table">
@@ -65,7 +65,7 @@
 			</div>
 		</form>
 
-		<form method="post" action="?/resend" use:enhance={resendLoading.enhanceSubmit} class="mt-4">
+		<form method="post" action="{AUTH_ROUTES.otp}?/resend" use:enhance={resendLoading.enhanceSubmit} class="mt-4">
 			<input type="hidden" name="email" value={data.email} />
 			<div class="form-actions">
 				<button type="submit" class="btn btn-outline gap-2" disabled={resendLoading.submitting}>

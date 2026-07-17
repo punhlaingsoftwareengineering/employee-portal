@@ -17,7 +17,7 @@
 
 <div class="card bg-base-100 shadow-sm">
 	<div class="card-body">
-		<form method="post" action="?/signInEmail" use:enhance={signInLoading.enhanceSubmit}>
+		<form method="post" action="{AUTH_ROUTES.login}?/signInEmail" use:enhance={signInLoading.enhanceSubmit}>
 			<input type="hidden" name="redirectTo" value={redirectTo} />
 
 			<table class="form-table">

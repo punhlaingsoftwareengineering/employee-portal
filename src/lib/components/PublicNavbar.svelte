@@ -24,6 +24,25 @@
 	);
 	const onServicesPage = $derived(page.url.pathname === PUBLIC_ROUTES.services);
 	const onAppsPage = $derived(page.url.pathname === PUBLIC_ROUTES.apps);
+
+	const user = $derived(page.data.user ?? null);
+	const userDisplayName = $derived(
+		user?.name?.trim() || user?.email?.split('@')[0] || 'Account'
+	);
+	const userInitials = $derived.by(() => {
+		const source = user?.name?.trim() || user?.email || '';
+		const parts = source.split(/\s+/).filter(Boolean);
+
+		if (parts.length >= 2) {
+			return `${parts[0]![0] ?? ''}${parts[parts.length - 1]![0] ?? ''}`.toUpperCase();
+		}
+
+		if (parts.length === 1) {
+			return parts[0]!.slice(0, 2).toUpperCase();
+		}
+
+		return '?';
+	});
 </script>
 
 <div class="navbar bg-base-100 border-b border-base-300 shadow-sm">
@@ -62,7 +81,25 @@
 
 	<div class="navbar-end gap-2">
 		<NotificationBell initialNotifications={notifications} {defaultSoundUrl} />
-		<a href={AUTH_ROUTES.login} class="btn btn-ghost">Sign in</a>
-		<a href={AUTH_ROUTES.signup} class="btn btn-primary">Get started</a>
+		{#if user}
+			<a href="/dashboard" class="btn btn-ghost max-w-48 gap-2 pl-2 pr-3">
+				{#if user.image}
+					<div class="avatar">
+						<div class="w-8 rounded-full">
+							<img src={user.image} alt="" />
+						</div>
+					</div>
+				{:else}
+					<div class="avatar avatar-placeholder">
+						<div class="w-8 rounded-full bg-neutral text-neutral-content">
+							<span class="text-xs">{userInitials}</span>
+						</div>
+					</div>
+				{/if}
+				<span class="hidden truncate sm:inline">{userDisplayName}</span>
+			</a>
+		{:else}
+			<a href={AUTH_ROUTES.login} class="btn btn-primary">Sign in</a>
+		{/if}
 	</div>
 </div>

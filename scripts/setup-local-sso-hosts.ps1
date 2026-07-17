@@ -31,6 +31,10 @@ if ($oaiOrderSenderOrigin) {
 	$entries += "127.0.0.1 $((Get-OriginUri $oaiOrderSenderOrigin).Host)"
 }
 
+if ($mariChatbotOrigin) {
+	$entries += "127.0.0.1 $((Get-OriginUri $mariChatbotOrigin).Host)"
+}
+
 $content = Get-Content $hostsPath -Raw
 foreach ($entry in $entries) {
 	if ($content -notmatch [regex]::Escape($entry)) {

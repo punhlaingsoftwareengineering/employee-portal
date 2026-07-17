@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { BadgeQuestionMark, Bot, Palette, Ticket, Type } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { BadgeQuestionMark, Bot, Palette, Type } from '@lucide/svelte';
 	import AiChatDialog from '$lib/components/AiChatDialog.svelte';
 	import FontDialog from '$lib/components/FontDialog.svelte';
-	import SupportTicketDialog from '$lib/components/SupportTicketDialog.svelte';
 	import ThemeDialog from '$lib/components/ThemeDialog.svelte';
 	import { getAllowedFontOptions, getAllowedThemeOptions } from '$lib/app-settings.svelte';
 	import type { User } from 'better-auth';
 
 	let { user = null }: { user?: User | null } = $props();
 
-	let ticketDialog = $state<SupportTicketDialog | null>(null);
 	let chatDialog = $state<AiChatDialog | null>(null);
 	let themeDialog = $state<ThemeDialog | null>(null);
 	let fontDialog = $state<FontDialog | null>(null);
@@ -23,11 +22,6 @@
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
 		}
-	}
-
-	function openTicket() {
-		closeFab();
-		ticketDialog?.open();
 	}
 
 	function openChat() {
@@ -45,22 +39,24 @@
 		fontDialog?.open();
 	}
 
-	function isEditableTarget(target: EventTarget | null): boolean {
-		return (
-			target instanceof HTMLElement &&
-			(target.isContentEditable ||
-				target.closest('input, textarea, select, [contenteditable="true"]') !== null)
-		);
-	}
-
-	$effect(() => {
+	onMount(() => {
 		function onKeydown(event: KeyboardEvent) {
 			if (!event.ctrlKey || event.metaKey || event.altKey) return;
 			if (event.key !== '/' && event.code !== 'Slash') return;
-			if (isEditableTarget(event.target)) return;
+
+			const target = event.target;
+			if (
+				target instanceof HTMLElement &&
+				(target.isContentEditable ||
+					target.closest('input, textarea, select, [contenteditable="true"]') !== null)
+			)
+				return;
 
 			event.preventDefault();
-			openChat();
+			if (document.activeElement instanceof HTMLElement) {
+				document.activeElement.blur();
+			}
+			chatDialog?.open();
 		}
 
 		window.addEventListener('keydown', onKeydown);
@@ -68,34 +64,19 @@
 	});
 </script>
 
-<SupportTicketDialog bind:this={ticketDialog} {user} />
 <AiChatDialog bind:this={chatDialog} />
 <ThemeDialog bind:this={themeDialog} />
 <FontDialog bind:this={fontDialog} />
 
 <div class="fab z-50">
-	<div tabindex="0" role="button" class="btn btn-sm btn-circle btn-primary shadow-lg" aria-label="Help">
+	<div tabindex="0" role="button" class="btn btn-circle btn-primary shadow-lg" aria-label="Help">
 		<BadgeQuestionMark class="h-4 w-4" />
 	</div>
 
-	<div class="text-sm font-medium">
-		Submit ticket
+	<div class="tooltip tooltip-left" data-tip="AI assistant (Ctrl+/)">
 		<button
 			type="button"
-			class="btn btn-sm btn-circle btn-secondary shadow-md"
-			aria-label="Submit ticket"
-			onclick={openTicket}
-		>
-			<Ticket class="h-4 w-4" />
-		</button>
-	</div>
-
-	<div class="flex items-center gap-1 text-sm font-medium">
-		<span>AI assistant</span>
-		<kbd class="kbd kbd-xs opacity-70">Ctrl</kbd><kbd class="kbd kbd-xs opacity-70">/</kbd>
-		<button
-			type="button"
-			class="btn btn-sm btn-circle btn-accent shadow-md"
+			class="btn btn-circle btn-primary shadow-md"
 			aria-label="AI assistant (Ctrl+/)"
 			onclick={openChat}
 		>
@@ -104,11 +85,10 @@
 	</div>
 
 	{#if showFontControl}
-		<div class="text-sm font-medium">
-			Font
+		<div class="tooltip tooltip-left" data-tip="Font">
 			<button
 				type="button"
-				class="btn btn-sm btn-circle btn-warning shadow-md"
+				class="btn btn-circle btn-warning shadow-md"
 				aria-label="Font"
 				onclick={openFont}
 			>
@@ -118,11 +98,10 @@
 	{/if}
 
 	{#if showThemeControl}
-		<div class="text-sm font-medium">
-			Theme
+		<div class="tooltip tooltip-left" data-tip="Theme">
 			<button
 				type="button"
-				class="btn btn-sm btn-circle btn-info shadow-md"
+				class="btn btn-circle btn-info shadow-md"
 				aria-label="Theme"
 				onclick={openTheme}
 			>

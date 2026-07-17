@@ -14,10 +14,6 @@ function normalize(text: string): string {
 function replyFor(message: string): string {
 	const text = normalize(message);
 
-	if (/ticket|support|help desk|issue|problem/.test(text)) {
-		return 'Open the support menu (bottom-right), choose Submit ticket, and fill in the category, urgency, subject, and description. Signed-in users can track tickets under My tickets.';
-	}
-
 	if (/service|app|tool/.test(text)) {
 		return 'Browse Services and Apps from the top navigation, or find them on the onboarding home page. Signed-in users also see assigned tools under Tools in the sidebar.';
 	}
@@ -39,10 +35,10 @@ function replyFor(message: string): string {
 	}
 
 	if (/hello|hi|hey|thanks|thank you/.test(text)) {
-		return 'Hello! Ask me about tickets, tools, login, themes, or where to find features in the portal.';
+		return 'Hello! Ask me about tools, login, themes, or where to find features in the portal.';
 	}
 
-	return 'I am not sure about that yet. Try asking about support tickets, services, login, themes, or employees — or submit a ticket for human help.';
+	return 'I am not sure about that yet. Try asking about services, login, themes, or employees.';
 }
 
 export function getAiAssistantWelcome(): { message: string; suggestions: readonly string[] } {

@@ -55,6 +55,6 @@ Use `modal-box modal-box-fit` on the inner box. **Do not** set `max-w-lg`, `max-
 
 - **Loading / error nested dialogs** (e.g. `svelte:boundary` snippets): also use `modal-box modal-box-fit`
 - **Fields**: keep `max-w-md` on inputs in `form-table-field` — they set natural dialog width
-- **Form layout**: same `form-table` pattern as [`forms-layout.mdc`](forms-layout.mdc)
+- **Form layout**: same `form-table` pattern as [`forms-layout.mdc`](forms-layout.mdc), including responsive stacking below `md`
 
 Skill: `employee-portal-daisyui`

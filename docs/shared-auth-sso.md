@@ -29,17 +29,23 @@ Per-app public URLs (must match the browser address):
 | OAI Order Sender | `ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersender.oai.phh.com` |
 | OAI Order Sender | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 
-Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting `DRIVE_ORIGIN` and `DOCS_ORIGIN` when set).
+Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibling `*_ORIGIN` values when set).
 
 `DRIVE_ORIGIN` syncs the **PHH-DRIVE** service tile link on portal startup (no manual SQL when env is set).
 
-`DOCS_ORIGIN` syncs the **Docs** service tile link on portal startup. Grant CMS access via **Settings → Access roles** (assign Docs service).
+`DOCS_ORIGIN` syncs the **Docs** service tile link on portal startup. Grant CMS access via **Settings â†’ Access roles** (assign Docs service).
 
 `OAI_ORDER_SENDER_ORIGIN` syncs the **OAI Order Sender** service tile on portal startup. Grant access via **Settings → Access roles** (assign OAI Order Sender service).
 
 `N8N_CHATBOT_ORIGIN` syncs the **N8N Chatbot** service tile. `N8N_MONITOR_ORIGIN` syncs **N8N Monitor**. `PHH_CALLTRACKER_DASHBOARD_ORIGIN` syncs **PHH CallTracker Dashboard**.
 
-Portal admin media uploads (images, PDFs, video, audio) use `DRIVE_TEAM_API_KEY` server-side — see [drive-media-integration.md](./drive-media-integration.md).
+`MARI_CHATBOT_ORIGIN` syncs the **Mari Chatbot** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign Mari Chatbot service).
+
+**n8n Monitor** is not a portal built-in. Create the Tools service manually, set `N8N_MONITOR_SERVICE_ID` on the monitor app to that UUID, add `http://monitor.n8n.phh.com` (UAT: `http://monitor.n8n.uat.phh.com`) to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
+
+**Call Tracker** is not a portal built-in. Create the Tools service manually, set `PORTAL_SERVICE_ID` on the calltracker app to that UUID, add `http://calltracker.office.phh.com` to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
+
+Portal admin media uploads (images, PDFs, video, audio) use `DRIVE_TEAM_API_KEY` server-side â€” see [drive-media-integration.md](./drive-media-integration.md).
 
 ## Local dev
 
@@ -54,6 +60,7 @@ N8N_CHATBOT_ORIGIN=http://chatbot.local.test
 N8N_MONITOR_ORIGIN=http://monitor.local.test
 PHH_CALLTRACKER_DASHBOARD_ORIGIN=http://dashboard.routetracker.local.test
 AUTH_COOKIE_DOMAIN=.local.test
+PORTAL_TRUSTED_REDIRECT_ORIGINS=http://n8n-monitor.local.test
 CADDY_DOCS_UPSTREAM=localhost:1026
 CADDY_OAI_ORDER_SENDER_UPSTREAM=localhost:6002
 ```
@@ -67,7 +74,7 @@ CADDY_OAI_ORDER_SENDER_UPSTREAM=localhost:6002
 
 2. **Install Caddy** (if needed): `winget install -e --id CaddyServer.Caddy`
 
-3. **Start apps** (five terminals):
+3. **Start apps** (terminals):
 
    ```powershell
    cd employee-portal && pnpm dev
@@ -80,6 +87,13 @@ CADDY_OAI_ORDER_SENDER_UPSTREAM=localhost:6002
 4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, `DOCS_ORIGIN`, and `OAI_ORDER_SENDER_ORIGIN` (not raw `localhost` ports).
 
 `pnpm caddy:dev` renders `Caddyfile.generated` from `.env` then starts Caddy.
+
+## Login troubleshooting
+
+- Always open the portal at `ORIGIN` (e.g. `http://portal.local.test` via Caddy), not `http://localhost:1027`. A host that is not in Better Auth `trustedOrigins` causes sign-in to fail with **400** and a message such as Invalid origin.
+- Wrong email/password also returns **400**; the login card shows the Better Auth error message — that is expected.
+- Auth forms post to absolute paths (`/auth/login?/signInEmail`, etc.) so a delayed submit after redirect from a private page (e.g. `/community/manage`) does not hit **405 Method Not Allowed**.
+- Console errors from `Grammarly.js`, `Agents-MessageBusClient`, or `inject_main.js` (often `crypto.randomUUID is not a function` on HTTP) come from browser extensions, not the portal app.
 
 ## Production
 
@@ -137,6 +151,46 @@ AUTH_DATABASE_URL=<portal postgres>
 PORTAL_DATABASE_URL=<portal postgres>
 KOGYITHURA_API_BASE=http://127.0.0.1:5678/webhook
 ```
+
+**Mari Chatbot**
+
+```env
+ORIGIN=http://chatbot.n8n.phh.com
+PORTAL_ORIGIN=http://phh.com
+AUTH_COOKIE_DOMAIN=.phh.com
+AUTH_DATABASE_URL=<portal postgres>
+PORTAL_DATABASE_URL=<portal postgres>
+DATABASE_URL=<mari cms postgres>
+```
+
+nginx (or Caddy): `chatbot.n8n.phh.com` â†’ `127.0.0.1:6001`. Grant access via portal **Settings â†’ Access roles** (assign Mari Chatbot).
+
+**n8n Monitor**
+
+```env
+ORIGIN=http://monitor.n8n.phh.com
+PORTAL_ORIGIN=https://phh.com
+AUTH_COOKIE_DOMAIN=.phh.com
+AUTH_DATABASE_URL=<portal postgres>
+PORTAL_DATABASE_URL=<portal postgres>
+DATABASE_URL=<n8n postgres>
+N8N_MONITOR_SERVICE_ID=<uuid from Tools service>
+```
+
+Add `http://monitor.n8n.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `monitor.n8n.phh.com` â†’ `127.0.0.1:6003` with `proxy_buffering off` for SSE. Create the Tools service manually, paste its UUID into `N8N_MONITOR_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
+
+**Call Tracker**
+
+```env
+ORIGIN=http://calltracker.office.phh.com
+PORTAL_ORIGIN=http://phh.com
+AUTH_COOKIE_DOMAIN=.phh.com
+AUTH_DATABASE_URL=<portal postgres>
+PORTAL_DATABASE_URL=<portal postgres>
+PORTAL_SERVICE_ID=<uuid from Tools service>
+```
+
+Add `http://calltracker.office.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `calltracker.office.phh.com` â†’ `127.0.0.1:6004`. Create the Tools service manually, paste its UUID into `PORTAL_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
 
 On the portal host:
 

@@ -64,11 +64,35 @@ html[data-app-font='times-new-roman'] {
 	}
 
 	.form-table-label {
-		@apply w-40 py-2 text-right align-middle font-medium whitespace-nowrap;
+		@apply w-40 py-2 text-left align-middle font-medium whitespace-nowrap;
+	}
+
+	.form-table-label:has(+ .form-table-field :is(input, select, textarea)[required])::after,
+	.form-table-label.form-table-label-required::after {
+		content: '*';
+		@apply ms-0.5 text-error;
 	}
 
 	.form-table-field {
 		@apply py-2 align-middle;
+	}
+
+	/* Responsive: stack label above field on small screens */
+	@media (max-width: 767px) {
+		.form-table,
+		.form-table :is(tbody, tr, td, th) {
+			display: block;
+			width: 100%;
+		}
+
+		.form-table-label {
+			@apply whitespace-normal text-left;
+			width: 100%;
+		}
+
+		.form-table-field {
+			width: 100%;
+		}
 	}
 
 	.form-actions {

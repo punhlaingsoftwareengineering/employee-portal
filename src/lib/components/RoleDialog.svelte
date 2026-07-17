@@ -33,7 +33,6 @@
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingRole = $state<AccessRole | null>(null);
 	let name = $state('');
-	let slug = $state('');
 	let description = $state('');
 	let employeeReadAll = $state(false);
 	let employeeWrite = $state(false);
@@ -57,6 +56,9 @@
 
 	const isEdit = $derived(Boolean(editingRole?.id));
 
+	const assignableServices = $derived(allServices.filter((item) => !item.isPublic));
+	const assignableApps = $derived(allApps.filter((item) => !item.isPublic));
+
 	const allPermissionsSelected = $derived(
 		employeeReadAll &&
 			employeeWrite &&
@@ -72,11 +74,12 @@
 	);
 
 	const allServicesSelected = $derived(
-		allServices.length > 0 && allServices.every((item) => selectedServiceIds.includes(item.id))
+		assignableServices.length > 0 &&
+			assignableServices.every((item) => selectedServiceIds.includes(item.id))
 	);
 
 	const allAppsSelected = $derived(
-		allApps.length > 0 && allApps.every((item) => selectedAppIds.includes(item.id))
+		assignableApps.length > 0 && assignableApps.every((item) => selectedAppIds.includes(item.id))
 	);
 
 	const allCommunityLinksSelected = $derived(
@@ -84,8 +87,8 @@
 			allCommunityLinks.every((item) => selectedCommunityLinkIds.includes(item.id))
 	);
 
-	const serviceRows = $derived(chunk(allServices, 3));
-	const appRows = $derived(chunk(allApps, 3));
+	const serviceRows = $derived(chunk(assignableServices, 3));
+	const appRows = $derived(chunk(assignableApps, 3));
 	const communityLinkRows = $derived(chunk(allCommunityLinks, 3));
 
 	function chunk<T>(items: T[], size: number): T[][] {
@@ -110,7 +113,6 @@
 
 		try {
 			name = existing?.name ?? '';
-			slug = existing?.slug ?? '';
 			description = existing?.description ?? '';
 			navDashboard = existing?.navDashboard ?? true;
 			navEmployees = existing?.navEmployees ?? true;
@@ -125,9 +127,18 @@
 			departmentWrite = existing?.departmentWrite ?? false;
 			facilityReadAll = existing?.facilityReadAll ?? false;
 			facilityWrite = existing?.facilityWrite ?? false;
+			const assignableServiceIds = new Set(
+				allServices.filter((s) => !s.isPublic).map((s) => s.id)
+			);
+			const assignableAppIds = new Set(allApps.filter((a) => !a.isPublic).map((a) => a.id));
 			selectedServiceIds =
-				existing?.id != null ? await getRoleServiceIds(existing.id) : [];
-			selectedAppIds = existing?.id != null ? await getRoleAppIds(existing.id) : [];
+				existing?.id != null
+					? (await getRoleServiceIds(existing.id)).filter((id) => assignableServiceIds.has(id))
+					: [];
+			selectedAppIds =
+				existing?.id != null
+					? (await getRoleAppIds(existing.id)).filter((id) => assignableAppIds.has(id))
+					: [];
 			selectedCommunityLinkIds =
 				existing?.id != null ? await getRoleCommunityLinkIds(existing.id) : [];
 		} finally {
@@ -166,11 +177,11 @@
 	}
 
 	function setAllServices(selected: boolean) {
-		selectedServiceIds = selected ? allServices.map((item) => item.id) : [];
+		selectedServiceIds = selected ? assignableServices.map((item) => item.id) : [];
 	}
 
 	function setAllApps(selected: boolean) {
-		selectedAppIds = selected ? allApps.map((item) => item.id) : [];
+		selectedAppIds = selected ? assignableApps.map((item) => item.id) : [];
 	}
 
 	function setAllCommunityLinks(selected: boolean) {
@@ -215,7 +226,6 @@
 		try {
 			const payload = {
 				name: name.trim(),
-				slug: slug.trim(),
 				description: description.trim() || undefined,
 				navDashboard,
 				navEmployees,
@@ -270,18 +280,6 @@
 									bind:value={name}
 									class="input input-bordered w-full max-w-md"
 									required
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td class="form-table-label">Slug</td>
-							<td class="form-table-field">
-								<input
-									type="text"
-									bind:value={slug}
-									class="input input-bordered w-full max-w-md"
-									required
-									disabled={editingRole?.isSystem}
 								/>
 							</td>
 						</tr>
@@ -454,7 +452,7 @@
 								<th colspan="3">
 									<div class="role-dialog-section-header">
 										<span class="text-sm font-medium text-base-content/80">Services</span>
-										{#if allServices.length > 0}
+										{#if assignableServices.length > 0}
 											<label class="role-dialog-select-all">
 												<span>Select all</span>
 												<input
@@ -471,9 +469,11 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#if allServices.length === 0}
+							{#if assignableServices.length === 0}
 								<tr>
-									<td colspan="3" class="text-sm text-base-content/60">No services registered yet.</td>
+									<td colspan="3" class="text-sm text-base-content/60">
+										No role-gated services yet. Public services are available to everyone.
+									</td>
 								</tr>
 							{:else}
 								{#each serviceRows as row, rowIndex (rowIndex)}
@@ -516,7 +516,7 @@
 								<th colspan="3">
 									<div class="role-dialog-section-header">
 										<span class="text-sm font-medium text-base-content/80">Apps</span>
-										{#if allApps.length > 0}
+										{#if assignableApps.length > 0}
 											<label class="role-dialog-select-all">
 												<span>Select all</span>
 												<input
@@ -533,9 +533,11 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#if allApps.length === 0}
+							{#if assignableApps.length === 0}
 								<tr>
-									<td colspan="3" class="text-sm text-base-content/60">No apps registered yet.</td>
+									<td colspan="3" class="text-sm text-base-content/60">
+										No role-gated apps yet. Public apps are available to everyone.
+									</td>
 								</tr>
 							{:else}
 								{#each appRows as row, rowIndex (rowIndex)}

@@ -215,7 +215,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td class="form-table-label align-top">Download URLs</td>
+						<td class="form-table-label form-table-label-required align-top">Download URLs</td>
 						<td class="form-table-field">
 							<p class="mb-3 text-sm text-base-content/70">
 								Paste a link or upload an installer or ZIP to PHH-DRIVE (<code
