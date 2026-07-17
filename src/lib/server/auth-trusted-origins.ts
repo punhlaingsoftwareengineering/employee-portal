@@ -1,7 +1,9 @@
 import {
+	CALLTRACKER_ORIGIN,
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
 	MARI_CHATBOT_ORIGIN,
+	N8N_MONITOR_ORIGIN,
 	ORDER_RESEND_ORIGIN,
 	ORIGIN,
 	PORTAL_TRUSTED_REDIRECT_ORIGINS
@@ -51,6 +53,8 @@ export function getAuthTrustedOrigins(): string[] {
 	addOrigin(trusted, DOCS_ORIGIN);
 	addOrigin(trusted, ORDER_RESEND_ORIGIN);
 	addOrigin(trusted, MARI_CHATBOT_ORIGIN);
+	addOrigin(trusted, N8N_MONITOR_ORIGIN);
+	addOrigin(trusted, CALLTRACKER_ORIGIN);
 	addOriginsList(trusted, PORTAL_TRUSTED_REDIRECT_ORIGINS);
 
 	return [...trusted];

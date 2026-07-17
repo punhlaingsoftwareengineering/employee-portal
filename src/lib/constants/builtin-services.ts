@@ -15,6 +15,12 @@ export const ORDER_RESEND_SERVICE_ID = 'b4c6d8e0-f2a3-5b7c-9d1e-2f3a4b5c6d7e';
 /** Stable ID — link synced from MARI_CHATBOT_ORIGIN env on startup. */
 export const MARI_CHATBOT_SERVICE_ID = 'c5d7e9f1-a3b4-6c8d-0e2f-3a4b5c6d7e8f';
 
+/** Stable ID — link synced from N8N_MONITOR_ORIGIN env on startup. */
+export const N8N_MONITOR_SERVICE_ID = 'd6e8f0a2-b4c5-6d8e-9f0a-1b2c3d4e5f6a';
+
+/** Stable ID — link synced from CALLTRACKER_ORIGIN env on startup. */
+export const CALLTRACKER_SERVICE_ID = 'e7f9a1b3-c5d6-7e9f-0a1b-2c3d4e5f6a7b';
+
 export const E_SIGNATURE_SERVICE_PATH = '/tools/e-signature';
 
 export type BuiltinServiceDefinition = {
@@ -46,7 +52,9 @@ const BUILTIN_SERVICE_IDS = new Set([
 	PHH_DRIVE_SERVICE_ID,
 	DOCS_SERVICE_ID,
 	ORDER_RESEND_SERVICE_ID,
-	MARI_CHATBOT_SERVICE_ID
+	MARI_CHATBOT_SERVICE_ID,
+	N8N_MONITOR_SERVICE_ID,
+	CALLTRACKER_SERVICE_ID
 ]);
 
 export function isBuiltinServiceId(id: string): boolean {

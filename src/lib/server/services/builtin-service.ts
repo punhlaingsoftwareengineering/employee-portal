@@ -2,14 +2,18 @@ import { and, eq } from 'drizzle-orm';
 import {
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
+	CALLTRACKER_ORIGIN,
 	MARI_CHATBOT_ORIGIN,
+	N8N_MONITOR_ORIGIN,
 	ORDER_RESEND_ORIGIN,
 	ORIGIN
 } from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
+	CALLTRACKER_SERVICE_ID,
 	DOCS_SERVICE_ID,
 	MARI_CHATBOT_SERVICE_ID,
+	N8N_MONITOR_SERVICE_ID,
 	ORDER_RESEND_SERVICE_ID,
 	PHH_DRIVE_SERVICE_ID,
 	getBuiltinServiceDefinition,
@@ -178,6 +182,38 @@ async function upsertMariChatbotService() {
 	});
 }
 
+async function upsertN8nMonitorService() {
+	const monitorOrigin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
+	if (!monitorOrigin) return;
+
+	await upsertServiceRow({
+		id: N8N_MONITOR_SERVICE_ID,
+		name: 'n8n Monitor',
+		description: 'Realtime monitor for published n8n workflow executions',
+		category: 'Productivity',
+		accentColor: '#0B2D5C',
+		link: monitorOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
+async function upsertCallTrackerService() {
+	const calltrackerOrigin = CALLTRACKER_ORIGIN?.trim().replace(/\/$/, '');
+	if (!calltrackerOrigin) return;
+
+	await upsertServiceRow({
+		id: CALLTRACKER_SERVICE_ID,
+		name: '3CX Call Tracker',
+		description: 'Dashboard for 3CX route tracker call analytics',
+		category: 'Productivity',
+		accentColor: '#0B2D5C',
+		link: calltrackerOrigin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
@@ -186,6 +222,8 @@ export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	await upsertDocsService();
 	await upsertOrderResendService();
 	await upsertMariChatbotService();
+	await upsertN8nMonitorService();
+	await upsertCallTrackerService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -234,6 +272,26 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 		if (!mariOrigin) return false;
 		try {
 			return new URL(link).origin === new URL(mariOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === N8N_MONITOR_SERVICE_ID) {
+		const monitorOrigin = N8N_MONITOR_ORIGIN?.trim().replace(/\/$/, '');
+		if (!monitorOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(monitorOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === CALLTRACKER_SERVICE_ID) {
+		const calltrackerOrigin = CALLTRACKER_ORIGIN?.trim().replace(/\/$/, '');
+		if (!calltrackerOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(calltrackerOrigin).origin;
 		} catch {
 			return false;
 		}
