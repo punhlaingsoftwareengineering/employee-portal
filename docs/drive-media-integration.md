@@ -28,7 +28,7 @@ Restart the portal after changing env vars.
 When the portal runs in Docker behind Caddy, the container cannot resolve the public drive hostname. Set an internal URL for server-side API calls:
 
 ```env
-DRIVE_ORIGIN=http://drive.office.phh.com
+DRIVE_ORIGIN=http://drive.phh.com
 DRIVE_INTERNAL_ORIGIN=http://host.docker.internal:1025
 DRIVE_STORAGE_PROVIDER=local
 DRIVE_TEAM_API_KEY=znltv_...

@@ -23,7 +23,7 @@ if (-not $portalOrigin) {
 	throw 'Set ORIGIN in .env (portal public URL, e.g. http://portal.local.test or https://phh.com).'
 }
 if (-not $driveOrigin) {
-	throw 'Set DRIVE_ORIGIN in .env (drive public URL, e.g. http://drive.local.test or https://office.drive.phh.com).'
+	throw 'Set DRIVE_ORIGIN in .env (drive public URL, e.g. http://drive.local.test or https://drive.phh.com).'
 }
 
 if (-not $portalUpstream) { $portalUpstream = 'localhost:1027' }

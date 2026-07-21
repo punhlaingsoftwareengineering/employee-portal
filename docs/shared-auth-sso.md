@@ -16,17 +16,17 @@ Per-app public URLs (must match the browser address):
 | App | Env var | Local | Production |
 |-----|---------|-------|------------|
 | employee-portal | `ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| employee-portal | `DRIVE_ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
-| employee-portal | `DOCS_ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
-| employee-portal | `OAI_ORDER_SENDER_ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersender.oai.phh.com` |
-| employee-portal | `N8N_CHATBOT_ORIGIN` | `http://chatbot.local.test` | `https://chatbot.n8n.phh.com` |
-| employee-portal | `N8N_MONITOR_ORIGIN` | `http://monitor.local.test` | `https://monitor.n8n.phh.com` |
-| employee-portal | `PHH_CALLTRACKER_DASHBOARD_ORIGIN` | `http://dashboard.routetracker.local.test` | `https://dashboard.routetracker.phh.com` |
-| PHH-DRIVE | `ORIGIN` | `http://drive.local.test` | `https://office.drive.phh.com` |
+| employee-portal | `DRIVE_ORIGIN` | `http://drive.local.test` | `https://drive.phh.com` |
+| employee-portal | `DOCS_ORIGIN` | `http://docs.local.test` | `https://docs.phh.com` |
+| employee-portal | `OAI_ORDER_SENDER_ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersenderoai.phh.com` |
+| employee-portal | `N8N_CHATBOT_ORIGIN` | `http://chatbot.local.test` | `https://chatbotn8n.phh.com` |
+| employee-portal | `N8N_MONITOR_ORIGIN` | `http://monitor.local.test` | `https://monitorn8n.phh.com` |
+| employee-portal | `PHH_CALLTRACKER_DASHBOARD_ORIGIN` | `http://dashboardroutetracker.local.test` | `https://dashboardroutetracker.phh.com` |
+| PHH-DRIVE | `ORIGIN` | `http://drive.local.test` | `https://drive.phh.com` |
 | PHH-DRIVE | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| docs | `ORIGIN` | `http://docs.local.test` | `https://docs.example.com` |
+| docs | `ORIGIN` | `http://docs.local.test` | `https://docs.phh.com` |
 | docs | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
-| OAI Order Sender | `ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersender.oai.phh.com` |
+| OAI Order Sender | `ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersenderoai.phh.com` |
 | OAI Order Sender | `PORTAL_ORIGIN` | `http://portal.local.test` | `https://phh.com` |
 
 Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibling `*_ORIGIN` values when set).
@@ -41,9 +41,9 @@ Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibl
 
 `MARI_CHATBOT_ORIGIN` syncs the **Mari Chatbot** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign Mari Chatbot service).
 
-**n8n Monitor** is not a portal built-in. Create the Tools service manually, set `N8N_MONITOR_SERVICE_ID` on the monitor app to that UUID, add `http://monitor.n8n.phh.com` (UAT: `http://uat.monitor.n8n.phh.com`) to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
+**n8n Monitor** is not a portal built-in. Create the Tools service manually, set `N8N_MONITOR_SERVICE_ID` on the monitor app to that UUID, add `http://monitorn8n.phh.com` (UAT: `http://monitorn8n.uat.phh.com`) to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
 
-**Call Tracker** is not a portal built-in. Create the Tools service manually, set `PORTAL_SERVICE_ID` on the calltracker app to that UUID, add `http://calltracker.office.phh.com` to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
+**Call Tracker** is not a portal built-in. Create the Tools service manually, set `PORTAL_SERVICE_ID` on the calltracker app to that UUID, add `http://dashboardroutetracker.phh.com` to `PORTAL_TRUSTED_REDIRECT_ORIGINS`, and grant access via **Settings â†’ Access roles**.
 
 Portal admin media uploads (images, PDFs, video, audio) use `DRIVE_TEAM_API_KEY` server-side â€” see [drive-media-integration.md](./drive-media-integration.md).
 
@@ -58,7 +58,7 @@ DOCS_ORIGIN=http://docs.local.test
 OAI_ORDER_SENDER_ORIGIN=http://oai-order-sender.local.test
 N8N_CHATBOT_ORIGIN=http://chatbot.local.test
 N8N_MONITOR_ORIGIN=http://monitor.local.test
-PHH_CALLTRACKER_DASHBOARD_ORIGIN=http://dashboard.routetracker.local.test
+PHH_CALLTRACKER_DASHBOARD_ORIGIN=http://dashboardroutetracker.local.test
 AUTH_COOKIE_DOMAIN=.local.test
 PORTAL_TRUSTED_REDIRECT_ORIGINS=http://n8n-monitor.local.test
 CADDY_DOCS_UPSTREAM=localhost:1026
@@ -103,12 +103,12 @@ Set production URLs in each app's `.env`:
 
 ```env
 ORIGIN=https://phh.com
-DRIVE_ORIGIN=https://office.drive.phh.com
-DOCS_ORIGIN=https://docs.example.com
-OAI_ORDER_SENDER_ORIGIN=https://ordersender.oai.phh.com
-N8N_CHATBOT_ORIGIN=https://chatbot.n8n.phh.com
-N8N_MONITOR_ORIGIN=https://monitor.n8n.phh.com
-PHH_CALLTRACKER_DASHBOARD_ORIGIN=https://dashboard.routetracker.phh.com
+DRIVE_ORIGIN=https://drive.phh.com
+DOCS_ORIGIN=https://docs.phh.com
+OAI_ORDER_SENDER_ORIGIN=https://ordersenderoai.phh.com
+N8N_CHATBOT_ORIGIN=https://chatbotn8n.phh.com
+N8N_MONITOR_ORIGIN=https://monitorn8n.phh.com
+PHH_CALLTRACKER_DASHBOARD_ORIGIN=https://dashboardroutetracker.phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 ```
 
@@ -125,7 +125,7 @@ With a shared Docker network, use `DRIVE_INTERNAL_ORIGIN=http://phh-drive:1025` 
 **PHH-DRIVE**
 
 ```env
-ORIGIN=https://office.drive.phh.com
+ORIGIN=https://drive.phh.com
 PORTAL_ORIGIN=https://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 ```
@@ -133,7 +133,7 @@ AUTH_COOKIE_DOMAIN=.phh.com
 **docs**
 
 ```env
-ORIGIN=https://docs.example.com
+ORIGIN=https://docs.phh.com
 PORTAL_ORIGIN=https://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -144,7 +144,7 @@ DATABASE_URL=<cms postgres>
 **OAI Order Sender**
 
 ```env
-ORIGIN=https://ordersender.oai.phh.com
+ORIGIN=https://ordersenderoai.phh.com
 PORTAL_ORIGIN=https://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -155,7 +155,7 @@ KOGYITHURA_API_BASE=http://127.0.0.1:5678/webhook
 **Mari Chatbot**
 
 ```env
-ORIGIN=http://chatbot.n8n.phh.com
+ORIGIN=http://chatbotn8n.phh.com
 PORTAL_ORIGIN=http://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -163,12 +163,12 @@ PORTAL_DATABASE_URL=<portal postgres>
 DATABASE_URL=<mari cms postgres>
 ```
 
-nginx (or Caddy): `chatbot.n8n.phh.com` â†’ `127.0.0.1:6001`. Grant access via portal **Settings â†’ Access roles** (assign Mari Chatbot).
+nginx (or Caddy): `chatbotn8n.phh.com` â†’ `127.0.0.1:6001`. Grant access via portal **Settings â†’ Access roles** (assign Mari Chatbot).
 
 **n8n Monitor**
 
 ```env
-ORIGIN=http://monitor.n8n.phh.com
+ORIGIN=http://monitorn8n.phh.com
 PORTAL_ORIGIN=https://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -177,12 +177,12 @@ DATABASE_URL=<n8n postgres>
 N8N_MONITOR_SERVICE_ID=<uuid from Tools service>
 ```
 
-Add `http://monitor.n8n.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `monitor.n8n.phh.com` â†’ `127.0.0.1:6003` with `proxy_buffering off` for SSE. Create the Tools service manually, paste its UUID into `N8N_MONITOR_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
+Add `http://monitorn8n.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `monitorn8n.phh.com` â†’ `127.0.0.1:6003` with `proxy_buffering off` for SSE. Create the Tools service manually, paste its UUID into `N8N_MONITOR_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
 
 **Call Tracker**
 
 ```env
-ORIGIN=http://calltracker.office.phh.com
+ORIGIN=http://dashboardroutetracker.phh.com
 PORTAL_ORIGIN=http://phh.com
 AUTH_COOKIE_DOMAIN=.phh.com
 AUTH_DATABASE_URL=<portal postgres>
@@ -190,7 +190,7 @@ PORTAL_DATABASE_URL=<portal postgres>
 PORTAL_SERVICE_ID=<uuid from Tools service>
 ```
 
-Add `http://calltracker.office.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `calltracker.office.phh.com` â†’ `127.0.0.1:6004`. Create the Tools service manually, paste its UUID into `PORTAL_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
+Add `http://dashboardroutetracker.phh.com` to portal `PORTAL_TRUSTED_REDIRECT_ORIGINS`. nginx: `dashboardroutetracker.phh.com` â†’ `127.0.0.1:6004`. Create the Tools service manually, paste its UUID into `PORTAL_SERVICE_ID`, then assign the service in **Settings â†’ Access roles**.
 
 On the portal host:
 

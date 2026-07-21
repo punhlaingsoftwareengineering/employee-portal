@@ -22,7 +22,7 @@ export const variables = defineEnvVars({
 	},
 	DRIVE_ORIGIN: {
 		description:
-			'PHH-DRIVE public URL (e.g. `https://office.drive.phh.com` or `http://drive.local.test`). Used for SSO redirects and Caddy.',
+			'PHH-DRIVE public URL (e.g. `https://drive.phh.com` or `http://drive.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
 	DRIVE_INTERNAL_ORIGIN: {
@@ -37,22 +37,22 @@ export const variables = defineEnvVars({
 	},
 	OAI_ORDER_SENDER_ORIGIN: {
 		description:
-			'OAI Order Sender public URL (e.g. `https://ordersender.oai.phh.com` or `http://oai-order-sender.local.test`). Used for SSO redirects and Caddy.',
+			'OAI Order Sender public URL (e.g. `https://ordersenderoai.phh.com` or `http://oai-order-sender.local.test`). Used for SSO redirects and Caddy.',
 		schema: optionalString
 	},
 	N8N_CHATBOT_ORIGIN: {
 		description:
-			'N8N Chatbot public URL (e.g. `http://chatbot.n8n.phh.com` or `http://chatbot.local.test`). Used for SSO redirects and Tools tile link.',
+			'N8N Chatbot public URL (e.g. `http://chatbotn8n.phh.com` or `http://chatbot.local.test`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	N8N_MONITOR_ORIGIN: {
 		description:
-			'N8N Monitor public URL (e.g. `http://monitor.n8n.phh.com`). Used for SSO redirects and Tools tile link.',
+			'N8N Monitor public URL (e.g. `http://monitorn8n.phh.com`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	PHH_CALLTRACKER_DASHBOARD_ORIGIN: {
 		description:
-			'PHH CallTracker Dashboard public URL (e.g. `http://dashboard.routetracker.phh.com`). Used for SSO redirects and Tools tile link.',
+			'PHH CallTracker Dashboard public URL (e.g. `http://dashboardroutetracker.phh.com`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
 	DRIVE_TEAM_API_KEY: {

@@ -11,7 +11,7 @@ describe('handleDrivePortalError', () => {
 
 	it('unwraps fetch cause in 502 message', () => {
 		const err = new TypeError('fetch failed', {
-			cause: new Error('getaddrinfo ENOTFOUND drive.office.phh.com')
+			cause: new Error('getaddrinfo ENOTFOUND drive.phh.com')
 		});
 		try {
 			handleDrivePortalError(err);
@@ -20,7 +20,7 @@ describe('handleDrivePortalError', () => {
 			const httpError = e as { status: number; body: { message: string } };
 			expect(httpError.status).toBe(502);
 			expect(httpError.body.message).toBe(
-				'fetch failed: getaddrinfo ENOTFOUND drive.office.phh.com'
+				'fetch failed: getaddrinfo ENOTFOUND drive.phh.com'
 			);
 		}
 	});

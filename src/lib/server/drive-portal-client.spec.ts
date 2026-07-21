@@ -77,14 +77,14 @@ describe('drive-portal-client', () => {
 	});
 
 	it('uses DRIVE_INTERNAL_ORIGIN for API calls and DRIVE_ORIGIN for public URLs', async () => {
-		mockEnv.DRIVE_ORIGIN = 'http://drive.office.phh.com';
+		mockEnv.DRIVE_ORIGIN = 'http://drive.phh.com';
 		mockEnv.DRIVE_INTERNAL_ORIGIN = 'http://host.docker.internal:1025';
 
 		const { uploadToCategory } = await import('./drive-portal-client');
 		const bytes = new Uint8Array([1, 2, 3]);
 		const result = await uploadToCategory('apps', 'logo.png', 'image/png', bytes);
 
-		expect(result.url).toBe('http://drive.office.phh.com/api/public/files/tok123');
+		expect(result.url).toBe('http://drive.phh.com/api/public/files/tok123');
 
 		const apiUrls = fetchMock.mock.calls.map(([input]) => String(input));
 		expect(apiUrls.every((url) => url.startsWith('http://host.docker.internal:1025'))).toBe(true);
@@ -92,6 +92,6 @@ describe('drive-portal-client', () => {
 		const hosts = fetchMock.mock.calls.map(
 			([, init]) => (init as RequestInit | undefined)?.headers as Headers | undefined
 		);
-		expect(hosts[0]?.get('Host')).toBe('drive.office.phh.com');
+		expect(hosts[0]?.get('Host')).toBe('drive.phh.com');
 	});
 });
