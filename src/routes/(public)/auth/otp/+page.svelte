@@ -8,6 +8,28 @@
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const verifyLoading = createFormLoading();
 	const resendLoading = createFormLoading();
+
+	let now = $state(Date.now());
+
+	const resendAvailableAt = $derived(
+		(form && 'resendAvailableAt' in form ? form.resendAvailableAt : null) ??
+			data.resendAvailableAt ??
+			0
+	);
+
+	$effect(() => {
+		const id = setInterval(() => {
+			now = Date.now();
+		}, 1000);
+		return () => clearInterval(id);
+	});
+
+	const cooldownSeconds = $derived(Math.max(0, Math.ceil((resendAvailableAt - now) / 1000)));
+	const cooldownLabel = $derived.by(() => {
+		const m = Math.floor(cooldownSeconds / 60);
+		const s = cooldownSeconds % 60;
+		return `${m}:${s.toString().padStart(2, '0')}`;
+	});
 </script>
 
 <h1 class="text-2xl font-bold">Verification code</h1>
@@ -20,7 +42,9 @@
 			</div>
 		{/if}
 
-		<p class="mb-4 text-sm opacity-80">Enter the one-time code sent to your email after sign up.</p>
+		<p class="mb-4 text-sm opacity-80">
+			Enter the 6-digit code sent to your email. It expires in 3 minutes.
+		</p>
 
 		<form method="post" action="{AUTH_ROUTES.otp}?/verify" use:enhance={verifyLoading.enhanceSubmit}>
 			<input type="hidden" name="redirectTo" value={data.redirectTo} />
@@ -42,14 +66,23 @@
 					<tr>
 						<td class="form-table-label">Code</td>
 						<td class="form-table-field">
-							<input
-								type="text"
-								name="otp"
-								class="input input-bordered w-full max-w-md"
-								inputmode="numeric"
-								autocomplete="one-time-code"
-								required
-							/>
+							<label class="otp">
+								<span></span>
+								<span></span>
+								<span></span>
+								<span></span>
+								<span></span>
+								<span></span>
+								<input
+									type="text"
+									name="otp"
+									autocomplete="one-time-code"
+									inputmode="numeric"
+									maxlength="6"
+									pattern="[0-9]{6}"
+									required
+								/>
+							</label>
 						</td>
 					</tr>
 				</tbody>
@@ -68,11 +101,19 @@
 		<form method="post" action="{AUTH_ROUTES.otp}?/resend" use:enhance={resendLoading.enhanceSubmit} class="mt-4">
 			<input type="hidden" name="email" value={data.email} />
 			<div class="form-actions">
-				<button type="submit" class="btn btn-outline gap-2" disabled={resendLoading.submitting}>
+				<button
+					type="submit"
+					class="btn btn-outline gap-2"
+					disabled={resendLoading.submitting || cooldownSeconds > 0}
+				>
 					{#if resendLoading.submitting}
 						<LoadingSpinner size="sm" />
 					{/if}
-					Resend code
+					{#if cooldownSeconds > 0}
+						Resend in {cooldownLabel}
+					{:else}
+						Resend code
+					{/if}
 				</button>
 			</div>
 		</form>

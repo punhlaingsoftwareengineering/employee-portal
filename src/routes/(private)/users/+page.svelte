@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, Pencil, Mail, RefreshCw, Ban } from '@lucide/svelte';
+	import { Plus, Pencil, RefreshCw, Ban } from '@lucide/svelte';
 	import InviteUserDialog from '$lib/components/InviteUserDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
@@ -10,6 +10,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import {
 		getPortalUsers,
 		getInvites,
@@ -110,7 +111,11 @@
 
 	<div class="mb-10">
 		<h2 class="mb-4 text-lg font-semibold">Users</h2>
-		<DataTable rows={users} rowKey={(portalUser) => portalUser.id} emptyMessage="No users yet.">
+		<DataTable
+			rows={users}
+			rowKey={(portalUser) => portalUser.id}
+			emptyMessage="No users yet."
+		>
 			{#snippet actions({ row: portalUser })}
 				{#if portalUser.id !== page.data.user?.id}
 					<IconActionButton
@@ -194,7 +199,12 @@
 						disabled={actionLoading.isPending(`resend:${invite.id}`)}
 						onclick={async () => {
 							await actionLoading.run(`resend:${invite.id}`, async () => {
-								await resendInvite(invite.id);
+								await withFormFeedback({
+									successMessage: 'Invite resent',
+									action: async () => {
+										await resendInvite(invite.id);
+									}
+								});
 							});
 						}}
 					>
@@ -213,7 +223,12 @@
 						onclick={async () => {
 							if (!confirm('Revoke this invite?')) return;
 							await actionLoading.run(`revoke:${invite.id}`, async () => {
-								await revokeInvite(invite.id);
+								await withFormFeedback({
+									successMessage: 'Invite revoked',
+									action: async () => {
+										await revokeInvite(invite.id);
+									}
+								});
 							});
 						}}
 					>

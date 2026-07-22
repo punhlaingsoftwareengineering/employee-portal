@@ -11,8 +11,10 @@ export type DepartmentRoleAssignment = {
 		navEmployees: boolean;
 		navDepartments: boolean;
 		navFacilities: boolean;
+		navPharmacy: boolean;
 		navTools: boolean;
 		navSettings: boolean;
+		navCommunity: boolean;
 		employeeReadAll: boolean;
 		employeeWrite: boolean;
 		employeeDelete: boolean;
@@ -20,6 +22,8 @@ export type DepartmentRoleAssignment = {
 		departmentWrite: boolean;
 		facilityReadAll: boolean;
 		facilityWrite: boolean;
+		pharmacyReadAll: boolean;
+		pharmacyWrite: boolean;
 	};
 };
 
@@ -35,4 +39,12 @@ export function canAccessTools(permissions: UserPermissionsSummary | null | unde
 	if (!permissions) return false;
 	if (permissions.isAdmin) return true;
 	return permissions.departmentRoles.some((assignment) => assignment.permissions.navTools);
+}
+
+export function canManageCommunity(
+	permissions: UserPermissionsSummary | null | undefined
+): boolean {
+	if (!permissions) return false;
+	if (permissions.isAdmin) return true;
+	return permissions.departmentRoles.some((assignment) => assignment.permissions.navCommunity);
 }

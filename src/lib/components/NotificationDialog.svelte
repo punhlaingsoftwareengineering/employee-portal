@@ -8,6 +8,7 @@
 		getNotifications
 	} from '$lib/remotes/notification.remote';
 	import { getNotificationSounds } from '$lib/remotes/notification-sound.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -67,23 +68,28 @@
 				return;
 			}
 
-			const payload = {
-				title: trimmedTitle,
-				body: trimmedBody || undefined,
-				linkUrl: trimmedLinkUrl || undefined,
-				priority,
-				iconName: trimmedIconName || undefined,
-				imageUrl: trimmedImageUrl || undefined,
-				soundId: soundId || undefined
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Notification updated' : 'Notification created',
+				action: async () => {
+					const payload = {
+						title: trimmedTitle,
+						body: trimmedBody || undefined,
+						linkUrl: trimmedLinkUrl || undefined,
+						priority,
+						iconName: trimmedIconName || undefined,
+						imageUrl: trimmedImageUrl || undefined,
+						soundId: soundId || undefined
+					};
 
-			if (editingNotification?.id) {
-				await updateNotification({ id: editingNotification.id, ...payload });
-			} else {
-				await createNotification(payload);
-			}
+					if (editingNotification?.id) {
+						await updateNotification({ id: editingNotification.id, ...payload });
+					} else {
+						await createNotification(payload);
+					}
 
-			void getNotifications().refresh();
+					void getNotifications().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save notification';

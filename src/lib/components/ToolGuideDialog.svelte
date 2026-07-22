@@ -5,6 +5,7 @@
 		updateToolGuide,
 		getToolGuides
 	} from '$lib/remotes/tool-guide.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -65,20 +66,25 @@
 				return;
 			}
 
-			const payload = {
-				title: trimmedTitle,
-				pdfUrl: trimmedPdfUrl,
-				description: trimmedDescription || undefined,
-				sortOrder
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Guide updated' : 'Guide created',
+				action: async () => {
+					const payload = {
+						title: trimmedTitle,
+						pdfUrl: trimmedPdfUrl,
+						description: trimmedDescription || undefined,
+						sortOrder
+					};
 
-			if (editingGuide?.id) {
-				await updateToolGuide({ id: editingGuide.id, ...payload });
-			} else {
-				await createToolGuide(payload);
-			}
+					if (editingGuide?.id) {
+						await updateToolGuide({ id: editingGuide.id, ...payload });
+					} else {
+						await createToolGuide(payload);
+					}
 
-			void getToolGuides().refresh();
+					void getToolGuides().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save guide';

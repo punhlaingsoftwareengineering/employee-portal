@@ -3,7 +3,7 @@ import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 import { getUserPermissions } from '$lib/server/services/portal-user';
 import { getServicesForUser } from '$lib/server/services/service';
 import { getAppsForUser } from '$lib/server/services/app';
-import { hasAppAccess } from '$lib/server/permissions';
+import { canAccessTools, hasAppAccess } from '$lib/server/permissions';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
@@ -22,11 +22,11 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		redirect(303, '/dashboard');
 	}
 
-	const availableServices = hasAppAccess(permissions)
-		? await getServicesForUser(permissions)
-		: [];
+	const toolsAccess = hasAppAccess(permissions) && canAccessTools(permissions);
 
-	const availableApps = hasAppAccess(permissions) ? await getAppsForUser(permissions) : [];
+	const availableServices = toolsAccess ? await getServicesForUser(permissions) : [];
+
+	const availableApps = toolsAccess ? await getAppsForUser(permissions) : [];
 
 	return { user: locals.user, permissions, availableServices, availableApps };
 };

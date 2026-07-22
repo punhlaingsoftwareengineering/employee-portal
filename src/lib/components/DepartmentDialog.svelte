@@ -5,6 +5,7 @@
 		updateDepartment,
 		getDepartments
 	} from '$lib/remotes/department.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
@@ -41,13 +42,17 @@
 				return;
 			}
 
-			if (editingDepartment?.id) {
-				await updateDepartment({ id: editingDepartment.id, name: trimmedName });
-			} else {
-				await createDepartment({ name: trimmedName });
-			}
-
-			void getDepartments().refresh();
+			await withFormFeedback({
+				successMessage: isEdit ? 'Department updated' : 'Department created',
+				action: async () => {
+					if (editingDepartment?.id) {
+						await updateDepartment({ id: editingDepartment.id, name: trimmedName });
+					} else {
+						await createDepartment({ name: trimmedName });
+					}
+					void getDepartments().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save department';

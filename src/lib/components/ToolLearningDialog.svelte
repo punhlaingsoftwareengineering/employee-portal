@@ -5,6 +5,7 @@
 		updateToolLearning,
 		getToolLearnings
 	} from '$lib/remotes/tool-learning.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -69,21 +70,26 @@
 				return;
 			}
 
-			const payload = {
-				title: trimmedTitle,
-				videoUrl: trimmedVideoUrl,
-				description: trimmedDescription || undefined,
-				duration: trimmedDuration || undefined,
-				sortOrder
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Learning updated' : 'Learning created',
+				action: async () => {
+					const payload = {
+						title: trimmedTitle,
+						videoUrl: trimmedVideoUrl,
+						description: trimmedDescription || undefined,
+						duration: trimmedDuration || undefined,
+						sortOrder
+					};
 
-			if (editingItem?.id) {
-				await updateToolLearning({ id: editingItem.id, ...payload });
-			} else {
-				await createToolLearning(payload);
-			}
+					if (editingItem?.id) {
+						await updateToolLearning({ id: editingItem.id, ...payload });
+					} else {
+						await createToolLearning(payload);
+					}
 
-			void getToolLearnings().refresh();
+					void getToolLearnings().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save learning item';

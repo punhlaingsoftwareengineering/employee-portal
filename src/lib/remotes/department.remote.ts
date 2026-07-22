@@ -3,10 +3,10 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as departmentService from '$lib/server/services/department';
 import { createDepartmentSchema, updateDepartmentSchema } from '$lib/schemas/department';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireDepartmentsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireDepartmentsAccess(getRequestEvent());
 }
 
 export const getDepartments = query(async () => departmentService.listDepartments(await perms()));

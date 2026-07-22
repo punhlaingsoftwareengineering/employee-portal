@@ -6,6 +6,7 @@
 		getCommunityCategories,
 		updateCommunityCategory
 	} from '$lib/remotes/community-category.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingItem = $state<CommunityCategory | null>(null);
@@ -56,19 +57,24 @@
 				return;
 			}
 
-			const payload = {
-				name: trimmedName,
-				description: trimmedDescription || undefined,
-				sortOrder
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Category updated' : 'Category created',
+				action: async () => {
+					const payload = {
+						name: trimmedName,
+						description: trimmedDescription || undefined,
+						sortOrder
+					};
 
-			if (editingItem?.id) {
-				await updateCommunityCategory({ id: editingItem.id, ...payload });
-			} else {
-				await createCommunityCategory(payload);
-			}
+					if (editingItem?.id) {
+						await updateCommunityCategory({ id: editingItem.id, ...payload });
+					} else {
+						await createCommunityCategory(payload);
+					}
 
-			void getCommunityCategories().refresh();
+					void getCommunityCategories().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save category';

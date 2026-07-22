@@ -7,6 +7,7 @@
 	} from '$lib/constants/app-download';
 	import { createApp, updateApp, getApps } from '$lib/remotes/app.remote';
 	import { normalizeDownloadUrls } from '$lib/utils/app-download';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 	import DriveMediaAppendButton from '$lib/components/drive/DriveMediaAppendButton.svelte';
@@ -119,28 +120,33 @@
 				return;
 			}
 
-			const payload = {
-				name: name.trim(),
-				tagline: tagline.trim() || undefined,
-				description: description.trim() || undefined,
-				iconUrl: iconUrl.trim() || null,
-				bannerUrl: bannerUrl.trim() || null,
-				downloadUrls,
-				version: version.trim() || undefined,
-				developer: developer.trim() || undefined,
-				category: category.trim() || undefined,
-				screenshotUrls: parseScreenshotUrls(screenshotUrlsText),
-				isPublic
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'App updated' : 'App created',
+				action: async () => {
+					const payload = {
+						name: name.trim(),
+						tagline: tagline.trim() || undefined,
+						description: description.trim() || undefined,
+						iconUrl: iconUrl.trim() || null,
+						bannerUrl: bannerUrl.trim() || null,
+						downloadUrls,
+						version: version.trim() || undefined,
+						developer: developer.trim() || undefined,
+						category: category.trim() || undefined,
+						screenshotUrls: parseScreenshotUrls(screenshotUrlsText),
+						isPublic
+					};
 
-			if (editingApp?.id) {
-				await updateApp({ id: editingApp.id, ...payload });
-			} else {
-				await createApp(payload);
-			}
+					if (editingApp?.id) {
+						await updateApp({ id: editingApp.id, ...payload });
+					} else {
+						await createApp(payload);
+					}
 
-			void getApps().refresh();
-			await invalidateAll();
+					void getApps().refresh();
+					await invalidateAll();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save app';

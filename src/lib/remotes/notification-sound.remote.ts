@@ -6,10 +6,10 @@ import {
 	createNotificationSoundSchema,
 	updateNotificationSoundSchema
 } from '$lib/schemas/notification-sound';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireSettingsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireSettingsAccess(getRequestEvent());
 }
 
 export const getNotificationSounds = query(async () =>

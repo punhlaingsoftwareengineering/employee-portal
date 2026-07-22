@@ -9,9 +9,22 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { getDepartments, deleteDepartment } from '$lib/remotes/department.remote';
 
-	const isAdmin = $derived(page.data.permissions?.isAdmin ?? false);
+	const permissions = $derived(page.data.permissions);
+	const isAdmin = $derived(permissions?.isAdmin ?? false);
+
+	function canWriteDepartmentRow(departmentId: string): boolean {
+		if (isAdmin) return true;
+		return (
+			permissions?.departmentRoles?.some(
+				(assignment) =>
+					assignment.departmentId === departmentId && assignment.permissions.departmentWrite
+			) ?? false
+		);
+	}
+
 	let departmentDialog = $state<DepartmentDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 </script>
@@ -34,7 +47,7 @@
 
 	<DataTable rows={departments} rowKey={(department) => department.id} emptyMessage="No departments yet.">
 		{#snippet actions({ row: department })}
-			{#if isAdmin}
+			{#if canWriteDepartmentRow(department.id)}
 				<IconActionButton
 					label="Edit"
 					variant="secondary"
@@ -49,7 +62,12 @@
 					onclick={async () => {
 						if (!confirm('Delete this department?')) return;
 						await deleteLoading.run(department.id, async () => {
-							await deleteDepartment(department.id);
+							await withFormFeedback({
+								successMessage: 'Department deleted',
+								action: async () => {
+									await deleteDepartment(department.id);
+								}
+							});
 						});
 					}}
 				>

@@ -15,7 +15,7 @@ DRIVE_STORAGE_PROVIDER=local
 | Variable | Required | Description |
 | -------- | -------- | ----------- |
 | `DRIVE_ORIGIN` | Yes | Same as SSO — drive public URL (browser-facing links) |
-| `DRIVE_INTERNAL_ORIGIN` | No | Server-side drive API URL when `DRIVE_ORIGIN` is not reachable from the container (Docker). Falls back to `DRIVE_ORIGIN`. |
+| `DRIVE_INTERNAL_ORIGIN` | No | Server-side drive API URL when `DRIVE_ORIGIN` is not reachable from the container (Docker). **Use `http://` to the container** (TLS is only on the public nginx hostname). Falls back to `DRIVE_ORIGIN`. |
 | `DRIVE_TEAM_API_KEY` | Yes | Team key (`znltv_…`) with `drive.read`, `drive.write`, `drive.share` |
 | `DRIVE_STORAGE_PROVIDER` | No | `local` (default) or `tigris` — must match the team |
 
@@ -28,7 +28,7 @@ Restart the portal after changing env vars.
 When the portal runs in Docker behind Caddy, the container cannot resolve the public drive hostname. Set an internal URL for server-side API calls:
 
 ```env
-DRIVE_ORIGIN=http://drive.phh.com
+DRIVE_ORIGIN=https://drive.phh.com
 DRIVE_INTERNAL_ORIGIN=http://host.docker.internal:1025
 DRIVE_STORAGE_PROVIDER=local
 DRIVE_TEAM_API_KEY=znltv_...
@@ -40,7 +40,7 @@ With a shared Docker network (`phh-net`), prefer container DNS:
 DRIVE_INTERNAL_ORIGIN=http://phh-drive:1025
 ```
 
-Keep `DRIVE_ORIGIN` as the browser-facing URL — returned file URLs and SSO redirects use it. Match `DRIVE_STORAGE_PROVIDER` to the team drive (`local` on this host).
+Keep `DRIVE_ORIGIN` as the browser-facing **https** URL — returned file URLs and SSO redirects use it. Never set `DRIVE_INTERNAL_ORIGIN` to `https://phh-drive:1025` (causes SSL “wrong version number”). Match `DRIVE_STORAGE_PROVIDER` to the team drive (`local` on this host).
 
 ## Folder layout
 
@@ -82,7 +82,7 @@ Returns **503** if `DRIVE_TEAM_API_KEY` is unset.
 
 ## Local dev
 
-1. Run drive (`pnpm dev` on port 1025) and portal with matching `DRIVE_ORIGIN` / SSO vars.
+1. Run drive (`npm run dev` on port 1025) and portal with matching `DRIVE_ORIGIN` / SSO vars.
 2. Set `DRIVE_TEAM_API_KEY` in portal `.env`.
 3. Open portal **Settings** or any admin dialog with media fields.
 

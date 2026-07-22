@@ -9,11 +9,27 @@
 		<meta name="text-scale" content="scale" />
 		<script>
 			(function () {
+				function readCookie(name) {
+					var prefix = name + '=';
+					var parts = document.cookie.split(';');
+					for (var i = 0; i < parts.length; i += 1) {
+						var trimmed = parts[i].trim();
+						if (trimmed.indexOf(prefix) === 0) return decodeURIComponent(trimmed.slice(prefix.length));
+					}
+					return null;
+				}
 				try {
 					var raw = localStorage.getItem('employee-portal-settings');
-					if (!raw) return;
-					var settings = JSON.parse(raw);
+					var settings = raw ? JSON.parse(raw) : {};
 					var root = document.documentElement;
+					var sharedTheme = readCookie('phh-ui-theme') || localStorage.getItem('phh-ui-theme');
+					if (sharedTheme) {
+						settings.theme = sharedTheme;
+					}
+					var sharedFont = readCookie('phh-ui-font') || localStorage.getItem('phh-ui-font');
+					if (sharedFont) {
+						settings.font = sharedFont;
+					}
 					if (settings.theme) {
 						var theme = settings.theme;
 						if (theme === 'system') {

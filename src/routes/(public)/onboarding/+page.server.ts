@@ -3,6 +3,7 @@ import { getOnboardingCarouselConfig } from '$lib/server/services/onboarding-car
 import { listOnboardingFacilities } from '$lib/server/services/facility';
 import { listPublicNewsletters } from '$lib/server/services/newsletter';
 import { listPublicOnboardingSlides } from '$lib/server/services/onboarding-slide';
+import { listPublicPharmacyMasters } from '$lib/server/services/pharmacy-master';
 import { listPublicServices } from '$lib/server/services/service';
 import {
 	ONBOARDING_FACILITY_DISPLAY_LIMIT,
@@ -11,15 +12,23 @@ import {
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const [publicServices, publicApps, slides, facilities, carouselConfig, newsletters] =
-		await Promise.all([
-			listPublicServices(),
-			listPublicApps(),
-			listPublicOnboardingSlides(),
-			listOnboardingFacilities(ONBOARDING_FACILITY_DISPLAY_LIMIT),
-			getOnboardingCarouselConfig(),
-			listPublicNewsletters(ONBOARDING_NEWSLETTER_DISPLAY_LIMIT)
-		]);
+	const [
+		publicServices,
+		publicApps,
+		slides,
+		facilities,
+		carouselConfig,
+		newsletters,
+		pharmacyMasters
+	] = await Promise.all([
+		listPublicServices(),
+		listPublicApps(),
+		listPublicOnboardingSlides(),
+		listOnboardingFacilities(ONBOARDING_FACILITY_DISPLAY_LIMIT),
+		getOnboardingCarouselConfig(),
+		listPublicNewsletters(ONBOARDING_NEWSLETTER_DISPLAY_LIMIT),
+		listPublicPharmacyMasters()
+	]);
 
 	return {
 		publicServices,
@@ -27,6 +36,7 @@ export const load: PageServerLoad = async () => {
 		slides,
 		facilities,
 		carouselIntervalMs: carouselConfig.intervalMs,
-		newsletters
+		newsletters,
+		pharmacyMasters
 	};
 };

@@ -1,13 +1,11 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserPermissions } from '$lib/server/services/portal-user';
+import { requireToolsAccess } from '$lib/server/auth-guard';
 import { canUserAccessService } from '$lib/server/services/service';
 import { proxyServiceRequest } from '$lib/server/services/service-proxy';
 
 async function authorize(event: Parameters<RequestHandler>[0]) {
-	if (!event.locals.user) error(401, 'Unauthorized');
-
-	const permissions = await getUserPermissions(event.locals.user.id);
+	const permissions = await requireToolsAccess(event);
 	const serviceId = event.params.id;
 	if (!serviceId || !(await canUserAccessService(permissions, serviceId))) {
 		error(403, 'You do not have access to this service');

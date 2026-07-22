@@ -94,4 +94,29 @@ describe('drive-portal-client', () => {
 		);
 		expect(hosts[0]?.get('Host')).toBe('drive.phh.com');
 	});
+
+	it('rewrites https Docker-internal Drive origins to http', async () => {
+		const { normalizeDriveApiOrigin } = await import('./drive-portal-client');
+		expect(normalizeDriveApiOrigin('https://phh-drive:1025')).toBe('http://phh-drive:1025');
+		expect(normalizeDriveApiOrigin('https://uat-phh-drive:1025/')).toBe(
+			'http://uat-phh-drive:1025'
+		);
+		expect(normalizeDriveApiOrigin('https://host.docker.internal:1025')).toBe(
+			'http://host.docker.internal:1025'
+		);
+		expect(normalizeDriveApiOrigin('https://drive.phh.com')).toBe('https://drive.phh.com');
+	});
+
+	it('rewrites https DRIVE_INTERNAL_ORIGIN when uploading', async () => {
+		mockEnv.DRIVE_ORIGIN = 'https://drive.phh.com';
+		mockEnv.DRIVE_INTERNAL_ORIGIN = 'https://phh-drive:1025';
+
+		const { uploadToCategory } = await import('./drive-portal-client');
+		const bytes = new Uint8Array([1, 2, 3]);
+		const result = await uploadToCategory('apps', 'logo.png', 'image/png', bytes);
+
+		expect(result.url).toBe('https://drive.phh.com/api/public/files/tok123');
+		const apiUrls = fetchMock.mock.calls.map(([input]) => String(input));
+		expect(apiUrls.every((url) => url.startsWith('http://phh-drive:1025'))).toBe(true);
+	});
 });

@@ -1,7 +1,10 @@
 import type { RequestHandler } from '@sveltejs/kit';
+import { requireAppAccess } from '$lib/server/auth-guard';
 import { subscribeNotifications } from '$lib/server/notification-bus';
 
-export const GET: RequestHandler = async ({ request }) => {
+export const GET: RequestHandler = async (event) => {
+	await requireAppAccess(event);
+
 	const stream = new ReadableStream({
 		start(controller) {
 			const encoder = new TextEncoder();
@@ -43,7 +46,7 @@ export const GET: RequestHandler = async ({ request }) => {
 				}
 			}, 30_000);
 
-			request.signal.addEventListener('abort', cleanup);
+			event.request.signal.addEventListener('abort', cleanup);
 		}
 	});
 

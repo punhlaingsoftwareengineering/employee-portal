@@ -1,12 +1,11 @@
 # ---------- Build stage ----------
 FROM node:24-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json .npmrc ./
+COPY patches ./patches
+RUN npm ci
 
 COPY . .
 
@@ -19,9 +18,9 @@ ENV BUILDING=true
 RUN DATABASE_URL="$BUILD_DATABASE_URL" \
 	ORIGIN="$BUILD_ORIGIN" \
 	BETTER_AUTH_SECRET="$BUILD_KIT_DUMMY_VALUE" \
-	pnpm build
+	npm run build
 
-RUN pnpm prune --prod
+RUN npm prune --omit=dev
 
 # ---------- Runtime stage ----------
 FROM node:24-alpine

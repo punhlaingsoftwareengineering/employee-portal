@@ -27,6 +27,6 @@ schema → service → remote → API → routes
 After schema changes:
 
 ```sh
-pnpm auth:schema   # if auth config changed
-pnpm db:push       # or db:generate + db:migrate
+npm run auth:schema   # if auth config changed
+npm run db:push       # or db:generate + db:migrate
 ```

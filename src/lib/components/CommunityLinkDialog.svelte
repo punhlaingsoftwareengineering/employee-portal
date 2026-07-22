@@ -12,6 +12,7 @@
 		updateCommunityLink
 	} from '$lib/remotes/community-link.remote';
 	import { getCommunityCategories } from '$lib/remotes/community-category.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import {
 		getCommunityPlatformColorClass,
 		getCommunityPlatformIcon
@@ -101,24 +102,29 @@
 				return;
 			}
 
-			const payload = {
-				categoryId,
-				title: trimmedTitle,
-				url: trimmedUrl,
-				description: trimmedDescription || undefined,
-				platform,
-				sortOrder,
-				showQr,
-				isPublic
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Link updated' : 'Link created',
+				action: async () => {
+					const payload = {
+						categoryId,
+						title: trimmedTitle,
+						url: trimmedUrl,
+						description: trimmedDescription || undefined,
+						platform,
+						sortOrder,
+						showQr,
+						isPublic
+					};
 
-			if (editingItem?.id) {
-				await updateCommunityLink({ id: editingItem.id, ...payload });
-			} else {
-				await createCommunityLink(payload);
-			}
+					if (editingItem?.id) {
+						await updateCommunityLink({ id: editingItem.id, ...payload });
+					} else {
+						await createCommunityLink(payload);
+					}
 
-			void getCommunityCategories().refresh();
+					void getCommunityCategories().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save link';

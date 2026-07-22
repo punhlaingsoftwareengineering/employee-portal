@@ -10,6 +10,7 @@
 		emptyMessage = 'No rows.',
 		pageSize = 20,
 		pageSizeOptions = [10, 20, 50],
+		showSerial = true,
 		actions,
 		children
 	}: {
@@ -18,6 +19,7 @@
 		emptyMessage?: string;
 		pageSize?: number;
 		pageSizeOptions?: number[];
+		showSerial?: boolean;
 		actions?: Snippet<[{ row: T }]>;
 		children?: Snippet;
 	} = $props();
@@ -84,6 +86,10 @@
 	);
 	const rangeEnd = $derived(Math.min(safeCurrentPage * currentPageSize, totalFiltered));
 	const columnCount = $derived(activeColumns.length);
+	const showActions = $derived(Boolean(actions));
+	const emptyColspan = $derived(
+		(showActions ? 1 : 0) + (showSerial ? 1 : 0) + columnCount
+	);
 
 	function resetPage() {
 		currentPage = 1;
@@ -97,11 +103,19 @@
 {/if}
 
 <div class="overflow-x-auto rounded-box border border-base-300">
-	<table class="table data-table">
+	<table
+		class="table data-table"
+		class:has-actions={showActions}
+		class:has-serial={showSerial}
+	>
 		<thead>
 			<tr>
-				<th class="sticky-col-actions" scope="col" aria-label="Actions"></th>
-				<th class="sticky-col-serial" scope="col">No.</th>
+				{#if showActions}
+					<th class="sticky-col-actions" scope="col" aria-label="Actions"></th>
+				{/if}
+				{#if showSerial}
+					<th class="sticky-col-serial" scope="col">No.</th>
+				{/if}
 				{#each activeColumns as column (column.id)}
 					<th
 						scope="col"
@@ -126,14 +140,18 @@
 		<tbody>
 			{#each paginatedRows as row, index (rowKey(row))}
 				<tr>
-					<td class="sticky-col-actions">
-						<div class="flex flex-nowrap gap-1">
-							{@render actions?.({ row })}
-						</div>
-					</td>
-					<td class="sticky-col-serial text-base-content/70">
-						{(safeCurrentPage - 1) * currentPageSize + index + 1}
-					</td>
+					{#if showActions}
+						<td class="sticky-col-actions">
+							<div class="flex flex-nowrap gap-1">
+								{@render actions?.({ row })}
+							</div>
+						</td>
+					{/if}
+					{#if showSerial}
+						<td class="sticky-col-serial text-base-content/70">
+							{(safeCurrentPage - 1) * currentPageSize + index + 1}
+						</td>
+					{/if}
 					{#each activeColumns as column (column.id)}
 						<td class={column.class} class:sticky-col-first={column.firstData}>
 							{@render column.children?.({ row })}
@@ -142,7 +160,7 @@
 				</tr>
 			{:else}
 				<tr>
-					<td colspan={2 + columnCount} class="text-center text-base-content/60">
+					<td colspan={emptyColspan} class="text-center text-base-content/60">
 						{emptyMessage}
 					</td>
 				</tr>

@@ -5,6 +5,7 @@
 		updateFacility,
 		getFacilities
 	} from '$lib/remotes/facility.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -61,21 +62,26 @@
 				return;
 			}
 
-			const payload = {
-				name: trimmedName,
-				description: description.trim() || undefined,
-				address: address.trim() || undefined,
-				imageUrl: imageUrl.trim() || null,
-				phone: phone.trim() || undefined
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Facility updated' : 'Facility created',
+				action: async () => {
+					const payload = {
+						name: trimmedName,
+						description: description.trim() || undefined,
+						address: address.trim() || undefined,
+						imageUrl: imageUrl.trim() || null,
+						phone: phone.trim() || undefined
+					};
 
-			if (editingFacility?.id) {
-				await updateFacility({ id: editingFacility.id, ...payload });
-			} else {
-				await createFacility(payload);
-			}
+					if (editingFacility?.id) {
+						await updateFacility({ id: editingFacility.id, ...payload });
+					} else {
+						await createFacility(payload);
+					}
 
-			void getFacilities().refresh();
+					void getFacilities().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save facility';

@@ -1,17 +1,27 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { OTP_RESEND_COOLDOWN_SECONDS } from '$lib/constants/auth-otp';
 import { auth } from '$lib/server/auth';
+import {
+	getOtpResendAvailableAt,
+	getOtpResendRemainingSeconds,
+	markOtpSent
+} from '$lib/server/otp-resend-cooldown';
 import { redirectSafe, resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
-export const load: PageServerLoad = ({ url }) => {
+export const load: PageServerLoad = ({ url, cookies }) => {
 	const email = url.searchParams.get('email') ?? '';
 	const redirectTo = resolveSafeRedirectTo(
 		url.searchParams.get('redirectTo') ?? '/dashboard',
 		url.origin
 	);
 
-	return { email, redirectTo };
+	return {
+		email,
+		redirectTo,
+		resendAvailableAt: getOtpResendAvailableAt(cookies)
+	};
 };
 
 export const actions: Actions = {
@@ -46,6 +56,14 @@ export const actions: Actions = {
 			return fail(400, { message: 'Email is required' });
 		}
 
+		const remaining = getOtpResendRemainingSeconds(event.cookies);
+		if (remaining > 0) {
+			return fail(429, {
+				message: `Please wait ${remaining}s before requesting another code.`,
+				resendAvailableAt: getOtpResendAvailableAt(event.cookies)
+			});
+		}
+
 		try {
 			await auth.api.sendVerificationOTP({
 				body: { email, type: 'email-verification' },
@@ -58,6 +76,14 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		return { resent: true };
+		const resendAvailableAt = markOtpSent(event.cookies, {
+			secure: event.url.protocol === 'https:'
+		});
+
+		return {
+			resent: true,
+			resendAvailableAt,
+			cooldownSeconds: OTP_RESEND_COOLDOWN_SECONDS
+		};
 	}
 };

@@ -1,0 +1,15 @@
+diff --git a/node_modules/@sveltejs/kit/src/exports/vite/utils.js b/node_modules/@sveltejs/kit/src/exports/vite/utils.js
+index 320a176..765bbb0 100644
+--- a/node_modules/@sveltejs/kit/src/exports/vite/utils.js
++++ b/node_modules/@sveltejs/kit/src/exports/vite/utils.js
+@@ -150,7 +150,9 @@ export function normalize_id(id, aliases, cwd) {
+ 	return posixify(id);
+ }
+ 
+-export const remote_module_pattern = /[/.]remote(\.[^/]+)+$/;
++// Match `*.remote.js` / `*.remote.ts` only — not dependency files named `remote.js`
++// (e.g. jose's `jwks/remote.js`), which `/[/.]remote…/` incorrectly treated as remotes.
++export const remote_module_pattern = /\.remote(\.[^/]+)+$/;
+ export const server_only_module_pattern = /[/.]server(\.[^/]+)+$/;
+ export const server_only_directory_pattern = /\/server\//;
+ 

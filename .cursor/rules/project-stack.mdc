@@ -1,11 +1,11 @@
 ---
-description: Employee Portal stack, pnpm commands, and documentation index
+description: Employee Portal stack, npm commands, and documentation index
 alwaysApply: true
 ---
 
 # Project Stack
 
-- **Runtime**: TypeScript, pnpm (`pnpm …`)
+- **Runtime**: TypeScript, npm (`npm …` / `npm run …`)
 - **Framework**: SvelteKit 3 + Svelte 5 (runes, experimental async + remote functions)
 - **Database**: Local PostgreSQL via `pg` + Drizzle ORM
 - **Auth**: Better Auth + Drizzle adapter
@@ -13,16 +13,16 @@ alwaysApply: true
 - **Validation**: Zod (Standard Schema for remotes)
 - **Layer order**: `schema → service → remote → API → routes`
 
-## pnpm scripts
+## npm scripts
 
 ```sh
-pnpm dev          # dev server
-pnpm build        # production build
-pnpm check        # svelte-check
-pnpm lint         # prettier + eslint
-pnpm format       # prettier --write
-pnpm db:push      # push schema to local Postgres
-pnpm auth:schema  # regenerate auth.schema.ts (if auth config changed)
+npm run dev          # dev server
+npm run build        # production build
+npm run check        # svelte-check
+npm run lint         # prettier + eslint
+npm run format       # prettier --write
+npm run db:push      # push schema to local Postgres
+npm run auth:schema  # regenerate auth.schema.ts (if auth config changed)
 ```
 
 ## Deep reference (personal skills)

@@ -8,6 +8,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { getAccessRoles, deleteAccessRole } from '$lib/remotes/access-role.remote';
 	import { getServices } from '$lib/remotes/service.remote';
 	import { getApps } from '$lib/remotes/app.remote';
@@ -25,6 +26,8 @@
 		if (role.departmentWrite) parts.push('manage depts');
 		if (role.facilityReadAll) parts.push('read facilities');
 		if (role.facilityWrite) parts.push('manage facilities');
+		if (role.pharmacyReadAll) parts.push('read pharmacy');
+		if (role.pharmacyWrite) parts.push('manage pharmacy');
 		return parts.join(' ');
 	}
 </script>
@@ -59,7 +62,12 @@
 					onclick={async () => {
 						if (!confirm(`Delete role "${role.name}"?`)) return;
 						await deleteLoading.run(role.id, async () => {
-							await deleteAccessRole(role.id);
+							await withFormFeedback({
+								successMessage: 'Role deleted',
+								action: async () => {
+									await deleteAccessRole(role.id);
+								}
+							});
 						});
 					}}
 				>
@@ -107,6 +115,12 @@
 						>{/if}
 					{#if role.facilityWrite}<span class="badge badge-outline badge-sm"
 							>manage facilities</span
+						>{/if}
+					{#if role.pharmacyReadAll}<span class="badge badge-outline badge-sm"
+							>read pharmacy</span
+						>{/if}
+					{#if role.pharmacyWrite}<span class="badge badge-outline badge-sm"
+							>manage pharmacy</span
 						>{/if}
 				</div>
 			{/snippet}

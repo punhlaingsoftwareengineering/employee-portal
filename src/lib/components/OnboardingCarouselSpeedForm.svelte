@@ -1,6 +1,7 @@
 <script lang="ts">
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { ONBOARDING_CAROUSEL_INTERVAL_OPTIONS_MS } from '$lib/constants/onboarding-carousel';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { updateOnboardingCarouselConfig } from '$lib/remotes/onboarding-carousel-config.remote';
 
 	let { initialIntervalMs }: { initialIntervalMs: number } = $props();
@@ -15,8 +16,13 @@
 		error = null;
 		saved = false;
 		try {
-			const config = await updateOnboardingCarouselConfig({ intervalMs });
-			intervalMs = config.intervalMs;
+			await withFormFeedback({
+				successMessage: 'Carousel speed saved',
+				action: async () => {
+					const config = await updateOnboardingCarouselConfig({ intervalMs });
+					intervalMs = config.intervalMs;
+				}
+			});
 			saved = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save carousel speed';
@@ -27,7 +33,7 @@
 </script>
 
 <div class="flex flex-wrap items-end gap-3">
-	<label class="form-control w-full max-w-xs">
+	<label class="form-control w-full min-w-0 max-w-xs flex-1 basis-40">
 		<span class="label py-0">
 			<span class="label-text">Interval</span>
 		</span>
@@ -44,7 +50,7 @@
 			{/each}
 		</select>
 	</label>
-	<button type="button" class="btn btn-primary btn-sm" disabled={saving} onclick={() => void save()}>
+	<button type="button" class="btn btn-primary btn-sm shrink-0" disabled={saving} onclick={() => void save()}>
 		{#if saving}
 			<LoadingSpinner size="sm" />
 		{:else}

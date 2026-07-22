@@ -3,10 +3,10 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as toolGuideService from '$lib/server/services/tool-guide';
 import { createToolGuideSchema, updateToolGuideSchema } from '$lib/schemas/tool-guide';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireToolsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireToolsAccess(getRequestEvent());
 }
 
 export const getToolGuides = query(async () => toolGuideService.listToolGuides(await perms()));

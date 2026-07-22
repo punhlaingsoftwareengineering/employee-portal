@@ -18,6 +18,7 @@
 	} from '$lib/utils/community-platform';
 	import ServiceIcon from '$lib/components/ServiceIcon.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 
 	let {
@@ -41,12 +42,16 @@
 	let departmentWrite = $state(false);
 	let facilityReadAll = $state(false);
 	let facilityWrite = $state(false);
+	let pharmacyReadAll = $state(false);
+	let pharmacyWrite = $state(false);
 	let navDashboard = $state(true);
 	let navEmployees = $state(true);
 	let navDepartments = $state(true);
 	let navFacilities = $state(true);
+	let navPharmacy = $state(true);
 	let navTools = $state(true);
 	let navSettings = $state(false);
+	let navCommunity = $state(false);
 	let selectedServiceIds = $state<string[]>([]);
 	let selectedAppIds = $state<string[]>([]);
 	let selectedCommunityLinkIds = $state<string[]>([]);
@@ -66,11 +71,20 @@
 			departmentReadAll &&
 			departmentWrite &&
 			facilityReadAll &&
-			facilityWrite
+			facilityWrite &&
+			pharmacyReadAll &&
+			pharmacyWrite
 	);
 
 	const allNavSelected = $derived(
-		navDashboard && navEmployees && navDepartments && navFacilities && navTools && navSettings
+		navDashboard &&
+			navEmployees &&
+			navDepartments &&
+			navFacilities &&
+			navPharmacy &&
+			navTools &&
+			navSettings &&
+			navCommunity
 	);
 
 	const allServicesSelected = $derived(
@@ -118,8 +132,10 @@
 			navEmployees = existing?.navEmployees ?? true;
 			navDepartments = existing?.navDepartments ?? true;
 			navFacilities = existing?.navFacilities ?? true;
+			navPharmacy = existing?.navPharmacy ?? true;
 			navTools = existing?.navTools ?? true;
 			navSettings = existing?.navSettings ?? false;
+			navCommunity = existing?.navCommunity ?? false;
 			employeeReadAll = existing?.employeeReadAll ?? false;
 			employeeWrite = existing?.employeeWrite ?? false;
 			employeeDelete = existing?.employeeDelete ?? false;
@@ -127,6 +143,8 @@
 			departmentWrite = existing?.departmentWrite ?? false;
 			facilityReadAll = existing?.facilityReadAll ?? false;
 			facilityWrite = existing?.facilityWrite ?? false;
+			pharmacyReadAll = existing?.pharmacyReadAll ?? false;
+			pharmacyWrite = existing?.pharmacyWrite ?? false;
 			const assignableServiceIds = new Set(
 				allServices.filter((s) => !s.isPublic).map((s) => s.id)
 			);
@@ -165,6 +183,8 @@
 		departmentWrite = selected;
 		facilityReadAll = selected;
 		facilityWrite = selected;
+		pharmacyReadAll = selected;
+		pharmacyWrite = selected;
 	}
 
 	function setAllNav(selected: boolean) {
@@ -172,8 +192,10 @@
 		navEmployees = selected;
 		navDepartments = selected;
 		navFacilities = selected;
+		navPharmacy = selected;
 		navTools = selected;
 		navSettings = selected;
+		navCommunity = selected;
 	}
 
 	function setAllServices(selected: boolean) {
@@ -224,35 +246,44 @@
 		error = null;
 
 		try {
-			const payload = {
-				name: name.trim(),
-				description: description.trim() || undefined,
-				navDashboard,
-				navEmployees,
-				navDepartments,
-				navFacilities,
-				navTools,
-				navSettings,
-				employeeReadAll,
-				employeeWrite,
-				employeeDelete,
-				departmentReadAll,
-				departmentWrite,
-				facilityReadAll,
-				facilityWrite,
-				serviceIds: selectedServiceIds,
-				appIds: selectedAppIds,
-				communityLinkIds: selectedCommunityLinkIds
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Role updated' : 'Role created',
+				action: async () => {
+					const payload = {
+						name: name.trim(),
+						description: description.trim() || undefined,
+						navDashboard,
+						navEmployees,
+						navDepartments,
+						navFacilities,
+						navPharmacy,
+						navTools,
+						navSettings,
+						navCommunity,
+						employeeReadAll,
+						employeeWrite,
+						employeeDelete,
+						departmentReadAll,
+						departmentWrite,
+						facilityReadAll,
+						facilityWrite,
+						pharmacyReadAll,
+						pharmacyWrite,
+						serviceIds: selectedServiceIds,
+						appIds: selectedAppIds,
+						communityLinkIds: selectedCommunityLinkIds
+					};
 
-			if (editingRole?.id) {
-				await updateAccessRole({ id: editingRole.id, ...payload });
-			} else {
-				await createAccessRole(payload);
-			}
+					if (editingRole?.id) {
+						await updateAccessRole({ id: editingRole.id, ...payload });
+					} else {
+						await createAccessRole(payload);
+					}
 
-			void getAccessRoles().refresh();
-			await invalidateAll();
+					void getAccessRoles().refresh();
+					await invalidateAll();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save role';
@@ -347,7 +378,7 @@
 							<td>
 								<label class="role-dialog-checkbox">
 									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={departmentWrite} />
-									<span>Manage departments</span>
+									<span>Update departments (assigned departments)</span>
 								</label>
 							</td>
 							<td>
@@ -361,11 +392,21 @@
 							<td>
 								<label class="role-dialog-checkbox">
 									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={facilityWrite} />
-									<span>Manage facilities</span>
+									<span>Update facilities (assigned facilities)</span>
 								</label>
 							</td>
-							<td></td>
-							<td></td>
+							<td>
+								<label class="role-dialog-checkbox">
+									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={pharmacyReadAll} />
+									<span>Read pharmacy master</span>
+								</label>
+							</td>
+							<td>
+								<label class="role-dialog-checkbox">
+									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={pharmacyWrite} />
+									<span>Manage pharmacy master</span>
+								</label>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -426,16 +467,31 @@
 							</td>
 							<td>
 								<label class="role-dialog-checkbox">
+									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navPharmacy} />
+									<span>Pharmacy</span>
+								</label>
+							</td>
+							<td>
+								<label class="role-dialog-checkbox">
 									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navTools} />
 									<span>Tools</span>
 								</label>
 							</td>
+						</tr>
+						<tr>
 							<td>
 								<label class="role-dialog-checkbox">
 									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navSettings} />
 									<span>Settings</span>
 								</label>
 							</td>
+							<td>
+								<label class="role-dialog-checkbox">
+									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navCommunity} />
+									<span>Community</span>
+								</label>
+							</td>
+							<td></td>
 						</tr>
 					</tbody>
 				</table>

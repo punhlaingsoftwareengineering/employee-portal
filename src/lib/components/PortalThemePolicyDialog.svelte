@@ -15,6 +15,7 @@
 		getPortalThemeConfig,
 		updatePortalThemeConfig
 	} from '$lib/remotes/portal-theme-config.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let allowedThemes = $state<AppTheme[]>([]);
@@ -76,14 +77,19 @@
 		error = null;
 
 		try {
-			const nextPolicy = await updatePortalThemeConfig({
-				allowedThemes,
-				defaultTheme
+			await withFormFeedback({
+				successMessage: 'Theme policy saved',
+				action: async () => {
+					const nextPolicy = await updatePortalThemeConfig({
+						allowedThemes,
+						defaultTheme
+					});
+					initPortalThemePolicyFromServer(nextPolicy);
+					if (!nextPolicy.allowedThemes.includes(appSettings.theme)) {
+						updateAppSettings({ theme: nextPolicy.defaultTheme });
+					}
+				}
 			});
-			initPortalThemePolicyFromServer(nextPolicy);
-			if (!nextPolicy.allowedThemes.includes(appSettings.theme)) {
-				updateAppSettings({ theme: nextPolicy.defaultTheme });
-			}
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save theme policy';

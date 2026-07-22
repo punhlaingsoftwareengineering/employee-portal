@@ -2,10 +2,10 @@ import { command, query } from '$app/server';
 import { getRequestEvent } from '$app/server';
 import { onboardingCarouselConfigSchema } from '$lib/schemas/onboarding-carousel-config';
 import * as onboardingCarouselConfigService from '$lib/server/services/onboarding-carousel-config';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireSettingsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireSettingsAccess(getRequestEvent());
 }
 
 export const getOnboardingCarouselConfig = query(async () =>

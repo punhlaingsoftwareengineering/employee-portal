@@ -5,6 +5,7 @@
 		updateNewsletter,
 		getNewsletters
 	} from '$lib/remotes/newsletter.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -49,17 +50,22 @@
 				return;
 			}
 
-			if (editingNewsletter?.id) {
-				await updateNewsletter({
-					id: editingNewsletter.id,
-					title: trimmedTitle,
-					pdfUrl: trimmedPdfUrl
-				});
-			} else {
-				await createNewsletter({ title: trimmedTitle, pdfUrl: trimmedPdfUrl });
-			}
+			await withFormFeedback({
+				successMessage: isEdit ? 'Newsletter updated' : 'Newsletter created',
+				action: async () => {
+					if (editingNewsletter?.id) {
+						await updateNewsletter({
+							id: editingNewsletter.id,
+							title: trimmedTitle,
+							pdfUrl: trimmedPdfUrl
+						});
+					} else {
+						await createNewsletter({ title: trimmedTitle, pdfUrl: trimmedPdfUrl });
+					}
 
-			void getNewsletters().refresh();
+					void getNewsletters().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save newsletter';

@@ -2,10 +2,10 @@ import { command, query } from '$app/server';
 import { getRequestEvent } from '$app/server';
 import * as portalThemeConfigService from '$lib/server/services/portal-theme-config';
 import { portalThemePolicySchema } from '$lib/schemas/portal-theme-config';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireSettingsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireSettingsAccess(getRequestEvent());
 }
 
 export const getPortalThemeConfig = query(async () => portalThemeConfigService.getPortalThemePolicy());

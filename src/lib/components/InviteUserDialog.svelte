@@ -2,6 +2,7 @@
 	import { Plus, Trash2 } from '@lucide/svelte';
 	import { createInvite, getAllDepartments, getAllFacilities, getInvites } from '$lib/remotes/portal-user.remote';
 	import { getAccessRoles } from '$lib/remotes/access-role.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 
@@ -48,18 +49,23 @@
 		submitting = true;
 
 		try {
-			await createInvite({
-				name: name.trim(),
-				email: email.trim(),
-				inviteAsAdmin,
-				assignments: inviteAsAdmin
-					? []
-					: assignments.filter(
-							(assignment) =>
-								assignment.departmentId && assignment.roleId && assignment.facilityId
-						)
+			await withFormFeedback({
+				successMessage: 'Invite sent',
+				action: async () => {
+					await createInvite({
+						name: name.trim(),
+						email: email.trim(),
+						inviteAsAdmin,
+						assignments: inviteAsAdmin
+							? []
+							: assignments.filter(
+									(assignment) =>
+										assignment.departmentId && assignment.roleId && assignment.facilityId
+								)
+					});
+					void getInvites().refresh();
+				}
 			});
-			void getInvites().refresh();
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to send invite';

@@ -47,4 +47,4 @@ foreach ($entry in $entries) {
 
 Write-Host ''
 Write-Host 'Hosts updated. Install Caddy if needed: winget install -e --id CaddyServer.Caddy'
-Write-Host 'Then from employee-portal: pnpm caddy:dev'
+Write-Host 'Then from employee-portal: npm run caddy:dev'

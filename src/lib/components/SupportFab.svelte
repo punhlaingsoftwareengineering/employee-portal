@@ -5,9 +5,8 @@
 	import FontDialog from '$lib/components/FontDialog.svelte';
 	import ThemeDialog from '$lib/components/ThemeDialog.svelte';
 	import { getAllowedFontOptions, getAllowedThemeOptions } from '$lib/app-settings.svelte';
-	import type { User } from 'better-auth';
 
-	let { user = null }: { user?: User | null } = $props();
+	let { canUseAiChat = false }: { canUseAiChat?: boolean } = $props();
 
 	let chatDialog = $state<AiChatDialog | null>(null);
 	let themeDialog = $state<ThemeDialog | null>(null);
@@ -25,6 +24,7 @@
 	}
 
 	function openChat() {
+		if (!canUseAiChat) return;
 		closeFab();
 		chatDialog?.open();
 	}
@@ -41,6 +41,7 @@
 
 	onMount(() => {
 		function onKeydown(event: KeyboardEvent) {
+			if (!canUseAiChat) return;
 			if (!event.ctrlKey || event.metaKey || event.altKey) return;
 			if (event.key !== '/' && event.code !== 'Slash') return;
 
@@ -64,7 +65,9 @@
 	});
 </script>
 
-<AiChatDialog bind:this={chatDialog} />
+{#if canUseAiChat}
+	<AiChatDialog bind:this={chatDialog} />
+{/if}
 <ThemeDialog bind:this={themeDialog} />
 <FontDialog bind:this={fontDialog} />
 
@@ -73,16 +76,18 @@
 		<BadgeQuestionMark class="h-4 w-4" />
 	</div>
 
-	<div class="tooltip tooltip-left" data-tip="AI assistant (Ctrl+/)">
-		<button
-			type="button"
-			class="btn btn-circle btn-primary shadow-md"
-			aria-label="AI assistant (Ctrl+/)"
-			onclick={openChat}
-		>
-			<Bot class="h-4 w-4" />
-		</button>
-	</div>
+	{#if canUseAiChat}
+		<div class="tooltip tooltip-left" data-tip="AI assistant (Ctrl+/)">
+			<button
+				type="button"
+				class="btn btn-circle btn-primary shadow-md"
+				aria-label="AI assistant (Ctrl+/)"
+				onclick={openChat}
+			>
+				<Bot class="h-4 w-4" />
+			</button>
+		</div>
+	{/if}
 
 	{#if showFontControl}
 		<div class="tooltip tooltip-left" data-tip="Font">

@@ -30,6 +30,19 @@
 	onMount(() => {
 		hydrateAppSettingsFromStorage();
 		applyAppSettings(appSettings);
-		return watchSystemThemePreference(() => applyAppSettings(appSettings));
+		const stopWatchingSystem = watchSystemThemePreference(() => applyAppSettings(appSettings));
+		const syncFromSharedStorage = () => {
+			hydrateAppSettingsFromStorage();
+			applyAppSettings(appSettings);
+		};
+
+		window.addEventListener('focus', syncFromSharedStorage);
+		document.addEventListener('visibilitychange', syncFromSharedStorage);
+
+		return () => {
+			stopWatchingSystem();
+			window.removeEventListener('focus', syncFromSharedStorage);
+			document.removeEventListener('visibilitychange', syncFromSharedStorage);
+		};
 	});
 </script>

@@ -6,7 +6,9 @@ export const PORTAL_FONT_STACKS: Record<AppFont, string> = {
 	'adwaita-mono': "'Adwaita Mono', ui-monospace, monospace",
 	roboto: "'Roboto', ui-sans-serif, system-ui, sans-serif",
 	arial: 'Arial, Helvetica, sans-serif',
-	'times-new-roman': "'Times New Roman', Times, serif"
+	'times-new-roman': "'Times New Roman', Times, serif",
+	'comic-relief': "'Comic Sans MS', 'Comic Neue', cursive",
+	pangolin: "'Pangolin', 'Comic Sans MS', cursive"
 };
 
 export function getPortalFontStack(font: AppFont): string {

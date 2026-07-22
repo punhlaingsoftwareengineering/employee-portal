@@ -112,7 +112,7 @@
 
 <PrivatePageHeader title="Settings" />
 
-<div class="card-masonry">
+<div class="grid grid-cols-1 items-start gap-4 sm:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
 	{#if isAdmin}
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body">
@@ -129,8 +129,8 @@
 						<tr>
 							<td class="form-table-label">Theme policy</td>
 							<td class="form-table-field">
-								<div class="flex flex-wrap items-center gap-3">
-									<span class="text-sm">
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="min-w-0 text-sm">
 										{allowedThemeCount} theme{allowedThemeCount === 1 ? '' : 's'} allowed
 									</span>
 									<button
@@ -146,7 +146,7 @@
 						<tr>
 							<td class="form-table-label">Default theme</td>
 							<td class="form-table-field">
-								<span class="badge badge-outline">{defaultThemeLabel}</span>
+								<span class="badge badge-outline max-w-full py-1.5 leading-snug">{defaultThemeLabel}</span>
 								<p class="mt-1 text-xs text-base-content/60">
 									Shown to new visitors and anyone who has not picked a theme from the FAB.
 								</p>
@@ -174,8 +174,8 @@
 						<tr>
 							<td class="form-table-label">Font policy</td>
 							<td class="form-table-field">
-								<div class="flex flex-wrap items-center gap-3">
-									<span class="text-sm">
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="min-w-0 text-sm">
 										{allowedFontCount} font{allowedFontCount === 1 ? '' : 's'} allowed
 									</span>
 									<button
@@ -191,7 +191,7 @@
 						<tr>
 							<td class="form-table-label">Default font</td>
 							<td class="form-table-field">
-								<span class="badge badge-outline">{defaultFontLabel}</span>
+								<span class="badge badge-outline max-w-full py-1.5 leading-snug">{defaultFontLabel}</span>
 								<p class="mt-1 text-xs text-base-content/60">
 									Shown to new visitors and anyone who has not picked a font from the FAB.
 								</p>
@@ -243,10 +243,10 @@
 						<td class="form-table-label">Preview</td>
 						<td class="form-table-field">
 							<div
-								class="flex items-center gap-2 rounded-box border border-base-300 bg-base-200 px-4 py-3"
+								class="flex min-w-0 flex-wrap items-center gap-2 rounded-box border border-base-300 bg-base-200 px-4 py-3"
 							>
-								<PortalIcon iconUrl={iconUrl || null} class="h-5 w-5" />
-								<span class="font-semibold">{title || DEFAULT_APP_TITLE}</span>
+								<PortalIcon iconUrl={iconUrl || null} class="h-5 w-5 shrink-0" />
+								<span class="min-w-0 wrap-break-word font-semibold">{title || DEFAULT_APP_TITLE}</span>
 							</div>
 						</td>
 					</tr>
@@ -262,8 +262,8 @@
 
 				<NewsletterDialog bind:this={newsletterDialog} />
 
-				<div class="mb-4 flex items-center justify-between gap-4">
-					<div>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+					<div class="min-w-0">
 						<SettingsCardTitle icon={Newspaper} title="Newsletters" />
 						<p class="text-sm text-base-content/70">
 							PDF newsletter links for users with Settings access.
@@ -273,12 +273,14 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<IconActionButton
-							label="Add newsletter"
-							onclick={() => newsletterDialog?.open()}
-						>
-							<Plus class="h-4 w-4" />
-						</IconActionButton>
+						<div class="shrink-0">
+							<IconActionButton
+								label="Add newsletter"
+								onclick={() => newsletterDialog?.open()}
+							>
+								<Plus class="h-4 w-4" />
+							</IconActionButton>
+						</div>
 					{/if}
 				</div>
 
@@ -362,8 +364,8 @@
 
 				<OnboardingSlideDialog bind:this={onboardingSlideDialog} />
 
-				<div class="mb-4 flex items-center justify-between gap-4">
-					<div>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+					<div class="min-w-0">
 						<SettingsCardTitle icon={Images} title="Onboarding carousel" />
 						<p class="text-sm text-base-content/70">
 							Slides shown on the public onboarding page.
@@ -373,12 +375,14 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<IconActionButton
-							label="Add slide"
-							onclick={() => onboardingSlideDialog?.open()}
-						>
-							<Plus class="h-4 w-4" />
-						</IconActionButton>
+						<div class="shrink-0">
+							<IconActionButton
+								label="Add slide"
+								onclick={() => onboardingSlideDialog?.open()}
+							>
+								<Plus class="h-4 w-4" />
+							</IconActionButton>
+						</div>
 					{/if}
 				</div>
 
@@ -471,8 +475,8 @@
 
 				<AnnouncementDialog bind:this={announcementDialog} />
 
-				<div class="mb-4 flex items-center justify-between gap-4">
-					<div>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+					<div class="min-w-0">
 						<SettingsCardTitle icon={Megaphone} title="Announcements" />
 						<p class="text-sm text-base-content/70">
 							Full-width banner above the navbar on onboarding pages.
@@ -482,12 +486,14 @@
 						</p>
 					</div>
 					{#if isAdmin}
-						<IconActionButton
-							label="Add announcement"
-							onclick={() => announcementDialog?.open()}
-						>
-							<Plus class="h-4 w-4" />
-						</IconActionButton>
+						<div class="shrink-0">
+							<IconActionButton
+								label="Add announcement"
+								onclick={() => announcementDialog?.open()}
+							>
+								<Plus class="h-4 w-4" />
+							</IconActionButton>
+						</div>
 					{/if}
 				</div>
 
@@ -582,19 +588,21 @@
 
 				<NotificationSoundDialog bind:this={notificationSoundDialog} />
 
-				<div class="mb-4 flex items-center justify-between gap-4">
-					<div>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+					<div class="min-w-0">
 						<SettingsCardTitle icon={Volume2} title="Sounds" />
 						<p class="text-sm text-base-content/70">
 							MP3, WAV, or other direct audio URLs played when new notifications arrive. One can be marked as the portal default.
 						</p>
 					</div>
-					<IconActionButton
-						label="Add sound"
-						onclick={() => notificationSoundDialog?.open()}
-					>
-						<Plus class="h-4 w-4" />
-					</IconActionButton>
+					<div class="shrink-0">
+						<IconActionButton
+							label="Add sound"
+							onclick={() => notificationSoundDialog?.open()}
+						>
+							<Plus class="h-4 w-4" />
+						</IconActionButton>
+					</div>
 				</div>
 
 				{#if sounds.length === 0}
@@ -681,19 +689,21 @@
 
 				<NotificationDialog bind:this={notificationDialog} />
 
-				<div class="mb-4 flex items-center justify-between gap-4">
-					<div>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+					<div class="min-w-0">
 						<SettingsCardTitle icon={Bell} title="Notifications" />
 						<p class="text-sm text-base-content/70">
 							Bell dropdown on public pages. New items are pushed in real time via SSE.
 						</p>
 					</div>
-					<IconActionButton
-						label="Add notification"
-						onclick={() => notificationDialog?.open()}
-					>
-						<Plus class="h-4 w-4" />
-					</IconActionButton>
+					<div class="shrink-0">
+						<IconActionButton
+							label="Add notification"
+							onclick={() => notificationDialog?.open()}
+						>
+							<Plus class="h-4 w-4" />
+						</IconActionButton>
+					</div>
 				</div>
 
 				{#if portalNotifications.length === 0}
@@ -778,9 +788,9 @@
 	</div>
 </div>
 
-<div class="mt-6 flex justify-end">
+<div class="mt-6 flex flex-wrap justify-end">
 	<button type="button" class="btn btn-ghost gap-2" onclick={handleReset}>
-		<RotateCcw class="h-4 w-4" />
+		<RotateCcw class="h-4 w-4 shrink-0" />
 		Reset device preferences
 	</button>
 </div>

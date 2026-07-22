@@ -5,6 +5,7 @@
 		updateOnboardingSlide,
 		getOnboardingSlides
 	} from '$lib/remotes/onboarding-slide.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -55,23 +56,28 @@
 				return;
 			}
 
-			const payload = {
-				title: trimmedTitle,
-				imageUrl: trimmedImageUrl,
-				description: trimmedDescription || undefined,
-				sortOrder
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Slide updated' : 'Slide created',
+				action: async () => {
+					const payload = {
+						title: trimmedTitle,
+						imageUrl: trimmedImageUrl,
+						description: trimmedDescription || undefined,
+						sortOrder
+					};
 
-			if (editingSlide?.id) {
-				await updateOnboardingSlide({
-					id: editingSlide.id,
-					...payload
-				});
-			} else {
-				await createOnboardingSlide(payload);
-			}
+					if (editingSlide?.id) {
+						await updateOnboardingSlide({
+							id: editingSlide.id,
+							...payload
+						});
+					} else {
+						await createOnboardingSlide(payload);
+					}
 
-			void getOnboardingSlides().refresh();
+					void getOnboardingSlides().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save slide';

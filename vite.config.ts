@@ -24,11 +24,14 @@ export default defineConfig(({ mode }) => {
 				experimental: { async: true }
 			},
 			adapter: adapter(),
+			// Kit 3 removed the built-in `$lib` alias; keep it until imports migrate to `#lib`.
+			alias: {
+				$lib: 'src/lib'
+			},
 			preprocess: [mdsvex({ extensions: ['.svx', '.md'] })],
 			extensions: ['.svelte', '.svx', '.md'],
 			experimental: {
 				remoteFunctions: true,
-				handleRenderingErrors: true,
 				forkPreloads: false
 			},
 			typescript: {

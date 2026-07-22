@@ -6,8 +6,6 @@
 	import { NOTIFICATIONS_ROUTE } from '$lib/constants/notification';
 	import NotificationListItem from '$lib/components/NotificationListItem.svelte';
 	import {
-		dismissAllNotificationsLocally,
-		dismissNotificationLocally,
 		loadDismissedNotificationIds,
 		loadNotificationsMuted,
 		playNotificationSound,
@@ -50,39 +48,31 @@
 	const hasMore = $derived(notifications.length > 20);
 
 	async function handleDismiss(id: string) {
+		if (!userId) return;
 		locallyDismissed = new Set([...locallyDismissed, id]);
 
-		if (userId) {
-			try {
-				await dismissNotification(id);
-			} catch {
-				const next = new Set(locallyDismissed);
-				next.delete(id);
-				locallyDismissed = next;
-			}
-			return;
+		try {
+			await dismissNotification(id);
+		} catch {
+			const next = new Set(locallyDismissed);
+			next.delete(id);
+			locallyDismissed = next;
 		}
-
-		dismissNotificationLocally(id);
 	}
 
 	async function handleDismissAll() {
+		if (!userId) return;
 		const ids = notifications.map((item) => item.id);
 		if (ids.length === 0) return;
 
 		const previous = locallyDismissed;
 		locallyDismissed = new Set([...locallyDismissed, ...ids]);
 
-		if (userId) {
-			try {
-				await dismissAllNotifications(ids);
-			} catch {
-				locallyDismissed = previous;
-			}
-			return;
+		try {
+			await dismissAllNotifications(ids);
+		} catch {
+			locallyDismissed = previous;
 		}
-
-		dismissAllNotificationsLocally(ids);
 	}
 
 	function toggleMuted() {
@@ -91,6 +81,8 @@
 	}
 
 	onMount(() => {
+		if (!userId) return;
+
 		const source = new EventSource('/api/notifications/stream');
 
 		source.addEventListener('notification', (event) => {

@@ -8,44 +8,46 @@
 <ul class="onboarding-facility-grid">
 	{#each facilities as item (item.id)}
 		<li>
-			<button type="button" class="onboarding-facility-card group">
-				<div class="onboarding-facility-media">
-				{#if item.imageUrl}
-					<img
-						src={item.imageUrl}
-						alt={item.name}
-						class="onboarding-facility-image"
-						loading="lazy"
-					/>
-				{:else}
-					<div class="onboarding-facility-placeholder" aria-hidden="true">
-						<Building2 class="h-12 w-12 text-base-content/25" />
-					</div>
-				{/if}
-
-				<div class="onboarding-facility-caption">
-					<p class="text-sm font-semibold leading-snug">{item.name}</p>
-				</div>
-
-				<div class="onboarding-facility-overlay">
-					<div class="onboarding-facility-overlay-content">
-						<h3 class="text-lg font-bold leading-tight">{item.name}</h3>
-						{#if item.address?.trim()}
-							<p class="mt-3 flex items-start gap-2 text-sm text-white/85">
-								<MapPin class="mt-0.5 h-4 w-4 shrink-0" />
-								<span>{item.address}</span>
-							</p>
+			<div class="aura aura-glow aura-md text-primary block w-full [--aura-radius:1rem]">
+				<button type="button" class="onboarding-facility-card group">
+					<div class="onboarding-facility-media">
+						{#if item.imageUrl}
+							<img
+								src={item.imageUrl}
+								alt={item.name}
+								class="onboarding-facility-image"
+								loading="lazy"
+							/>
+						{:else}
+							<div class="onboarding-facility-placeholder" aria-hidden="true">
+								<Building2 class="h-12 w-12 text-base-content/25" />
+							</div>
 						{/if}
-						{#if item.phone}
-							<p class="mt-3 flex items-center gap-2 text-sm text-white/85">
-								<Phone class="h-4 w-4 shrink-0" />
-								<span>{item.phone}</span>
-							</p>
-						{/if}
+
+						<div class="onboarding-facility-caption">
+							<p class="text-sm font-semibold leading-snug">{item.name}</p>
+						</div>
+
+						<div class="onboarding-facility-overlay">
+							<div class="onboarding-facility-overlay-content">
+								<h3 class="text-lg font-bold leading-tight">{item.name}</h3>
+								{#if item.address?.trim()}
+									<p class="mt-3 flex items-start gap-2 text-sm text-white/85">
+										<MapPin class="mt-0.5 h-4 w-4 shrink-0" />
+										<span>{item.address}</span>
+									</p>
+								{/if}
+								{#if item.phone}
+									<p class="mt-3 flex items-center gap-2 text-sm text-white/85">
+										<Phone class="h-4 w-4 shrink-0" />
+										<span>{item.phone}</span>
+									</p>
+								{/if}
+							</div>
+						</div>
 					</div>
-				</div>
-				</div>
-			</button>
+				</button>
+			</div>
 		</li>
 	{/each}
 </ul>
@@ -78,9 +80,8 @@
 		text-align: left;
 		border-radius: 1rem;
 		overflow: hidden;
-		box-shadow:
-			0 1px 2px rgb(0 0 0 / 0.14),
-			0 6px 16px rgb(0 0 0 / 0.12);
+		background-color: var(--color-base-100);
+		color: inherit;
 	}
 
 	.onboarding-facility-media {

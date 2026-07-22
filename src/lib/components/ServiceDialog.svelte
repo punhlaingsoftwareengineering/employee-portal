@@ -4,6 +4,7 @@
 	import { normalizeAccentColor } from '$lib/schemas/service';
 	import { createService, updateService, getServices } from '$lib/remotes/service.remote';
 	import { DEFAULT_SERVICE_ACCENT, accentGradientBackground } from '$lib/utils/accent-gradient';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -57,24 +58,29 @@
 		error = null;
 
 		try {
-			const payload = {
-				name: name.trim(),
-				description: description.trim() || undefined,
-				category: category.trim() || undefined,
-				accentColor: normalizeAccentColor(accentColor),
-				link: link.trim(),
-				iconUrl: iconUrl.trim() || null,
-				isPublic
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Service updated' : 'Service created',
+				action: async () => {
+					const payload = {
+						name: name.trim(),
+						description: description.trim() || undefined,
+						category: category.trim() || undefined,
+						accentColor: normalizeAccentColor(accentColor),
+						link: link.trim(),
+						iconUrl: iconUrl.trim() || null,
+						isPublic
+					};
 
-			if (editingService?.id) {
-				await updateService({ id: editingService.id, ...payload });
-			} else {
-				await createService(payload);
-			}
+					if (editingService?.id) {
+						await updateService({ id: editingService.id, ...payload });
+					} else {
+						await createService(payload);
+					}
 
-			void getServices().refresh();
-			await invalidateAll();
+					void getServices().refresh();
+					await invalidateAll();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save service';

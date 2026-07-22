@@ -74,10 +74,10 @@ export async function listNotifications(perms: UserPermissions) {
 	});
 }
 
-export async function listPublicNotifications(userId: string | null) {
+export async function listUserNotifications(userId: string) {
 	try {
 		const defaultMp3Url = await getDefaultMp3Url();
-		const dismissedIds = userId ? await listDismissedIds(userId) : [];
+		const dismissedIds = await listDismissedIds(userId);
 
 		const rows = await db.query.notification.findMany({
 			with: { sound: true },

@@ -26,15 +26,19 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 		navEmployees: true,
 		navDepartments: true,
 		navFacilities: true,
+		navPharmacy: true,
 		navTools: true,
 		navSettings: false,
+		navCommunity: false,
 		employeeReadAll: true,
 		employeeWrite: true,
 		employeeDelete: true,
 		departmentReadAll: true,
 		departmentWrite: false,
 		facilityReadAll: true,
-		facilityWrite: false
+		facilityWrite: false,
+		pharmacyReadAll: true,
+		pharmacyWrite: true
 	},
 	{
 		name: 'HR',
@@ -44,15 +48,19 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 		navEmployees: true,
 		navDepartments: true,
 		navFacilities: true,
+		navPharmacy: true,
 		navTools: true,
 		navSettings: false,
+		navCommunity: false,
 		employeeReadAll: false,
 		employeeWrite: true,
 		employeeDelete: true,
 		departmentReadAll: false,
 		departmentWrite: false,
 		facilityReadAll: false,
-		facilityWrite: false
+		facilityWrite: false,
+		pharmacyReadAll: false,
+		pharmacyWrite: false
 	},
 	{
 		name: 'Viewer',
@@ -62,15 +70,19 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 		navEmployees: true,
 		navDepartments: true,
 		navFacilities: true,
+		navPharmacy: true,
 		navTools: true,
 		navSettings: false,
+		navCommunity: false,
 		employeeReadAll: false,
 		employeeWrite: false,
 		employeeDelete: false,
 		departmentReadAll: false,
 		departmentWrite: false,
 		facilityReadAll: true,
-		facilityWrite: false
+		facilityWrite: false,
+		pharmacyReadAll: true,
+		pharmacyWrite: false
 	}
 ];
 

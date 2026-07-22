@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { Building2, Newspaper } from '@lucide/svelte';
+	import { Building2, Newspaper, Pill } from '@lucide/svelte';
 	import OnboardingCarousel from '$lib/components/OnboardingCarousel.svelte';
 	import OnboardingFacilityGrid from '$lib/components/OnboardingFacilityGrid.svelte';
+	import OnboardingFacilityTabs from '$lib/components/OnboardingFacilityTabs.svelte';
 	import OnboardingNewsletterGrid from '$lib/components/OnboardingNewsletterGrid.svelte';
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
@@ -67,6 +68,18 @@
 	</section>
 {/if}
 
+<section
+	id={ONBOARDING_SECTION_IDS.pharmacyMaster}
+	class="container mx-auto max-w-5xl scroll-mt-24 px-4 pb-16"
+>
+	<SectionHead
+		icon={Pill}
+		title="Pharmacy Master"
+		description="Browse pharmacy items by facility: Hlaing Thar Yar, Mandalay, and Taung Gyi."
+	/>
+	<OnboardingFacilityTabs items={data.pharmacyMasters} />
+</section>
+
 {#if data.newsletters.length > 0}
 	<section
 		id={ONBOARDING_SECTION_IDS.newsletters}
@@ -85,8 +98,8 @@
 	<section class="container mx-auto max-w-5xl px-4 pb-16">
 		<SectionHead
 			icon={Building2}
-			title="Our facilities"
-			description="Explore our hospital locations. Hover a card for details."
+			title="Facilities"
+			description="Explore hospital locations. Hover a card for details."
 		/>
 		<OnboardingFacilityGrid facilities={data.facilities} />
 	</section>

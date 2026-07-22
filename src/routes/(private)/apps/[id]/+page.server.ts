@@ -1,13 +1,10 @@
-import { error } from '@sveltejs/kit';
-import { getUserPermissions } from '$lib/server/services/portal-user';
+import { requireToolsAccess } from '$lib/server/auth-guard';
 import { getAppForUser } from '$lib/server/services/app';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-	if (!locals.user) error(401, 'Unauthorized');
-
-	const permissions = await getUserPermissions(locals.user.id);
-	const app = await getAppForUser(permissions, params.id);
+export const load: PageServerLoad = async (event) => {
+	const perms = await requireToolsAccess(event);
+	const app = await getAppForUser(perms, event.params.id);
 
 	return { app };
 };

@@ -9,6 +9,9 @@
 
 	const notifications = $derived(page.data.notifications ?? []);
 	const defaultSoundUrl = $derived(page.data.defaultSoundUrl ?? null);
+	const canUseNotifications = $derived(
+		Boolean(page.data.canUseNotifications ?? page.data.canUseAiChat)
+	);
 	const docsHref = $derived(page.data.docsHref ?? null);
 
 	const onboardingSections = $derived(
@@ -80,8 +83,10 @@
 	</div>
 
 	<div class="navbar-end gap-2">
-		<NotificationBell initialNotifications={notifications} {defaultSoundUrl} />
 		{#if user}
+			{#if canUseNotifications}
+				<NotificationBell initialNotifications={notifications} {defaultSoundUrl} />
+			{/if}
 			<a href="/dashboard" class="btn btn-ghost max-w-48 gap-2 pl-2 pr-3">
 				{#if user.image}
 					<div class="avatar">

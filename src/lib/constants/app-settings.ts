@@ -29,7 +29,9 @@ export const APP_FONTS = [
 	{ value: 'adwaita-mono', label: 'Adwaita Mono' },
 	{ value: 'roboto', label: 'Roboto' },
 	{ value: 'arial', label: 'Arial' },
-	{ value: 'times-new-roman', label: 'Times New Roman' }
+	{ value: 'times-new-roman', label: 'Times New Roman' },
+	{ value: 'comic-relief', label: 'Comic Relief' },
+	{ value: 'pangolin', label: 'Pangolin' }
 ] as const;
 
 export const APP_FONT_VALUES = APP_FONTS.map((font) => font.value);

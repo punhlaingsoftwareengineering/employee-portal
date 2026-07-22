@@ -1,4 +1,4 @@
-import { defineEnvVars } from '@sveltejs/kit/hooks';
+import { defineEnvVars } from '@sveltejs/kit/env';
 import { z } from 'zod';
 
 const optionalString = z.string().optional();
@@ -27,7 +27,7 @@ export const variables = defineEnvVars({
 	},
 	DRIVE_INTERNAL_ORIGIN: {
 		description:
-			'PHH-DRIVE URL for server-side API calls (e.g. `http://host.docker.internal:1025` or `http://phh-drive:1025`). Falls back to DRIVE_ORIGIN when unset.',
+			'PHH-DRIVE URL for server-side API calls (e.g. `http://phh-drive:1025`). Must be http inside Docker — TLS terminates at nginx. Falls back to DRIVE_ORIGIN when unset.',
 		schema: optionalString
 	},
 	DOCS_ORIGIN: {

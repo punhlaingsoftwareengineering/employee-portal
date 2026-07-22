@@ -20,6 +20,9 @@ import {
 	type PortalThemePolicy
 } from '$lib/constants/app-settings';
 
+export const SHARED_THEME_STORAGE_KEY = 'phh-ui-theme';
+export const SHARED_FONT_STORAGE_KEY = 'phh-ui-font';
+
 const VALID_FONTS = new Set(APP_FONTS.map((f) => f.value));
 const VALID_THEMES = new Set(APP_THEMES.map((t) => t.value));
 
@@ -67,6 +70,41 @@ function loadSettings(): AppSettings {
 	}
 }
 
+function getCookieDomain(): string | null {
+	if (!browser) return null;
+	const { hostname } = window.location;
+	if (
+		hostname === 'localhost' ||
+		hostname.endsWith('.localhost') ||
+		/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)
+	) {
+		return null;
+	}
+
+	const parts = hostname.split('.').filter(Boolean);
+	if (parts.length < 2) return null;
+	return `.${parts.slice(-2).join('.')}`;
+}
+
+function readCookie(name: string): string | null {
+	if (!browser) return null;
+	const prefix = `${name}=`;
+	for (const part of document.cookie.split(';')) {
+		const trimmed = part.trim();
+		if (trimmed.startsWith(prefix)) {
+			return decodeURIComponent(trimmed.slice(prefix.length));
+		}
+	}
+	return null;
+}
+
+function writeCookie(name: string, value: string) {
+	if (!browser) return;
+	const domain = getCookieDomain();
+	const domainPart = domain ? `; domain=${domain}` : '';
+	document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax${domainPart}`;
+}
+
 function persistBrandingCookie(settings: AppSettings) {
 	if (!browser) return;
 
@@ -82,6 +120,10 @@ function persistBrandingCookie(settings: AppSettings) {
 function persistSettings(settings: AppSettings) {
 	if (!browser) return;
 	localStorage.setItem(APP_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+	localStorage.setItem(SHARED_THEME_STORAGE_KEY, settings.theme);
+	localStorage.setItem(SHARED_FONT_STORAGE_KEY, settings.font);
+	writeCookie(SHARED_THEME_STORAGE_KEY, settings.theme);
+	writeCookie(SHARED_FONT_STORAGE_KEY, settings.font);
 	persistBrandingCookie(settings);
 }
 
@@ -151,8 +193,17 @@ export function hydrateAppSettingsFromStorage() {
 
 	const loaded = loadSettings();
 	Object.assign(appSettings, loaded);
+	const sharedTheme = readCookie(SHARED_THEME_STORAGE_KEY) ?? localStorage.getItem(SHARED_THEME_STORAGE_KEY);
+	const sharedFont = readCookie(SHARED_FONT_STORAGE_KEY) ?? localStorage.getItem(SHARED_FONT_STORAGE_KEY);
+	if (sharedTheme && VALID_THEMES.has(sharedTheme as AppTheme)) {
+		appSettings.theme = sharedTheme as AppTheme;
+	}
+	if (sharedFont && VALID_FONTS.has(sharedFont as AppFont)) {
+		appSettings.font = sharedFont as AppFont;
+	}
 	clampThemeToPolicy();
 	clampFontToPolicy();
+	persistSettings(appSettings);
 	persistBrandingCookie(appSettings);
 }
 

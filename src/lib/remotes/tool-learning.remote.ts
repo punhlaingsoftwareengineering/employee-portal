@@ -3,10 +3,10 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as toolLearningService from '$lib/server/services/tool-learning';
 import { createToolLearningSchema, updateToolLearningSchema } from '$lib/schemas/tool-learning';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireToolsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireToolsAccess(getRequestEvent());
 }
 
 export const getToolLearnings = query(async () =>

@@ -6,15 +6,19 @@ export const accessRolePermissionsSchema = z.object({
 	navEmployees: z.boolean().default(true),
 	navDepartments: z.boolean().default(true),
 	navFacilities: z.boolean().default(true),
+	navPharmacy: z.boolean().default(true),
 	navTools: z.boolean().default(true),
 	navSettings: z.boolean().default(false),
+	navCommunity: z.boolean().default(false),
 	employeeReadAll: z.boolean().default(false),
 	employeeWrite: z.boolean().default(false),
 	employeeDelete: z.boolean().default(false),
 	departmentReadAll: z.boolean().default(false),
 	departmentWrite: z.boolean().default(false),
 	facilityReadAll: z.boolean().default(false),
-	facilityWrite: z.boolean().default(false)
+	facilityWrite: z.boolean().default(false),
+	pharmacyReadAll: z.boolean().default(false),
+	pharmacyWrite: z.boolean().default(false)
 });
 
 /** Optional; clients should omit — server generates from name. */

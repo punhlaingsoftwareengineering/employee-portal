@@ -3,10 +3,10 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as facilityService from '$lib/server/services/facility';
 import { createFacilitySchema, updateFacilitySchema } from '$lib/schemas/facility';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireFacilitiesAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireFacilitiesAccess(getRequestEvent());
 }
 
 export const getFacilities = query(async () => facilityService.listFacilities(await perms()));

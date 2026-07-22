@@ -52,9 +52,33 @@ function drivePublicOrigin(): string {
 	return origin;
 }
 
+/**
+ * Server-side calls to Drive inside Docker must use plain HTTP.
+ * TLS terminates at nginx; `https://container:1025` yields OpenSSL "wrong version number".
+ */
+export function normalizeDriveApiOrigin(origin: string): string {
+	try {
+		const url = new URL(origin);
+		if (url.protocol !== 'https:') return origin.replace(/\/$/, '');
+		const host = url.hostname.toLowerCase();
+		const isDockerInternal =
+			host === 'host.docker.internal' ||
+			!host.includes('.') ||
+			host.endsWith('.internal') ||
+			/^(uat-)?phh-drive$/.test(host);
+		if (isDockerInternal) {
+			url.protocol = 'http:';
+			return url.origin;
+		}
+	} catch {
+		/* keep as-is */
+	}
+	return origin.replace(/\/$/, '');
+}
+
 function driveApiOrigin(): string {
 	const internal = DRIVE_INTERNAL_ORIGIN?.trim().replace(/\/$/, '');
-	if (internal) return internal;
+	if (internal) return normalizeDriveApiOrigin(internal);
 	return drivePublicOrigin();
 }
 

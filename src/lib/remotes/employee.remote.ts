@@ -1,18 +1,22 @@
-import { query, form, command } from '$app/server';
+import { query, command } from '$app/server';
 import { getRequestEvent } from '$app/server';
-import { redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as employeeService from '$lib/server/services/employee';
-import { createEmployeeSchema, updateEmployeeSchema } from '$lib/schemas/employee';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import {
+	createEmployeeSchema,
+	employeeIdSchema,
+	overrideEmployeesFromExcelSchema,
+	updateEmployeeSchema
+} from '$lib/schemas/employee';
+import { requireEmployeesAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireEmployeesAccess(getRequestEvent());
 }
 
 export const getEmployees = query(async () => employeeService.listEmployees(await perms()));
 
-export const getEmployee = query(z.string().uuid(), async (id) =>
+export const getEmployee = query(employeeIdSchema, async (id) =>
 	employeeService.getEmployee(await perms(), id)
 );
 
@@ -22,20 +26,29 @@ export const createEmployee = command(createEmployeeSchema, async (data) => {
 	return employee;
 });
 
-export const updateEmployee = form(
+export const updateEmployee = command(
 	z.object({
-		id: z.string().uuid(),
+		id: employeeIdSchema,
 		...updateEmployeeSchema.shape
 	}),
 	async ({ id, ...data }) => {
-		await employeeService.updateEmployee(await perms(), id, data);
+		const employee = await employeeService.updateEmployee(await perms(), id, data);
 		void getEmployees().refresh();
 		void getEmployee(id).refresh();
-		redirect(303, `/employees/${id}`);
+		return employee;
 	}
 );
 
-export const deleteEmployee = command(z.string().uuid(), async (id) => {
+export const deleteEmployee = command(employeeIdSchema, async (id) => {
 	await employeeService.deleteEmployee(await perms(), id);
 	void getEmployees().refresh();
 });
+
+export const overrideEmployeesFromExcel = command(
+	overrideEmployeesFromExcelSchema,
+	async (data) => {
+		const result = await employeeService.overrideEmployeesFromExcel(await perms(), data);
+		void getEmployees().refresh();
+		return result;
+	}
+);

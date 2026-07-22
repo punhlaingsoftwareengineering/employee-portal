@@ -5,6 +5,7 @@
 		updateNotificationSound,
 		getNotificationSounds
 	} from '$lib/remotes/notification-sound.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 	import { isNotificationSoundUrl, normalizeNotificationSoundUrl } from '$lib/constants/notification';
@@ -57,19 +58,24 @@
 				return;
 			}
 
-			const payload = {
-				name: trimmedName,
-				mp3Url: trimmedAudioUrl,
-				isDefault
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Sound updated' : 'Sound created',
+				action: async () => {
+					const payload = {
+						name: trimmedName,
+						mp3Url: trimmedAudioUrl,
+						isDefault
+					};
 
-			if (editingSound?.id) {
-				await updateNotificationSound({ id: editingSound.id, ...payload });
-			} else {
-				await createNotificationSound(payload);
-			}
+					if (editingSound?.id) {
+						await updateNotificationSound({ id: editingSound.id, ...payload });
+					} else {
+						await createNotificationSound(payload);
+					}
 
-			void getNotificationSounds().refresh();
+					void getNotificationSounds().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save sound';

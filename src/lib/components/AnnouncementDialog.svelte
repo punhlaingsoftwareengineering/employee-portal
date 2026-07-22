@@ -7,6 +7,7 @@
 		updateAnnouncement,
 		getAnnouncements
 	} from '$lib/remotes/announcement.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 
@@ -75,27 +76,32 @@
 				return;
 			}
 
-			const payload = {
-				type,
-				title: trimmedTitle,
-				body: isText && trimmedBody ? trimmedBody : undefined,
-				linkUrl: trimmedLinkUrl || undefined,
-				imageUrl: isImage ? trimmedImageUrl : undefined,
-				accentPreset: isText ? accentPreset : undefined,
-				accentColor: isText && trimmedAccentColor ? trimmedAccentColor : undefined,
-				isActive
-			};
+			await withFormFeedback({
+				successMessage: isEdit ? 'Announcement updated' : 'Announcement created',
+				action: async () => {
+					const payload = {
+						type,
+						title: trimmedTitle,
+						body: isText && trimmedBody ? trimmedBody : undefined,
+						linkUrl: trimmedLinkUrl || undefined,
+						imageUrl: isImage ? trimmedImageUrl : undefined,
+						accentPreset: isText ? accentPreset : undefined,
+						accentColor: isText && trimmedAccentColor ? trimmedAccentColor : undefined,
+						isActive
+					};
 
-			if (editingAnnouncement?.id) {
-				await updateAnnouncement({
-					id: editingAnnouncement.id,
-					...payload
-				});
-			} else {
-				await createAnnouncement(payload);
-			}
+					if (editingAnnouncement?.id) {
+						await updateAnnouncement({
+							id: editingAnnouncement.id,
+							...payload
+						});
+					} else {
+						await createAnnouncement(payload);
+					}
 
-			void getAnnouncements().refresh();
+					void getAnnouncements().refresh();
+				}
+			});
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save announcement';

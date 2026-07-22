@@ -77,16 +77,16 @@ CADDY_OAI_ORDER_SENDER_UPSTREAM=localhost:6002
 3. **Start apps** (terminals):
 
    ```powershell
-   cd employee-portal && pnpm dev
-   cd drive && pnpm dev
-   cd docs && pnpm dev
+   cd employee-portal && npm run dev
+   cd drive && npm run dev
+   cd docs && npm run dev
    cd OAI_ORDER_SENDER && npm run dev
-   cd employee-portal && pnpm caddy:dev
+   cd employee-portal && npm run caddy:dev
    ```
 
 4. Browse the URLs from `ORIGIN`, `DRIVE_ORIGIN`, `DOCS_ORIGIN`, and `OAI_ORDER_SENDER_ORIGIN` (not raw `localhost` ports).
 
-`pnpm caddy:dev` renders `Caddyfile.generated` from `.env` then starts Caddy.
+`npm run caddy:dev` renders `Caddyfile.generated` from `.env` then starts Caddy.
 
 ## Login troubleshooting
 
@@ -115,7 +115,7 @@ AUTH_COOKIE_DOMAIN=.phh.com
 **Docker** (portal container cannot reach public drive hostname for server-side uploads):
 
 ```env
-DRIVE_INTERNAL_ORIGIN=http://host.docker.internal:1025
+DRIVE_INTERNAL_ORIGIN=http://phh-drive:1025
 DRIVE_STORAGE_PROVIDER=tigris
 DRIVE_TEAM_API_KEY=znltv_...
 ```
@@ -196,7 +196,7 @@ On the portal host:
 
 ```powershell
 cd employee-portal
-pnpm caddy:render
+npm run caddy:render
 caddy run --config Caddyfile.generated
 ```
 

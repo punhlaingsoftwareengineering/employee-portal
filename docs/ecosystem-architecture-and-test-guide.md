@@ -191,7 +191,7 @@ flowchart TB
 | `src/lib/constants/drive-media-categories.spec.ts` | Category constants |
 | `src/routes/api/drive-media/drive-media.spec.ts` | Drive media route handler |
 
-**Run:** `pnpm test:unit` (Vitest), `pnpm test:e2e` (Playwright — no e2e files yet)
+**Run:** `npm run test:unit` (Vitest), `npm run test:e2e` (Playwright — no e2e files yet)
 
 ---
 
@@ -289,7 +289,7 @@ portal/
 
 **37 unit/spec files** covering API routes, upload (chunk-store, persist, limits), move, seal, trash, portal-origin, require-api-session, team-scope, team-api-key-permission, and component helpers.
 
-**Run:** `pnpm test:unit`, `pnpm test:e2e` (no e2e files yet)
+**Run:** `npm run test:unit`, `npm run test:e2e` (no e2e files yet)
 
 ---
 
@@ -523,9 +523,9 @@ sequenceDiagram
 
 **Commands:**
 ```bash
-pnpm test:unit    # Vitest
-pnpm test:e2e     # Playwright (build + preview first)
-pnpm test         # Both
+npm run test:unit    # Vitest
+npm run test:e2e     # Playwright (build + preview first)
+npm run test         # Both
 ```
 
 ### 7.2 Prerequisites for Integration / E2E Tests
@@ -533,7 +533,7 @@ pnpm test         # Both
 | Requirement | Details |
 |-------------|---------|
 | **Hosts file** | `portal.local.test`, `drive.local.test`, `docs.local.test` → 127.0.0.1 |
-| **Caddy** | Run from employee-portal: `pnpm caddy:dev` |
+| **Caddy** | Run from employee-portal: `npm run caddy:dev` |
 | **All three apps running** | Portal :1027, Drive :1025, Docs :1026 |
 | **Shared `.env`** | Matching `BETTER_AUTH_SECRET`, `AUTH_COOKIE_DOMAIN`, `AUTH_DATABASE_URL` |
 | **Test databases** | Separate Postgres instances or schemas for CI |
@@ -738,16 +738,16 @@ DRIVE_ORIGIN=http://drive.local.test
 
 ```bash
 # Terminal 1
-cd employee-portal && pnpm dev
+cd employee-portal && npm run dev
 
 # Terminal 2
-cd drive && pnpm dev
+cd drive && npm run dev
 
 # Terminal 3
-cd docs && pnpm dev
+cd docs && npm run dev
 
 # Terminal 4
-cd employee-portal && pnpm caddy:dev
+cd employee-portal && npm run caddy:dev
 ```
 
 Browse via `http://portal.local.test`, `http://drive.local.test`, `http://docs.local.test` — **not** raw localhost ports (cookie domain and trusted origins depend on this).

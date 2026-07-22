@@ -2,16 +2,16 @@ import { query, command } from '$app/server';
 import { getRequestEvent } from '$app/server';
 import * as serviceService from '$lib/server/services/service';
 import { createServiceSchema, updateServiceSchema } from '$lib/schemas/service';
-import { requireAdmin, requireAppAccess } from '$lib/server/auth-guard';
+import { requireAdmin, requireToolsAccess } from '$lib/server/auth-guard';
 import { z } from 'zod';
 
 async function adminPerms() {
 	return requireAdmin(getRequestEvent());
 }
 
-async function appPerms() {
+async function toolsPerms() {
 	const event = getRequestEvent();
-	const perms = await requireAppAccess(event);
+	const perms = await requireToolsAccess(event);
 	return { event, perms };
 }
 
@@ -21,7 +21,7 @@ export const getServices = query(async () => {
 });
 
 export const getAvailableServices = query(async () => {
-	const { perms } = await appPerms();
+	const { perms } = await toolsPerms();
 	return serviceService.getServicesForUser(perms);
 });
 
@@ -56,7 +56,7 @@ export const deleteService = command(z.string().uuid(), async (id) => {
 export const getServiceLinkStatuses = query(z.array(z.string().uuid()), async (serviceIds) => {
 	const event = getRequestEvent();
 	if (event.locals.user) {
-		const perms = await requireAppAccess(event);
+		const perms = await requireToolsAccess(event);
 		return serviceService.getServiceLinkStatuses(serviceIds, perms);
 	}
 	return serviceService.getServiceLinkStatuses(serviceIds, 'public');

@@ -17,7 +17,9 @@ alwaysApply: false
 
 Roles are **CRUD-managed** by admins at `/users` (Manager, HR, Viewer seeded by default).
 
-Each role defines permission flags: employee read/write/delete, department read/write.
+Each role defines permission flags: employee read/write/delete, department read/write, facility read/write.
+
+**Org scope:** `employeeWrite`, `departmentWrite`, and `facilityWrite` apply only to the user’s assigned department/facility rows. Creating new departments or facilities is **admin-only**. `departmentReadAll` / `facilityReadAll` grant global read, not global write.
 
 Users get per-department assignments via `roleId` FK.
 
@@ -32,6 +34,16 @@ Users get per-department assignments via `roleId` FK.
 - `requireUser` — authenticated
 - `requireAppAccess` — not guest; has admin or ≥1 department role
 - `requireAdmin` — portal admin only
+- `requireDashboardAccess` — `navDashboard` (or admin)
+- `requireEmployeesAccess` — `navEmployees` + employee capability
+- `requireDepartmentsAccess` — `navDepartments` + department capability
+- `requireFacilitiesAccess` — `navFacilities` + facility capability
+- `requirePharmacyAccess` — `navPharmacy` + pharmacy capability
+- `requireToolsAccess` — `navTools` (or admin)
+- `requireSettingsAccess` — `navSettings` (or admin)
+- `requireCommunityManage` — `navCommunity` (or admin). **Not** `navDashboard`.
+
+Each private sidebar page has a matching layout/API guard. Nav flags only control visibility/access; content CRUD still uses the capability flags (employeeWrite, etc.).
 
 Services accept `UserPermissions` from `getUserPermissions(userId)`.
 

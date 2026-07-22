@@ -32,7 +32,7 @@ export function sendVerificationOtpEmail(data: {
 			from: SMTP_FROM,
 			to: data.email,
 			subject: subjects[data.type],
-			text: `Your verification code is: ${data.otp}\n\nThis code expires in 5 minutes.`
+			text: `Your verification code is: ${data.otp}\n\nThis code expires in 3 minutes.`
 		})
 		.catch((err) => {
 			console.error('[mail] Failed to send OTP email', err);

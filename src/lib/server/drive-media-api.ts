@@ -20,8 +20,11 @@ function formatDriveErrorMessage(e: unknown): string {
 			: typeof e.cause === 'string'
 				? e.cause
 				: '';
-	if (cause && cause !== e.message) return `${e.message}: ${cause}`;
-	return e.message;
+	const combined = cause && cause !== e.message ? `${e.message}: ${cause}` : e.message;
+	if (/wrong version number|EPROTO/i.test(combined)) {
+		return `${combined} — DRIVE_INTERNAL_ORIGIN must be http:// to the Drive container (e.g. http://phh-drive:1025), not https. Public DRIVE_ORIGIN stays https.`;
+	}
+	return combined;
 }
 
 export function handleDrivePortalError(e: unknown): never {

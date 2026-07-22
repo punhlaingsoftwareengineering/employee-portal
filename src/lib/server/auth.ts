@@ -12,6 +12,7 @@ import {
 	createUserProfile,
 	findValidPendingInviteByEmail
 } from '$lib/server/services/portal-user';
+import { OTP_EXPIRES_IN_SECONDS } from '$lib/constants/auth-otp';
 import { getAuthSessionOptions } from '$lib/server/auth-session-config';
 import { getAuthTrustedOrigins } from '$lib/server/auth-trusted-origins';
 
@@ -56,6 +57,7 @@ export const auth = betterAuth({
 		emailOTP({
 			sendVerificationOnSignUp: true,
 			overrideDefaultEmailVerification: true,
+			expiresIn: OTP_EXPIRES_IN_SECONDS,
 			async sendVerificationOTP({ email, otp, type }) {
 				await sendVerificationOtpEmail({ email, otp, type });
 			}

@@ -1,4 +1,4 @@
-@import '$lib/assets/fonts/fonts.css';
+@import '../lib/assets/fonts/fonts.css';
 @import 'tailwindcss';
 
 /* IconActionButton variants — always emit (avoids intermittent missing styles on tab remount/HMR) */
@@ -19,6 +19,8 @@
 	--font-roboto: 'Roboto', ui-sans-serif, system-ui, sans-serif;
 	--font-arial: Arial, Helvetica, sans-serif;
 	--font-times-new-roman: 'Times New Roman', Times, serif;
+	--font-comic-relief: 'Comic Sans MS', 'Comic Neue', cursive;
+	--font-pangolin: 'Pangolin', 'Comic Sans MS', cursive;
 }
 
 html {
@@ -50,6 +52,14 @@ html[data-app-font='times-new-roman'] {
 	font-family: var(--font-times-new-roman);
 }
 
+html[data-app-font='comic-relief'] {
+	font-family: var(--font-comic-relief);
+}
+
+html[data-app-font='pangolin'] {
+	font-family: var(--font-pangolin);
+}
+
 @layer components {
 	.card {
 		@apply border border-primary;
@@ -74,10 +84,35 @@ html[data-app-font='times-new-roman'] {
 	}
 
 	.form-table-field {
-		@apply py-2 align-middle;
+		@apply min-w-0 py-2 align-middle;
 	}
 
-	/* Responsive: stack label above field on small screens */
+	/* Stack label above field when the card (not just the viewport) is narrow */
+	.card > .card-body {
+		container-type: inline-size;
+		container-name: card-body;
+	}
+
+	@container card-body (max-width: 36rem) {
+		.form-table,
+		.form-table :is(tbody, tr, td, th) {
+			display: block;
+			width: 100%;
+		}
+
+		.form-table-label {
+			width: 100%;
+			white-space: normal;
+			padding-bottom: 0;
+		}
+
+		.form-table-field {
+			width: 100%;
+			padding-top: 0.25rem;
+		}
+	}
+
+	/* Fallback for viewports without a sized card container */
 	@media (max-width: 767px) {
 		.form-table,
 		.form-table :is(tbody, tr, td, th) {
@@ -96,20 +131,44 @@ html[data-app-font='times-new-roman'] {
 	}
 
 	.form-actions {
-		@apply mt-4 flex w-full gap-2;
+		@apply mt-4 flex w-full flex-wrap gap-2;
 	}
 
 	.form-actions > :is(a, button) {
-		@apply flex-1;
+		@apply min-w-0 flex-1 basis-32;
+		height: auto;
+	}
+
+	/*
+	 * DaisyUI sets a fixed height on .btn / .badge. When labels wrap in a narrow
+	 * column they overflow — grow with content instead (keep square/circle fixed).
+	 */
+	.btn:not(.btn-circle):not(.btn-square) {
+		height: auto !important;
+		min-height: var(--size, 2.5rem);
+		white-space: normal;
+	}
+
+	.badge {
+		display: inline-flex;
+		height: auto !important;
+		min-height: var(--size, 1.25rem);
+		align-items: center;
+		white-space: normal;
+		overflow: visible;
+		padding-block: 0.375rem;
+		line-height: 1.25;
+		text-align: start;
 	}
 
 	/* Multi-card layouts — cards size to their own content (no row-height matching) */
 	.card-masonry {
-		@apply columns-1 gap-6 md:columns-2 xl:columns-3;
+		@apply columns-1 gap-4 sm:gap-6 md:columns-2 xl:columns-3;
 	}
 
 	.card-masonry > * {
-		@apply mb-6 break-inside-avoid;
+		@apply mb-4 w-full min-w-0 break-inside-avoid sm:mb-6;
+		overflow: hidden;
 	}
 
 	.card-grid {
@@ -187,6 +246,24 @@ html[data-app-font='times-new-roman'] {
 		@apply btn-sm;
 	}
 
+	.portal-private .btn:not(.btn-circle):not(.btn-square) {
+		height: auto;
+		min-height: var(--size, 2rem);
+	}
+
+	.data-table {
+		--sticky-actions-w: 0rem;
+		--sticky-serial-w: 0rem;
+	}
+
+	.data-table.has-actions {
+		--sticky-actions-w: 5.5rem;
+	}
+
+	.data-table.has-serial {
+		--sticky-serial-w: 3rem;
+	}
+
 	.data-table .sticky-col-actions {
 		@apply bg-base-100 min-w-[5.5rem] w-[5.5rem];
 		position: sticky;
@@ -201,14 +278,14 @@ html[data-app-font='times-new-roman'] {
 	.data-table .sticky-col-serial {
 		@apply bg-base-100 min-w-[3rem] w-[3rem] text-center;
 		position: sticky;
-		left: 5.5rem;
+		left: var(--sticky-actions-w);
 		z-index: 2;
 	}
 
 	.data-table .sticky-col-first {
 		@apply bg-base-100 min-w-[10rem];
 		position: sticky;
-		left: 8.5rem;
+		left: calc(var(--sticky-actions-w) + var(--sticky-serial-w));
 		z-index: 1;
 	}
 
@@ -253,11 +330,11 @@ body.sidebar-resizing {
 }
 
 .portal-sticky-page-header {
-	@apply z-10 -mx-6 shrink-0 border-b border-base-content/10 bg-base-100 px-6 pt-3 pb-2;
+	@apply z-10 -mx-4 shrink-0 border-b border-base-content/10 bg-base-100 px-4 pt-3 pb-2 sm:-mx-6 sm:px-6;
 }
 
 .portal-private-main {
-	@apply flex flex-1 flex-col gap-6 px-6 pb-6 pt-0;
+	@apply flex flex-1 flex-col gap-4 px-4 pb-4 pt-0 sm:gap-6 sm:px-6 sm:pb-6;
 }
 
 @media (min-width: 1024px) {

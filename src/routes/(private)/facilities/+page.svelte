@@ -9,13 +9,21 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { getFacilities, deleteFacility } from '$lib/remotes/facility.remote';
 
 	const permissions = $derived(page.data.permissions);
-	const canManage = $derived(
-		permissions?.isAdmin ||
-			permissions?.departmentRoles?.some((assignment) => assignment.permissions.facilityWrite)
-	);
+	const isAdmin = $derived(permissions?.isAdmin ?? false);
+
+	function canWriteFacilityRow(facilityId: string): boolean {
+		if (isAdmin) return true;
+		return (
+			permissions?.departmentRoles?.some(
+				(assignment) =>
+					assignment.facilityId === facilityId && assignment.permissions.facilityWrite
+			) ?? false
+		);
+	}
 
 	let facilityDialog = $state<FacilityDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
@@ -28,7 +36,7 @@
 
 	<PrivatePageHeader title="Facilities" />
 
-	{#if canManage}
+	{#if isAdmin}
 		<div class="flex justify-end">
 			<button type="button" class="btn btn-primary gap-2" onclick={() => facilityDialog?.open()}>
 				<Plus class="h-4 w-4" />
@@ -39,7 +47,7 @@
 
 	<DataTable rows={facilities} rowKey={(item) => item.id} emptyMessage="No facilities yet.">
 		{#snippet actions({ row: item })}
-			{#if canManage}
+			{#if canWriteFacilityRow(item.id)}
 				<IconActionButton
 					label="Edit"
 					variant="secondary"
@@ -54,7 +62,12 @@
 					onclick={async () => {
 						if (!confirm(`Delete facility "${item.name}"?`)) return;
 						await deleteLoading.run(item.id, async () => {
-							await deleteFacility(item.id);
+							await withFormFeedback({
+								successMessage: 'Facility deleted',
+								action: async () => {
+									await deleteFacility(item.id);
+								}
+							});
 						});
 					}}
 				>

@@ -6,10 +6,10 @@ import {
 	createOnboardingSlideSchema,
 	updateOnboardingSlideSchema
 } from '$lib/schemas/onboarding-slide';
-import { requireAppAccess } from '$lib/server/auth-guard';
+import { requireSettingsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireSettingsAccess(getRequestEvent());
 }
 
 export const getOnboardingSlides = query(async () =>

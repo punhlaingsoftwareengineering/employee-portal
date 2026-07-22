@@ -3,10 +3,10 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as notificationService from '$lib/server/services/notification';
 import { createNotificationSchema, updateNotificationSchema } from '$lib/schemas/notification';
-import { requireAppAccess, requireUser } from '$lib/server/auth-guard';
+import { requireAppAccess, requireSettingsAccess } from '$lib/server/auth-guard';
 
 async function perms() {
-	return requireAppAccess(getRequestEvent());
+	return requireSettingsAccess(getRequestEvent());
 }
 
 export const getNotifications = query(async () =>
@@ -42,11 +42,11 @@ export const deleteNotification = command(z.string().uuid(), async (id) => {
 });
 
 export const dismissNotification = command(z.string().uuid(), async (id) => {
-	const user = requireUser(getRequestEvent());
-	await notificationService.dismissNotification(user.id, id);
+	const access = await requireAppAccess(getRequestEvent());
+	await notificationService.dismissNotification(access.userId, id);
 });
 
 export const dismissAllNotifications = command(z.array(z.string().uuid()), async (ids) => {
-	const user = requireUser(getRequestEvent());
-	await notificationService.dismissAllNotifications(user.id, ids);
+	const access = await requireAppAccess(getRequestEvent());
+	await notificationService.dismissAllNotifications(access.userId, ids);
 });

@@ -2,6 +2,7 @@ export * from './enums';
 export * from './department';
 export * from './facility';
 export * from './employee';
+export * from './pharmacy-master';
 export * from './auth.schema';
 export * from './user-profile';
 export * from './user-department-role';

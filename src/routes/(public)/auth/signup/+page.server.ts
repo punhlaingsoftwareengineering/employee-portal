@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { AUTH_ROUTES } from '$lib/constants/auth-routes';
 import { auth } from '$lib/server/auth';
 import { redirectIfAuthenticated } from '$lib/server/auth-guest';
+import { markOtpSent } from '$lib/server/otp-resend-cooldown';
 import { resolveSafeRedirectTo } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
@@ -41,6 +42,7 @@ export const actions: Actions = {
 		const otpUrl = new URL(AUTH_ROUTES.otp, event.url.origin);
 		otpUrl.searchParams.set('email', email);
 		otpUrl.searchParams.set('redirectTo', redirectTo);
+		markOtpSent(event.cookies, { secure: event.url.protocol === 'https:' });
 		redirect(303, `${otpUrl.pathname}${otpUrl.search}`);
 	}
 };

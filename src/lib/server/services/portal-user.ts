@@ -37,15 +37,19 @@ export async function getUserPermissions(userId: string): Promise<UserPermission
 				navEmployees: assignment.role.navEmployees,
 				navDepartments: assignment.role.navDepartments,
 				navFacilities: assignment.role.navFacilities,
+				navPharmacy: assignment.role.navPharmacy,
 				navTools: assignment.role.navTools,
 				navSettings: assignment.role.navSettings,
+				navCommunity: assignment.role.navCommunity,
 				employeeReadAll: assignment.role.employeeReadAll,
 				employeeWrite: assignment.role.employeeWrite,
 				employeeDelete: assignment.role.employeeDelete,
 				departmentReadAll: assignment.role.departmentReadAll,
 				departmentWrite: assignment.role.departmentWrite,
 				facilityReadAll: assignment.role.facilityReadAll,
-				facilityWrite: assignment.role.facilityWrite
+				facilityWrite: assignment.role.facilityWrite,
+				pharmacyReadAll: assignment.role.pharmacyReadAll,
+				pharmacyWrite: assignment.role.pharmacyWrite
 			}
 		}))
 	};

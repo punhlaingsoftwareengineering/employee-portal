@@ -15,6 +15,7 @@
 		getPortalFontConfig,
 		updatePortalFontConfig
 	} from '$lib/remotes/portal-font-config.remote';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let allowedFonts = $state<AppFont[]>([]);
@@ -76,14 +77,19 @@
 		error = null;
 
 		try {
-			const nextPolicy = await updatePortalFontConfig({
-				allowedFonts,
-				defaultFont
+			await withFormFeedback({
+				successMessage: 'Font policy saved',
+				action: async () => {
+					const nextPolicy = await updatePortalFontConfig({
+						allowedFonts,
+						defaultFont
+					});
+					initPortalFontPolicyFromServer(nextPolicy);
+					if (!nextPolicy.allowedFonts.includes(appSettings.font)) {
+						updateAppSettings({ font: nextPolicy.defaultFont });
+					}
+				}
 			});
-			initPortalFontPolicyFromServer(nextPolicy);
-			if (!nextPolicy.allowedFonts.includes(appSettings.font)) {
-				updateAppSettings({ font: nextPolicy.defaultFont });
-			}
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save font policy';

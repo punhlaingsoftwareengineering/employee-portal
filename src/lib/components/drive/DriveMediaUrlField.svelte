@@ -34,11 +34,11 @@
 </script>
 
 <div class="flex w-full max-w-md flex-col gap-2">
-	<div class="flex gap-2">
+	<div class="flex flex-wrap gap-2">
 		<input
 			type="url"
 			bind:value
-			class="{inputClass} min-w-0 flex-1"
+			class="{inputClass} min-w-0 flex-1 basis-40"
 			{placeholder}
 			{required}
 			{disabled}
@@ -50,7 +50,7 @@
 			{disabled}
 			onclick={() => picker?.open()}
 		>
-			<LucideHardDriveUpload class="size-4" />
+			<LucideHardDriveUpload class="size-4 shrink-0" />
 			Upload
 		</button>
 	</div>

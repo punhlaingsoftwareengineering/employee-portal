@@ -8,6 +8,7 @@
 		getPortalUsers
 	} from '$lib/remotes/portal-user.remote';
 	import type { PortalRole } from '$lib/constants/user-roles';
+	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 
@@ -56,18 +57,23 @@
 		error = null;
 
 		try {
-			await updateUserAccess({
-				userId: portalUser.id,
-				portalRole,
-				assignments:
-					portalRole === 'member'
-						? assignments.filter(
-								(assignment) =>
-									assignment.departmentId && assignment.roleId && assignment.facilityId
-							)
-						: []
+			await withFormFeedback({
+				successMessage: 'User access updated',
+				action: async () => {
+					await updateUserAccess({
+						userId: portalUser!.id,
+						portalRole,
+						assignments:
+							portalRole === 'member'
+								? assignments.filter(
+										(assignment) =>
+											assignment.departmentId && assignment.roleId && assignment.facilityId
+									)
+								: []
+					});
+					void getPortalUsers().refresh();
+				}
 			});
-			void getPortalUsers().refresh();
 			close();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to update user';
