@@ -38,6 +38,9 @@ export class DrivePortalNotConfiguredError extends Error {
 	}
 }
 
+/** Sent to PHH-DRIVE so file owner is the portal user, not the API key creator. */
+export const DRIVE_ON_BEHALF_OF_HEADER = 'X-Drive-On-Behalf-Of';
+
 export type PortalDriveMediaFile = {
 	id: string;
 	name: string;
@@ -94,9 +97,11 @@ function storageProvider(): 'local' | 'tigris' {
 	return 'local';
 }
 
-export function buildDriveAuthHeaders(extra?: HeadersInit): Headers {
+export function buildDriveAuthHeaders(extra?: HeadersInit, onBehalfOfUserId?: string | null): Headers {
 	const headers = new Headers(extra);
 	headers.set('Authorization', `Bearer ${apiKey()}`);
+	const acting = onBehalfOfUserId?.trim();
+	if (acting) headers.set(DRIVE_ON_BEHALF_OF_HEADER, acting);
 	return headers;
 }
 
@@ -106,9 +111,47 @@ export function absolutizeDriveUrl(url: string): string {
 	return `${origin}${url.startsWith('/') ? url : `/${url}`}`;
 }
 
-async function driveFetch(path: string, init?: RequestInit): Promise<Response> {
+/**
+ * Rewrite a browser-facing Drive URL to the Docker-internal origin for server-side fetch.
+ * Avoids TLS/DNS failures when the portal container calls `https://drive.phh.com`.
+ */
+export function rewriteDriveUrlForServerFetch(url: string): {
+	url: string;
+	headers: HeadersInit;
+} {
+	const trimmed = url.trim();
+	const headers: Record<string, string> = {};
+	if (!trimmed.startsWith('http')) return { url: trimmed, headers };
+
+	const internal = DRIVE_INTERNAL_ORIGIN?.trim().replace(/\/$/, '');
+	const publicOrigin = DRIVE_ORIGIN?.trim().replace(/\/$/, '');
+	if (!internal || !publicOrigin) return { url: trimmed, headers };
+
+	try {
+		const parsed = new URL(trimmed);
+		const publicHost = new URL(publicOrigin).host.toLowerCase();
+		if (parsed.host.toLowerCase() !== publicHost) return { url: trimmed, headers };
+
+		const apiOrigin = normalizeDriveApiOrigin(internal);
+		if (new URL(apiOrigin).host.toLowerCase() !== publicHost) {
+			headers.Host = publicHost;
+		}
+		return {
+			url: `${apiOrigin}${parsed.pathname}${parsed.search}`,
+			headers
+		};
+	} catch {
+		return { url: trimmed, headers };
+	}
+}
+
+async function driveFetch(
+	path: string,
+	init?: RequestInit,
+	onBehalfOfUserId?: string | null
+): Promise<Response> {
 	const apiOrigin = driveApiOrigin();
-	const headers = buildDriveAuthHeaders(init?.headers);
+	const headers = buildDriveAuthHeaders(init?.headers, onBehalfOfUserId);
 	const publicHost = new URL(drivePublicOrigin()).host;
 	if (new URL(apiOrigin).host !== publicHost) {
 		headers.set('Host', publicHost);
@@ -120,8 +163,12 @@ async function driveFetch(path: string, init?: RequestInit): Promise<Response> {
 	return res;
 }
 
-async function driveJson<T>(path: string, init?: RequestInit): Promise<T> {
-	const res = await driveFetch(path, init);
+async function driveJson<T>(
+	path: string,
+	init?: RequestInit,
+	onBehalfOfUserId?: string | null
+): Promise<T> {
+	const res = await driveFetch(path, init, onBehalfOfUserId);
 	if (!res.ok) {
 		const text = await res.text();
 		throw new Error(text || `Drive API ${res.status}`);
@@ -197,7 +244,8 @@ async function uploadBytes(
 	parentId: string,
 	fileName: string,
 	mimeType: string,
-	bytes: Uint8Array
+	bytes: Uint8Array,
+	onBehalfOfUserId?: string | null
 ): Promise<string> {
 	const sp = storageProvider();
 	if (bytes.length <= SIMPLE_UPLOAD_MAX_BYTES) {
@@ -207,11 +255,15 @@ async function uploadBytes(
 			storageProvider: sp,
 			parentId
 		});
-		const data = await driveJson<DriveUploadResponse>(`/api/drive/upload?${qs}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/octet-stream' },
-			body: Buffer.from(bytes)
-		});
+		const data = await driveJson<DriveUploadResponse>(
+			`/api/drive/upload?${qs}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/octet-stream' },
+				body: Buffer.from(bytes)
+			},
+			onBehalfOfUserId
+		);
 		const created = data.created?.[0];
 		if (!created?.id) throw new Error('Drive upload did not return a file id');
 		return created.id;
@@ -233,11 +285,15 @@ async function uploadBytes(
 			qs.set('mimeType', mimeType);
 			qs.set('parentId', parentId);
 		}
-		const data = await driveJson<DriveChunkResponse>(`/api/drive/upload/chunk?${qs}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/octet-stream' },
-			body: Buffer.from(chunk)
-		});
+		const data = await driveJson<DriveChunkResponse>(
+			`/api/drive/upload/chunk?${qs}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/octet-stream' },
+				body: Buffer.from(chunk)
+			},
+			onBehalfOfUserId
+		);
 		uploadId = data.uploadId;
 		if (data.done) {
 			const created = data.created?.[0];
@@ -252,10 +308,11 @@ export async function uploadToCategory(
 	category: PortalDriveCategory,
 	fileName: string,
 	mimeType: string,
-	bytes: Uint8Array
+	bytes: Uint8Array,
+	onBehalfOfUserId?: string | null
 ): Promise<{ id: string; name: string; url: string }> {
 	const folderId = await ensureCategoryFolder(category);
-	const fileId = await uploadBytes(folderId, fileName, mimeType, bytes);
+	const fileId = await uploadBytes(folderId, fileName, mimeType, bytes, onBehalfOfUserId);
 	const url = await ensurePublicUrl(fileId);
 	return { id: fileId, name: fileName, url };
 }

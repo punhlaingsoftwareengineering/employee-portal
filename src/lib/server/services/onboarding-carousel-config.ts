@@ -13,7 +13,7 @@ import {
 	ONBOARDING_CAROUSEL_CONFIG_ROW_ID,
 	onboardingCarouselConfig
 } from '$lib/server/db/schema/onboarding-carousel-config';
-import type { UserPermissions } from '$lib/server/permissions';
+import { canSettingsOnboardingUpdate, type UserPermissions } from '$lib/server/permissions';
 
 function clampIntervalMs(value: number): number {
 	return Math.min(
@@ -22,8 +22,8 @@ function clampIntervalMs(value: number): number {
 	);
 }
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsOnboardingUpdate(perms)) error(403, 'Forbidden');
 }
 
 export async function getOnboardingCarouselConfig(): Promise<OnboardingCarouselConfigView> {
@@ -48,7 +48,7 @@ export async function updateOnboardingCarouselConfig(
 	perms: UserPermissions,
 	input: unknown
 ): Promise<OnboardingCarouselConfigView> {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	const data = onboardingCarouselConfigSchema.parse(input);
 	const intervalMs = clampIntervalMs(data.intervalMs);

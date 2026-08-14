@@ -1,6 +1,13 @@
 <script lang="ts">
 	import type { PortalDriveCategory } from '$lib/constants/drive-media-categories';
+	import type { ImageAspectRatio } from '$lib/constants/image-aspect';
+	import { aspectHint } from '$lib/constants/image-aspect';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import {
+		assertImageFileAspect,
+		assertImageUrlAspect,
+		isImageFile
+	} from '$lib/utils/image-aspect-ratio';
 	import { LucideFolderOpen, LucideTrash2, LucideUpload } from '@lucide/svelte';
 
 	type MediaFile = { id: string; name: string; updatedAt: string | null };
@@ -8,10 +15,12 @@
 	let {
 		category,
 		accept = '*/*',
+		aspectRatio = null,
 		onSelect
 	}: {
 		category: PortalDriveCategory;
 		accept?: string;
+		aspectRatio?: ImageAspectRatio | null;
 		onSelect: (url: string) => void;
 	} = $props();
 
@@ -22,6 +31,8 @@
 	let pickingId = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let dragDepth = $state(0);
+
+	const acceptsImages = $derived(accept.includes('image') || accept === '*/*');
 
 	export function open() {
 		error = null;
@@ -56,6 +67,9 @@
 		uploading = true;
 		error = null;
 		try {
+			if (aspectRatio && acceptsImages && isImageFile(file)) {
+				await assertImageFileAspect(file, aspectRatio);
+			}
 			const fd = new FormData();
 			fd.set('file', file);
 			const r = await fetch(`/api/drive-media/${category}/upload`, {
@@ -86,6 +100,11 @@
 			if (!r.ok) throw new Error(await r.text());
 			const j = (await r.json()) as { url?: string };
 			if (!j.url) throw new Error('Pick did not return a URL');
+			if (aspectRatio && acceptsImages) {
+				await assertImageUrlAspect(j.url, aspectRatio, {
+					allowNonImage: accept.includes('pdf') || accept.includes('video')
+				});
+			}
 			onSelect(j.url);
 			close();
 		} catch (e) {
@@ -128,6 +147,9 @@
 		<p class="mt-1 text-sm text-base-content/70">
 			Upload a new file or pick an existing one from the portal folder on PHH-DRIVE.
 		</p>
+		{#if aspectRatio && acceptsImages}
+			<p class="mt-2 text-sm text-primary">{aspectHint(aspectRatio)}</p>
+		{/if}
 
 		<div
 			class="mt-4 rounded-box border-2 border-dashed p-6 text-center transition-colors {dragDepth > 0

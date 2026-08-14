@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Plus, Eye, Pencil, Trash2 } from '@lucide/svelte';
 	import AppDialog from '$lib/components/AppDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
@@ -6,6 +7,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import ServiceIcon from '$lib/components/ServiceIcon.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { permissionFlag } from '$lib/constants/permissions';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteApp } from '$lib/remotes/app.remote';
 	import type { getApps } from '$lib/remotes/app.remote';
@@ -16,44 +18,59 @@
 		apps: Awaited<ReturnType<typeof getApps>>;
 	} = $props();
 
+	const permissions = $derived(page.data.permissions);
+	const canCreate = $derived(permissionFlag(permissions, 'toolsAppCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'toolsAppUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'toolsAppDelete'));
+
 	let appDialog = $state<AppDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 </script>
 
 <AppDialog bind:this={appDialog} />
 
-<div class="mb-4 flex items-center justify-end">
-	<button type="button" class="btn btn-primary gap-2" onclick={() => appDialog?.open()}>
-		<Plus class="h-4 w-4" />
-		New app
-	</button>
-</div>
+{#if canCreate}
+	<div class="mb-4 flex items-center justify-end">
+		<button
+			type="button"
+			class="btn btn-primary gap-2 cursor-pointer"
+			onclick={() => appDialog?.open()}
+		>
+			<Plus class="h-4 w-4" />
+			New app
+		</button>
+	</div>
+{/if}
 
 <DataTable rows={apps} rowKey={(item) => item.id} emptyMessage="No apps yet.">
 	{#snippet actions({ row: item })}
 		<IconActionButton label="View" href="/apps/{item.id}">
 			<Eye class="h-4 w-4" />
 		</IconActionButton>
-		<IconActionButton label="Edit" variant="secondary" onclick={() => appDialog?.open(item)}>
-			<Pencil class="h-4 w-4" />
-		</IconActionButton>
-		<IconActionButton
-			label="Delete"
-			variant="error"
-			disabled={deleteLoading.isPending(item.id)}
-			onclick={async () => {
-				if (!confirm(`Delete app "${item.name}"?`)) return;
-				await deleteLoading.run(item.id, async () => {
-					await deleteApp(item.id);
-				});
-			}}
-		>
-			{#if deleteLoading.isPending(item.id)}
-				<LoadingSpinner size="sm" />
-			{:else}
-				<Trash2 class="h-4 w-4" />
-			{/if}
-		</IconActionButton>
+		{#if canUpdate}
+			<IconActionButton label="Edit" variant="secondary" onclick={() => appDialog?.open(item)}>
+				<Pencil class="h-4 w-4" />
+			</IconActionButton>
+		{/if}
+		{#if canDelete}
+			<IconActionButton
+				label="Delete"
+				variant="error"
+				disabled={deleteLoading.isPending(item.id)}
+				onclick={async () => {
+					if (!confirm(`Delete app "${item.name}"?`)) return;
+					await deleteLoading.run(item.id, async () => {
+						await deleteApp(item.id);
+					});
+				}}
+			>
+				{#if deleteLoading.isPending(item.id)}
+					<LoadingSpinner size="sm" />
+				{:else}
+					<Trash2 class="h-4 w-4" />
+				{/if}
+			</IconActionButton>
+		{/if}
 	{/snippet}
 
 	<DataTableColumn label="Icon" filterText={(item) => item.iconUrl ?? item.name} class="w-10">

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus, Pencil, RefreshCw, Ban } from '@lucide/svelte';
+	import { Plus, Pencil, RefreshCw, Ban, Trash2 } from '@lucide/svelte';
 	import InviteUserDialog from '$lib/components/InviteUserDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
@@ -17,9 +17,18 @@
 		getAllDepartments,
 		getAllFacilities,
 		resendInvite,
-		revokeInvite
+		revokeInvite,
+		deletePortalUser
 	} from '$lib/remotes/portal-user.remote';
 	import { getAccessRoles } from '$lib/remotes/access-role.remote';
+	import { permissionFlag } from '$lib/constants/permissions';
+
+	const permissions = $derived(page.data.permissions);
+	const canInvite = $derived(permissionFlag(permissions, 'usersInvite'));
+	const canUpdate = $derived(permissionFlag(permissions, 'usersUpdate'));
+	const canResend = $derived(permissionFlag(permissions, 'usersInviteResend'));
+	const canRevoke = $derived(permissionFlag(permissions, 'usersInviteRevoke'));
+	const canDelete = $derived(permissions?.isAdmin ?? false);
 
 	let inviteDialog = $state<InviteUserDialog | null>(null);
 	let editUserDialog = $state<EditUserAccessDialog | null>(null);
@@ -102,12 +111,18 @@
 
 	<PrivatePageHeader title="Users" />
 
-	<div class="flex justify-end">
-		<button type="button" class="btn btn-primary gap-2" onclick={() => inviteDialog?.open()}>
-			<Plus class="h-4 w-4" />
-			Invite user
-		</button>
-	</div>
+	{#if canInvite}
+		<div class="flex justify-end">
+			<button
+				type="button"
+				class="btn btn-primary cursor-pointer gap-2"
+				onclick={() => inviteDialog?.open()}
+			>
+				<Plus class="h-4 w-4" />
+				Invite user
+			</button>
+		</div>
+	{/if}
 
 	<div class="mb-10">
 		<h2 class="mb-4 text-lg font-semibold">Users</h2>
@@ -117,13 +132,37 @@
 			emptyMessage="No users yet."
 		>
 			{#snippet actions({ row: portalUser })}
-				{#if portalUser.id !== page.data.user?.id}
+				{#if canUpdate && portalUser.id !== page.data.user?.id}
 					<IconActionButton
 						label="Edit"
 						variant="secondary"
 						onclick={() => editUserDialog?.open(portalUser)}
 					>
 						<Pencil class="h-4 w-4" />
+					</IconActionButton>
+				{/if}
+				{#if canDelete && portalUser.id !== page.data.user?.id}
+					<IconActionButton
+						label="Delete"
+						variant="error"
+						disabled={actionLoading.isPending(`delete:${portalUser.id}`)}
+						onclick={async () => {
+							if (!confirm(`Delete user ${portalUser.name}? This cannot be undone.`)) return;
+							await actionLoading.run(`delete:${portalUser.id}`, async () => {
+								await withFormFeedback({
+									successMessage: 'User deleted',
+									action: async () => {
+										await deletePortalUser(portalUser.id);
+									}
+								});
+							});
+						}}
+					>
+						{#if actionLoading.isPending(`delete:${portalUser.id}`)}
+							<LoadingSpinner size="sm" />
+						{:else}
+							<Trash2 class="h-4 w-4" />
+						{/if}
 					</IconActionButton>
 				{/if}
 			{/snippet}
@@ -192,7 +231,7 @@
 			emptyMessage="No invites yet."
 		>
 			{#snippet actions({ row: invite })}
-				{#if invite.status === 'pending' || invite.status === 'expired' || invite.status === 'revoked'}
+				{#if canResend && (invite.status === 'pending' || invite.status === 'expired' || invite.status === 'revoked')}
 					<IconActionButton
 						label="Resend"
 						variant="secondary"
@@ -215,7 +254,7 @@
 						{/if}
 					</IconActionButton>
 				{/if}
-				{#if invite.status === 'pending'}
+				{#if canRevoke && invite.status === 'pending'}
 					<IconActionButton
 						label="Revoke"
 						variant="error"

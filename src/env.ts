@@ -73,23 +73,25 @@ export const variables = defineEnvVars({
 			'Secret used to sign tokens. For production use 32 characters generated with high entropy. See [Better Auth installation](https://www.better-auth.com/docs/installation).'
 	},
 	SMTP_HOST: {
-		description: 'SMTP server host for auth emails (OTP, verification).',
+		description:
+			'SMTP server host for auth emails (OTP, password reset, invites). Office 365: smtp.office365.com.',
 		schema: optionalString
 	},
 	SMTP_PORT: {
-		description: 'SMTP server port (587 or 465).',
+		description: 'SMTP server port (587 STARTTLS or 465 TLS).',
 		schema: optionalString
 	},
 	SMTP_USER: {
-		description: 'SMTP username / mailbox address.',
+		description: 'SMTP username / mailbox address (must match SMTP_FROM mailbox for Office 365).',
 		schema: optionalString
 	},
 	SMTP_PASS: {
-		description: 'SMTP password or app password.',
+		description:
+			'SMTP password or app password. Office 365 needs Authenticated SMTP enabled on the mailbox.',
 		schema: optionalString
 	},
 	SMTP_FROM: {
-		description: 'From address for outgoing auth emails.',
+		description: 'From address for outgoing auth emails (display name allowed).',
 		schema: optionalString
 	},
 	AUTH_SESSION_EXPIRES_IN: {
@@ -103,11 +105,12 @@ export const variables = defineEnvVars({
 		schema: optionalString
 	},
 	AUTH_SESSION_COOKIE_CACHE_ENABLED: {
-		description: 'Cache session in cookie for faster getSession. Default: `true`.',
+		description:
+			'Cache session in cookie for faster getSession. Default: `false` (off so role/access revoke is immediate).',
 		schema: optionalString
 	},
 	AUTH_SESSION_COOKIE_CACHE_MAX_AGE: {
-		description: 'Cookie session cache TTL (e.g. `5m`, `300`). Default: `5m`.',
+		description: 'Cookie session cache TTL (e.g. `5m`, `300`). Default: `30m` when cache is enabled.',
 		schema: optionalString
 	},
 	AUTH_SESSION_SECURE_COOKIES: {

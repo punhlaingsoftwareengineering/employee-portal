@@ -2,12 +2,8 @@ import { query, command } from '$app/server';
 import { getRequestEvent } from '$app/server';
 import * as serviceService from '$lib/server/services/service';
 import { createServiceSchema, updateServiceSchema } from '$lib/schemas/service';
-import { requireAdmin, requireToolsAccess } from '$lib/server/auth-guard';
+import { requireToolsAccess } from '$lib/server/auth-guard';
 import { z } from 'zod';
-
-async function adminPerms() {
-	return requireAdmin(getRequestEvent());
-}
 
 async function toolsPerms() {
 	const event = getRequestEvent();
@@ -16,7 +12,7 @@ async function toolsPerms() {
 }
 
 export const getServices = query(async () => {
-	await adminPerms();
+	await toolsPerms();
 	return serviceService.listServices();
 });
 
@@ -26,29 +22,29 @@ export const getAvailableServices = query(async () => {
 });
 
 export const getRoleServiceIds = query(z.string().uuid(), async (roleId) => {
-	await adminPerms();
+	await toolsPerms();
 	return serviceService.getRoleServiceIds(roleId);
 });
 
 export const createService = command(createServiceSchema, async (data) => {
-	await adminPerms();
-	const record = await serviceService.createService(data);
+	const { perms } = await toolsPerms();
+	const record = await serviceService.createService(perms, data);
 	void getServices().refresh();
 	void getAvailableServices().refresh();
 	return record;
 });
 
 export const updateService = command(updateServiceSchema, async (data) => {
-	await adminPerms();
-	const record = await serviceService.updateService(data);
+	const { perms } = await toolsPerms();
+	const record = await serviceService.updateService(perms, data);
 	void getServices().refresh();
 	void getAvailableServices().refresh();
 	return record;
 });
 
 export const deleteService = command(z.string().uuid(), async (id) => {
-	await adminPerms();
-	await serviceService.deleteService(id);
+	const { perms } = await toolsPerms();
+	await serviceService.deleteService(perms, id);
 	void getServices().refresh();
 	void getAvailableServices().refresh();
 });

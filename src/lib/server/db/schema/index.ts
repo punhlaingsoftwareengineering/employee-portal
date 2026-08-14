@@ -1,7 +1,9 @@
 export * from './enums';
 export * from './department';
+export * from './department-rating';
 export * from './facility';
 export * from './employee';
+export * from './doctor';
 export * from './pharmacy-master';
 export * from './auth.schema';
 export * from './user-profile';
@@ -24,6 +26,7 @@ export * from './notification';
 export * from './notification-read';
 export * from './portal-theme-config';
 export * from './portal-font-config';
+export * from './portal-font-size-config';
 export * from './support-ticket';
 export * from './community-category';
 export * from './community-link';

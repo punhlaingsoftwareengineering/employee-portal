@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { PublicNotification } from '$lib/schemas/notification';
 	import NotificationIcon from '$lib/components/NotificationIcon.svelte';
-	import { X } from '@lucide/svelte';
+	import { Check, X } from '@lucide/svelte';
 
 	let {
 		notification,
-		onDismiss
+		onMarkRead
 	}: {
 		notification: PublicNotification;
-		onDismiss: (id: string) => void | Promise<void>;
+		onMarkRead: (id: string) => void | Promise<void>;
 	} = $props();
 
 	const priorityClass = $derived(
@@ -21,7 +21,11 @@
 	);
 </script>
 
-<div class="flex items-start gap-2 border-l-4 px-3 py-2 {priorityClass}">
+<div
+	class="flex items-start gap-2 border-l-4 px-3 py-2 {priorityClass} {notification.isRead
+		? 'bg-base-100 opacity-75'
+		: 'bg-base-200/40'}"
+>
 	{#if notification.linkUrl}
 		<a
 			href={notification.linkUrl}
@@ -48,12 +52,19 @@
 			</div>
 		</div>
 	{/if}
-	<button
-		type="button"
-		class="btn btn-ghost btn-xs btn-square shrink-0"
-		aria-label="Dismiss notification"
-		onclick={() => onDismiss(notification.id)}
-	>
-		<X class="h-3.5 w-3.5" />
-	</button>
+	{#if notification.isRead}
+		<span class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-base-content/40" title="Read">
+			<Check class="h-3.5 w-3.5" aria-hidden="true" />
+			<span class="sr-only">Read</span>
+		</span>
+	{:else}
+		<button
+			type="button"
+			class="btn btn-ghost btn-xs btn-square shrink-0"
+			aria-label="Mark as read"
+			onclick={() => onMarkRead(notification.id)}
+		>
+			<X class="h-3.5 w-3.5" />
+		</button>
+	{/if}
 </div>

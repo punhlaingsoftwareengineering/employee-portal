@@ -38,9 +38,27 @@ export const APP_FONT_VALUES = APP_FONTS.map((font) => font.value);
 
 export type AppFont = (typeof APP_FONTS)[number]['value'];
 
+/** Shared across portal, docs, and drive (`phh-ui-font-size`). */
+export const APP_FONT_SIZES = [
+	{ value: 'extra-small', label: 'Extra small', scale: 0.8125 },
+	{ value: 'smaller', label: 'Smaller', scale: 0.875 },
+	{ value: 'normal', label: 'Normal', scale: 1 },
+	{ value: 'larger', label: 'Larger', scale: 1.125 },
+	{ value: 'extra-large', label: 'Extra large', scale: 1.25 }
+] as const;
+
+export const APP_FONT_SIZE_VALUES = APP_FONT_SIZES.map((size) => size.value);
+
+export type AppFontSize = (typeof APP_FONT_SIZES)[number]['value'];
+
+export const APP_FONT_SIZE_SCALE: Record<AppFontSize, number> = Object.fromEntries(
+	APP_FONT_SIZES.map((size) => [size.value, size.scale])
+) as Record<AppFontSize, number>;
+
 export type AppSettings = {
 	theme: AppTheme;
 	font: AppFont;
+	fontSize: AppFontSize;
 	title: string;
 	iconUrl: string | null;
 };
@@ -75,9 +93,24 @@ export function filterAllowedFontOptions(allowedFonts: AppFont[]) {
 	return APP_FONTS.filter((option) => allowedFonts.includes(option.value));
 }
 
+export type PortalFontSizePolicy = {
+	allowedFontSizes: AppFontSize[];
+	defaultFontSize: AppFontSize;
+};
+
+export const DEFAULT_PORTAL_FONT_SIZE_POLICY: PortalFontSizePolicy = {
+	allowedFontSizes: [...APP_FONT_SIZE_VALUES],
+	defaultFontSize: 'normal'
+};
+
+export function filterAllowedFontSizeOptions(allowedFontSizes: AppFontSize[]) {
+	return APP_FONT_SIZES.filter((option) => allowedFontSizes.includes(option.value));
+}
+
 export const DEFAULT_APP_SETTINGS: AppSettings = {
 	theme: SYSTEM_THEME_OPTION,
 	font: 'maple-mono',
+	fontSize: 'normal',
 	title: DEFAULT_APP_TITLE,
 	iconUrl: null
 };

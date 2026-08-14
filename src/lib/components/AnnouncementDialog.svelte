@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { Announcement } from '$lib/server/db/schema/announcement';
 	import type { AnnouncementAccentPreset, AnnouncementType } from '$lib/constants/announcement';
-	import { ANNOUNCEMENT_ACCENT_OPTIONS, ANNOUNCEMENT_TYPES } from '$lib/constants/announcement';
+	import {
+	ANNOUNCEMENT_ACCENT_OPTIONS,
+	ANNOUNCEMENT_IMAGE_HEIGHT_PX,
+	ANNOUNCEMENT_TYPES
+} from '$lib/constants/announcement';
 	import {
 		createAnnouncement,
 		updateAnnouncement,
@@ -10,6 +14,7 @@
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingAnnouncement = $state<Announcement | null>(null);
@@ -188,10 +193,15 @@
 									bind:value={imageUrl}
 									category="announcements"
 									accept="image/*"
+									aspectRatio={IMAGE_ASPECT.announcement}
 									required
 									placeholder="https://example.com/banner.png"
 									disabled={submitting}
 								/>
+								<p class="mt-1 text-xs text-base-content/60">
+									Shown at {ANNOUNCEMENT_IMAGE_HEIGHT_PX}px tall across the full page width. Use a
+									wide strip (20:1), e.g. 1440×{ANNOUNCEMENT_IMAGE_HEIGHT_PX}.
+								</p>
 							</td>
 						</tr>
 					{/if}

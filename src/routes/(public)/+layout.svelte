@@ -6,7 +6,7 @@
 	let { data, children } = $props();
 </script>
 
-<div class="flex min-h-screen flex-col bg-base-200">
+<div class="flex min-h-screen flex-col overscroll-none bg-base-200">
 	{#if data.announcement}
 		<AnnouncementBanner announcement={data.announcement} />
 	{/if}

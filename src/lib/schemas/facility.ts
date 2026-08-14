@@ -7,7 +7,8 @@ export const createFacilitySchema = z.object({
 	description: z.string().max(500).optional(),
 	address: z.string().max(300).optional(),
 	imageUrl: nullableUrl,
-	phone: z.string().max(30).optional()
+	phone: z.string().max(30).optional(),
+	showOnOnboarding: z.boolean().optional()
 });
 
 export const updateFacilitySchema = createFacilitySchema.partial();

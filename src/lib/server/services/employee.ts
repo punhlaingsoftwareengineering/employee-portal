@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, isNull, or } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { employee } from '$lib/server/db/schema/employee';
@@ -10,26 +10,45 @@ import {
 	type UpdateEmployeeInput
 } from '$lib/schemas/employee';
 import {
+	canCreateEmployeeMaster,
 	canDeleteEmployeeMaster,
-	canManageEmployeeMaster,
+	canExcelOverrideEmployeeMaster,
 	canReadEmployeeMaster,
+	canUpdateEmployeeMaster,
 	type UserPermissions
 } from '$lib/server/permissions';
 import {
 	decodeExcelBase64,
+	excelEmployeeNo,
 	excelText,
 	parseExcelBoolean,
 	parseExcelDate,
-	parseExcelRows,
+	parseEmployeeExcelRows,
 	parseExcelTimestamp
 } from '$lib/server/excel-import';
 
+function isUniqueViolation(err: unknown): boolean {
+	return (
+		typeof err === 'object' &&
+		err !== null &&
+		'code' in err &&
+		(err as { code?: string }).code === '23505'
+	);
+}
 function assertCanRead(perms: UserPermissions) {
 	if (!canReadEmployeeMaster(perms)) error(403, 'Forbidden');
 }
 
-function assertCanManage(perms: UserPermissions) {
-	if (!canManageEmployeeMaster(perms)) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canCreateEmployeeMaster(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canUpdateEmployeeMaster(perms)) error(403, 'Forbidden');
+}
+
+function assertCanExcelOverride(perms: UserPermissions) {
+	if (!canExcelOverrideEmployeeMaster(perms)) error(403, 'Forbidden');
 }
 
 function assertCanDelete(perms: UserPermissions) {
@@ -39,6 +58,14 @@ function assertCanDelete(perms: UserPermissions) {
 function normalizeEntryDate(value: CreateEmployeeInput['entryDate']) {
 	if (value == null) return null;
 	return value instanceof Date ? value : new Date(value);
+}
+
+/** Public directory — hide inactive employees. */
+export async function listPublicEmployees() {
+	return db.query.employee.findMany({
+		where: or(eq(employee.active, true), isNull(employee.active)),
+		orderBy: [asc(employee.employeeName), asc(employee.employeeNo)]
+	});
 }
 
 export async function listEmployees(perms: UserPermissions) {
@@ -59,29 +86,44 @@ export async function getEmployee(perms: UserPermissions, id: string) {
 }
 
 export async function createEmployee(perms: UserPermissions, input: CreateEmployeeInput) {
-	assertCanManage(perms);
+	assertCanCreate(perms);
 	const data = createEmployeeSchema.parse(input);
 	const existing = await db.query.employee.findFirst({
 		where: eq(employee.id, data.id)
 	});
-	if (existing) error(409, 'Employee id already exists');
+	if (existing) {
+		error(
+			409,
+			`Employee ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+		);
+	}
 
-	const [record] = await db
-		.insert(employee)
-		.values({
-			id: data.id,
-			employeeNo: data.employeeNo ?? null,
-			employeeName: data.employeeName ?? null,
-			position: data.position ?? null,
-			department: data.department ?? null,
-			joinDate: data.joinDate ?? null,
-			facility: data.facility ?? null,
-			userId: data.userId ?? null,
-			entryDate: normalizeEntryDate(data.entryDate),
-			active: data.active ?? null
-		})
-		.returning();
-	return record;
+	try {
+		const [record] = await db
+			.insert(employee)
+			.values({
+				id: data.id,
+				employeeNo: data.employeeNo ?? null,
+				employeeName: data.employeeName ?? null,
+				position: data.position ?? null,
+				department: data.department ?? null,
+				joinDate: data.joinDate ?? null,
+				facility: data.facility ?? null,
+				userId: data.userId ?? null,
+				entryDate: normalizeEntryDate(data.entryDate),
+				active: data.active ?? null
+			})
+			.returning();
+		return record;
+	} catch (err) {
+		if (isUniqueViolation(err)) {
+			error(
+				409,
+				`Employee ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+			);
+		}
+		throw err;
+	}
 }
 
 export async function updateEmployee(
@@ -89,7 +131,7 @@ export async function updateEmployee(
 	id: string,
 	input: UpdateEmployeeInput
 ) {
-	assertCanManage(perms);
+	assertCanUpdate(perms);
 	await getEmployee(perms, id);
 	const data = updateEmployeeSchema.parse(input);
 
@@ -117,36 +159,92 @@ export async function deleteEmployee(perms: UserPermissions, id: string) {
 	await db.delete(employee).where(eq(employee.id, id));
 }
 
+function slugPart(value: string | null): string {
+	return (value ?? '')
+		.toLowerCase()
+		.replace(/\u00a0/g, ' ')
+		.trim()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+		.slice(0, 40);
+}
+
+function employeeRowId(
+	employeeNo: string | null,
+	employeeName: string | null,
+	position: string | null,
+	facility: string | null,
+	rowIndex: number
+): string {
+	if (employeeNo) return employeeNo;
+	const slug = [employeeName, position, facility].map(slugPart).filter(Boolean).join('_');
+	const base = slug ? `nf-${slug}` : `nf-row-${rowIndex}`;
+	return base.slice(0, 100);
+}
+
 export async function overrideEmployeesFromExcel(
 	perms: UserPermissions,
 	input: OverrideEmployeesFromExcelInput
 ) {
-	assertCanManage(perms);
+	assertCanExcelOverride(perms);
 	const bytes = decodeExcelBase64(input.fileBase64);
-	const rows = parseExcelRows(bytes);
+	const rows = parseEmployeeExcelRows(bytes);
 
 	if (rows.length === 0) error(400, 'Excel file has no data rows');
 
-	const values = rows.map((row, index) => {
-		const id = excelText(row, 'id');
-		if (!id) error(400, `Row ${index + 2}: id is required`);
-		return {
+	const values: {
+		id: string;
+		employeeNo: string | null;
+		employeeName: string | null;
+		position: string | null;
+		department: string | null;
+		joinDate: string | null;
+		facility: string | null;
+		entryDate: Date | null;
+		userId: string | null;
+		active: boolean | null;
+	}[] = [];
+	const usedIds = new Set<string>();
+
+	for (let index = 0; index < rows.length; index++) {
+		const row = rows[index]!;
+		const rowIndex = index + 2;
+		const employeeNo = excelEmployeeNo(row, 'emp_no', 'employee_no', 'employeeno', 'id');
+		const employeeName = excelText(row, 'name', 'employee_name', 'employeename');
+		if (!employeeNo && !employeeName) continue;
+
+		const position = excelText(row, 'position');
+		const department = excelText(row, 'department');
+		const facility = excelText(row, 'facility');
+		let id = employeeRowId(employeeNo, employeeName, position, facility, rowIndex);
+		if (usedIds.has(id)) {
+			if (employeeNo) {
+				error(400, `Excel file contains duplicate Emp No "${employeeNo}"`);
+			}
+			id = `${id.slice(0, 90)}-${rowIndex}`.slice(0, 100);
+		}
+		usedIds.add(id);
+		values.push({
 			id,
-			employeeNo: excelText(row, 'employee_no', 'employeeno'),
-			employeeName: excelText(row, 'employee_name', 'employeename'),
-			position: excelText(row, 'position'),
-			department: excelText(row, 'department'),
-			joinDate: parseExcelDate(row.join_date ?? row.joindate),
-			facility: excelText(row, 'facility'),
+			employeeNo,
+			employeeName,
+			position,
+			department,
+			joinDate: parseExcelDate(
+				row.joined_date ?? row.join_date ?? row.joindate ?? row.joineddate
+			),
+			facility,
 			entryDate: parseExcelTimestamp(row.entry_date ?? row.entrydate),
 			userId: excelText(row, 'user_id', 'userid'),
-			active: parseExcelBoolean(row.active)
-		};
-	});
+			active: parseExcelBoolean(row.active) ?? true
+		});
+	}
 
-	const ids = values.map((row) => row.id);
-	if (new Set(ids).size !== ids.length) {
-		error(400, 'Excel file contains duplicate id values');
+	if (values.length === 0) {
+		error(
+			400,
+			'Excel headers did not match employee columns. Expected: Emp No, Name, Position, Department, Joined Date, Facility'
+		);
 	}
 
 	await db.delete(employee);

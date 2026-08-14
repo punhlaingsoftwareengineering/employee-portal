@@ -9,14 +9,27 @@ import {
 	type CreateCommunityCategoryInput,
 	type UpdateCommunityCategoryInput
 } from '$lib/schemas/community-category';
-import { canManageCommunity, type UserPermissions } from '$lib/server/permissions';
+import {
+	canCommunityCategoryCreate,
+	canCommunityCategoryDelete,
+	canCommunityCategoryUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 import { getCommunityLinksForViewer } from '$lib/server/services/community-link';
 
 const categoryOrder = [asc(communityCategory.sortOrder), asc(communityCategory.createdAt)];
 const linkOrder = [asc(communityLink.sortOrder), asc(communityLink.createdAt)];
 
-function requireCommunityManage(perms: UserPermissions) {
-	if (!canManageCommunity(perms)) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canCommunityCategoryCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canCommunityCategoryUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canCommunityCategoryDelete(perms)) error(403, 'Forbidden');
 }
 
 async function listCommunitySectionsWithLinks(
@@ -77,7 +90,7 @@ export async function createCommunityCategory(
 	perms: UserPermissions,
 	input: CreateCommunityCategoryInput
 ) {
-	requireCommunityManage(perms);
+	assertCanCreate(perms);
 
 	const data = createCommunityCategorySchema.parse(input);
 	const [record] = await db.insert(communityCategory).values(data).returning();
@@ -89,7 +102,7 @@ export async function updateCommunityCategory(
 	id: string,
 	input: UpdateCommunityCategoryInput
 ) {
-	requireCommunityManage(perms);
+	assertCanUpdate(perms);
 
 	await getCommunityCategory(perms, id);
 	const data = updateCommunityCategorySchema.parse(input);
@@ -104,7 +117,7 @@ export async function updateCommunityCategory(
 }
 
 export async function deleteCommunityCategory(perms: UserPermissions, id: string) {
-	requireCommunityManage(perms);
+	assertCanDelete(perms);
 
 	await getCommunityCategory(perms, id);
 	await db.delete(communityCategory).where(eq(communityCategory.id, id));

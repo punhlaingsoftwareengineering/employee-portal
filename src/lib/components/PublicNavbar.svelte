@@ -3,6 +3,7 @@
 	import PortalIcon from '$lib/components/PortalIcon.svelte';
 	import NotificationBell from '$lib/components/NotificationBell.svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
+	import { APP_VERSION } from '$lib/app-version';
 	import { DEFAULT_APP_TITLE } from '$lib/constants/app-settings';
 	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 	import { appSettings } from '$lib/app-settings.svelte';
@@ -52,7 +53,12 @@
 	<div class="navbar-start">
 		<a href={PUBLIC_ROUTES.onboarding} class="btn btn-ghost gap-2 text-xl font-bold">
 			<PortalIcon iconUrl={appSettings.iconUrl} class="h-6 w-6" />
-			{appSettings.title || DEFAULT_APP_TITLE}
+			<span class="inline-flex items-baseline gap-1.5">
+				{appSettings.title || DEFAULT_APP_TITLE}
+				<span class="text-[10px] font-medium tracking-normal text-base-content/45"
+					>v{APP_VERSION}</span
+				>
+			</span>
 		</a>
 	</div>
 

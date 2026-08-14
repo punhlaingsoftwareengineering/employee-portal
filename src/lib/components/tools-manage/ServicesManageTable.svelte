@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Plus, ExternalLink, Pencil, Trash2 } from '@lucide/svelte';
 	import ServiceDialog from '$lib/components/ServiceDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
@@ -6,6 +7,7 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import ServiceIcon from '$lib/components/ServiceIcon.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { permissionFlag } from '$lib/constants/permissions';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteService } from '$lib/remotes/service.remote';
 	import { isBuiltinServiceId } from '$lib/constants/builtin-services';
@@ -18,32 +20,45 @@
 		services: Awaited<ReturnType<typeof getServices>>;
 	} = $props();
 
+	const permissions = $derived(page.data.permissions);
+	const canCreate = $derived(permissionFlag(permissions, 'toolsServiceCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'toolsServiceUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'toolsServiceDelete'));
+
 	let serviceDialog = $state<ServiceDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 </script>
 
 <ServiceDialog bind:this={serviceDialog} />
 
-<div class="mb-4 flex items-center justify-end">
-	<button type="button" class="btn btn-primary gap-2" onclick={() => serviceDialog?.open()}>
-		<Plus class="h-4 w-4" />
-		New service
-	</button>
-</div>
+{#if canCreate}
+	<div class="mb-4 flex items-center justify-end">
+		<button
+			type="button"
+			class="btn btn-primary gap-2 cursor-pointer"
+			onclick={() => serviceDialog?.open()}
+		>
+			<Plus class="h-4 w-4" />
+			New service
+		</button>
+	</div>
+{/if}
 
 <DataTable rows={services} rowKey={(item) => item.id} emptyMessage="No services yet.">
 	{#snippet actions({ row: item })}
 		<IconActionButton label="Open" href={item.link} external>
 			<ExternalLink class="h-4 w-4" />
 		</IconActionButton>
-		<IconActionButton
-			label="Edit"
-			variant="secondary"
-			onclick={() => serviceDialog?.open(item)}
-		>
-			<Pencil class="h-4 w-4" />
-		</IconActionButton>
-		{#if !isBuiltinServiceId(item.id)}
+		{#if canUpdate}
+			<IconActionButton
+				label="Edit"
+				variant="secondary"
+				onclick={() => serviceDialog?.open(item)}
+			>
+				<Pencil class="h-4 w-4" />
+			</IconActionButton>
+		{/if}
+		{#if canDelete && !isBuiltinServiceId(item.id)}
 			<IconActionButton
 				label="Delete"
 				variant="error"

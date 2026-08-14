@@ -20,6 +20,160 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
+	import {
+		emptyPermissionFlags,
+		type AccessRolePermissionFlags,
+		type AccessRolePermissionKey
+	} from '$lib/constants/access-role-permissions';
+
+	type FlagOption = { key: AccessRolePermissionKey; label: string };
+	type FlagSection = { title: string; hint?: string; flags: FlagOption[] };
+
+	const NAV_DEFAULTS: Partial<AccessRolePermissionFlags> = {
+		navDashboard: true,
+		navEmployees: true,
+		navDepartments: true,
+		navFacilities: true,
+		navPharmacy: true,
+		navDoctors: true,
+		navTools: true
+	};
+
+	const FLAG_SECTIONS: FlagSection[] = [
+		{
+			title: 'Sidebar navigation',
+			hint: 'Controls which sidebar buttons this role grants. Users still need matching permissions / tool assignment to access pages.',
+			flags: [
+				{ key: 'navDashboard', label: 'Dashboard' },
+				{ key: 'navEmployees', label: 'Employees' },
+				{ key: 'navDepartments', label: 'Departments' },
+				{ key: 'navFacilities', label: 'Facilities' },
+				{ key: 'navPharmacy', label: 'Pharmacy' },
+				{ key: 'navDoctors', label: 'Doctors' },
+				{ key: 'navTools', label: 'Tools' },
+				{ key: 'navSettings', label: 'Settings' },
+				{ key: 'navCommunity', label: 'Community' },
+				{ key: 'navUsers', label: 'Users' },
+				{ key: 'navRoles', label: 'Roles' }
+			]
+		},
+		{
+			title: 'Employees',
+			flags: [
+				{ key: 'employeeReadAll', label: 'View all departments' },
+				{ key: 'employeeCreate', label: 'Manual add' },
+				{ key: 'employeeUpdate', label: 'Edit row' },
+				{ key: 'employeeDelete', label: 'Delete' },
+				{ key: 'employeeExcelOverride', label: 'Excel override' }
+			]
+		},
+		{
+			title: 'Doctors',
+			flags: [
+				{ key: 'doctorReadAll', label: 'View table' },
+				{ key: 'doctorCreate', label: 'Manual add' },
+				{ key: 'doctorUpdate', label: 'Edit row' },
+				{ key: 'doctorDelete', label: 'Delete' },
+				{ key: 'doctorExcelOverride', label: 'Excel override' }
+			]
+		},
+		{
+			title: 'Pharmacy',
+			flags: [
+				{ key: 'pharmacyReadAll', label: 'View table' },
+				{ key: 'pharmacyCreate', label: 'Manual add' },
+				{ key: 'pharmacyUpdate', label: 'Edit row' },
+				{ key: 'pharmacyDelete', label: 'Delete' },
+				{ key: 'pharmacyExcelOverride', label: 'Excel override' }
+			]
+		},
+		{
+			title: 'Departments',
+			flags: [
+				{ key: 'departmentReadAll', label: 'View all' },
+				{ key: 'departmentCreate', label: 'Manual add' },
+				{ key: 'departmentUpdate', label: 'Edit (assigned)' },
+				{ key: 'departmentDelete', label: 'Delete (assigned)' }
+			]
+		},
+		{
+			title: 'Facilities',
+			flags: [
+				{ key: 'facilityReadAll', label: 'View all' },
+				{ key: 'facilityCreate', label: 'Manual add' },
+				{ key: 'facilityUpdate', label: 'Edit (assigned)' },
+				{ key: 'facilityDelete', label: 'Delete (assigned)' }
+			]
+		},
+		{
+			title: 'Users',
+			flags: [
+				{ key: 'usersRead', label: 'View table' },
+				{ key: 'usersInvite', label: 'Invite user' },
+				{ key: 'usersUpdate', label: 'Edit access' },
+				{ key: 'usersInviteResend', label: 'Resend invite' },
+				{ key: 'usersInviteRevoke', label: 'Revoke invite' }
+			]
+		},
+		{
+			title: 'Roles',
+			flags: [
+				{ key: 'rolesRead', label: 'View table' },
+				{ key: 'rolesCreate', label: 'Create role' },
+				{ key: 'rolesUpdate', label: 'Edit role' },
+				{ key: 'rolesDelete', label: 'Delete role' }
+			]
+		},
+		{
+			title: 'Community',
+			flags: [
+				{ key: 'communityCategoryCreate', label: 'Add category' },
+				{ key: 'communityCategoryUpdate', label: 'Edit category' },
+				{ key: 'communityCategoryDelete', label: 'Delete category' },
+				{ key: 'communityLinkCreate', label: 'Add link' },
+				{ key: 'communityLinkUpdate', label: 'Edit link' },
+				{ key: 'communityLinkDelete', label: 'Delete link' }
+			]
+		},
+		{
+			title: 'Settings',
+			flags: [
+				{ key: 'settingsThemeUpdate', label: 'Theme / font policies' },
+				{ key: 'settingsNewsletterCreate', label: 'Newsletter add' },
+				{ key: 'settingsNewsletterUpdate', label: 'Newsletter edit' },
+				{ key: 'settingsNewsletterDelete', label: 'Newsletter delete' },
+				{ key: 'settingsOnboardingCreate', label: 'Onboarding add' },
+				{ key: 'settingsOnboardingUpdate', label: 'Onboarding edit' },
+				{ key: 'settingsOnboardingDelete', label: 'Onboarding delete' },
+				{ key: 'settingsAnnouncementCreate', label: 'Announcement add' },
+				{ key: 'settingsAnnouncementUpdate', label: 'Announcement edit' },
+				{ key: 'settingsAnnouncementDelete', label: 'Announcement delete' },
+				{ key: 'settingsSoundCreate', label: 'Sound add' },
+				{ key: 'settingsSoundUpdate', label: 'Sound edit' },
+				{ key: 'settingsSoundDelete', label: 'Sound delete' },
+				{ key: 'settingsNotificationCreate', label: 'Notification add' },
+				{ key: 'settingsNotificationUpdate', label: 'Notification edit' },
+				{ key: 'settingsNotificationDelete', label: 'Notification delete' }
+			]
+		},
+		{
+			title: 'Tools manage',
+			flags: [
+				{ key: 'toolsServiceCreate', label: 'Service add' },
+				{ key: 'toolsServiceUpdate', label: 'Service edit' },
+				{ key: 'toolsServiceDelete', label: 'Service delete' },
+				{ key: 'toolsAppCreate', label: 'App add' },
+				{ key: 'toolsAppUpdate', label: 'App edit' },
+				{ key: 'toolsAppDelete', label: 'App delete' },
+				{ key: 'toolsGuideCreate', label: 'Guide add' },
+				{ key: 'toolsGuideUpdate', label: 'Guide edit' },
+				{ key: 'toolsGuideDelete', label: 'Guide delete' },
+				{ key: 'toolsLearningCreate', label: 'Learning add' },
+				{ key: 'toolsLearningUpdate', label: 'Learning edit' },
+				{ key: 'toolsLearningDelete', label: 'Learning delete' }
+			]
+		}
+	];
 
 	let {
 		allServices = [],
@@ -35,23 +189,7 @@
 	let editingRole = $state<AccessRole | null>(null);
 	let name = $state('');
 	let description = $state('');
-	let employeeReadAll = $state(false);
-	let employeeWrite = $state(false);
-	let employeeDelete = $state(false);
-	let departmentReadAll = $state(false);
-	let departmentWrite = $state(false);
-	let facilityReadAll = $state(false);
-	let facilityWrite = $state(false);
-	let pharmacyReadAll = $state(false);
-	let pharmacyWrite = $state(false);
-	let navDashboard = $state(true);
-	let navEmployees = $state(true);
-	let navDepartments = $state(true);
-	let navFacilities = $state(true);
-	let navPharmacy = $state(true);
-	let navTools = $state(true);
-	let navSettings = $state(false);
-	let navCommunity = $state(false);
+	let flags = $state<AccessRolePermissionFlags>(emptyPermissionFlags(NAV_DEFAULTS));
 	let selectedServiceIds = $state<string[]>([]);
 	let selectedAppIds = $state<string[]>([]);
 	let selectedCommunityLinkIds = $state<string[]>([]);
@@ -63,29 +201,6 @@
 
 	const assignableServices = $derived(allServices.filter((item) => !item.isPublic));
 	const assignableApps = $derived(allApps.filter((item) => !item.isPublic));
-
-	const allPermissionsSelected = $derived(
-		employeeReadAll &&
-			employeeWrite &&
-			employeeDelete &&
-			departmentReadAll &&
-			departmentWrite &&
-			facilityReadAll &&
-			facilityWrite &&
-			pharmacyReadAll &&
-			pharmacyWrite
-	);
-
-	const allNavSelected = $derived(
-		navDashboard &&
-			navEmployees &&
-			navDepartments &&
-			navFacilities &&
-			navPharmacy &&
-			navTools &&
-			navSettings &&
-			navCommunity
-	);
 
 	const allServicesSelected = $derived(
 		assignableServices.length > 0 &&
@@ -119,7 +234,35 @@
 		return padded;
 	}
 
-	export async function open(existing?: (AccessRole & { serviceCount?: number; appCount?: number }) | null) {
+	function sectionSelected(section: FlagSection): boolean {
+		return section.flags.every((flag) => flags[flag.key]);
+	}
+
+	function setSection(section: FlagSection, selected: boolean) {
+		const next = { ...flags };
+		for (const flag of section.flags) {
+			next[flag.key] = selected;
+		}
+		flags = next;
+	}
+
+	function setFlag(key: AccessRolePermissionKey, checked: boolean) {
+		flags = { ...flags, [key]: checked };
+	}
+
+	function pickExistingFlags(existing: AccessRole): AccessRolePermissionFlags {
+		const picked: Partial<AccessRolePermissionFlags> = {};
+		for (const section of FLAG_SECTIONS) {
+			for (const flag of section.flags) {
+				picked[flag.key] = Boolean(existing[flag.key]);
+			}
+		}
+		return emptyPermissionFlags(picked);
+	}
+
+	export async function open(
+		existing?: (AccessRole & { serviceCount?: number; appCount?: number }) | null
+	) {
 		editingRole = existing ?? null;
 		error = null;
 		opening = true;
@@ -128,23 +271,7 @@
 		try {
 			name = existing?.name ?? '';
 			description = existing?.description ?? '';
-			navDashboard = existing?.navDashboard ?? true;
-			navEmployees = existing?.navEmployees ?? true;
-			navDepartments = existing?.navDepartments ?? true;
-			navFacilities = existing?.navFacilities ?? true;
-			navPharmacy = existing?.navPharmacy ?? true;
-			navTools = existing?.navTools ?? true;
-			navSettings = existing?.navSettings ?? false;
-			navCommunity = existing?.navCommunity ?? false;
-			employeeReadAll = existing?.employeeReadAll ?? false;
-			employeeWrite = existing?.employeeWrite ?? false;
-			employeeDelete = existing?.employeeDelete ?? false;
-			departmentReadAll = existing?.departmentReadAll ?? false;
-			departmentWrite = existing?.departmentWrite ?? false;
-			facilityReadAll = existing?.facilityReadAll ?? false;
-			facilityWrite = existing?.facilityWrite ?? false;
-			pharmacyReadAll = existing?.pharmacyReadAll ?? false;
-			pharmacyWrite = existing?.pharmacyWrite ?? false;
+			flags = existing ? pickExistingFlags(existing) : emptyPermissionFlags(NAV_DEFAULTS);
 			const assignableServiceIds = new Set(
 				allServices.filter((s) => !s.isPublic).map((s) => s.id)
 			);
@@ -173,29 +300,6 @@
 		selectedServiceIds = [];
 		selectedAppIds = [];
 		selectedCommunityLinkIds = [];
-	}
-
-	function setAllPermissions(selected: boolean) {
-		employeeReadAll = selected;
-		employeeWrite = selected;
-		employeeDelete = selected;
-		departmentReadAll = selected;
-		departmentWrite = selected;
-		facilityReadAll = selected;
-		facilityWrite = selected;
-		pharmacyReadAll = selected;
-		pharmacyWrite = selected;
-	}
-
-	function setAllNav(selected: boolean) {
-		navDashboard = selected;
-		navEmployees = selected;
-		navDepartments = selected;
-		navFacilities = selected;
-		navPharmacy = selected;
-		navTools = selected;
-		navSettings = selected;
-		navCommunity = selected;
 	}
 
 	function setAllServices(selected: boolean) {
@@ -247,28 +351,14 @@
 
 		try {
 			await withFormFeedback({
-				successMessage: isEdit ? 'Role updated' : 'Role created',
+				successMessage: isEdit
+					? 'Role updated. Assigned users must sign in again for the new access to apply.'
+					: 'Role created',
 				action: async () => {
 					const payload = {
 						name: name.trim(),
 						description: description.trim() || undefined,
-						navDashboard,
-						navEmployees,
-						navDepartments,
-						navFacilities,
-						navPharmacy,
-						navTools,
-						navSettings,
-						navCommunity,
-						employeeReadAll,
-						employeeWrite,
-						employeeDelete,
-						departmentReadAll,
-						departmentWrite,
-						facilityReadAll,
-						facilityWrite,
-						pharmacyReadAll,
-						pharmacyWrite,
+						...flags,
 						serviceIds: selectedServiceIds,
 						appIds: selectedAppIds,
 						communityLinkIds: selectedCommunityLinkIds
@@ -309,7 +399,7 @@
 								<input
 									type="text"
 									bind:value={name}
-									class="input input-bordered w-full max-w-md"
+									class="input input-bordered w-full max-w-md cursor-text"
 									required
 								/>
 							</td>
@@ -319,7 +409,7 @@
 							<td class="form-table-field">
 								<textarea
 									bind:value={description}
-									class="textarea textarea-bordered w-full max-w-md"
+									class="textarea textarea-bordered w-full max-w-md cursor-text"
 									rows="2"
 								></textarea>
 							</td>
@@ -327,174 +417,59 @@
 					</tbody>
 				</table>
 
-				<table class="role-dialog-section-table mt-6">
-					<thead>
-						<tr>
-							<th colspan="3">
-								<div class="role-dialog-section-header">
-									<span class="font-semibold">Permissions</span>
-									<label class="role-dialog-select-all">
-										<span>Select all</span>
-										<input
-											type="checkbox"
-											class="checkbox checkbox-sm"
-											checked={allPermissionsSelected}
-											onchange={(event) =>
-												setAllPermissions((event.currentTarget as HTMLInputElement).checked)}
-										/>
-									</label>
-								</div>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={employeeReadAll} />
-									<span>Read employees in all departments</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={employeeWrite} />
-									<span>Create / update employees (assigned departments)</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={employeeDelete} />
-									<span>Delete employees (assigned departments)</span>
-								</label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={departmentReadAll} />
-									<span>Read all departments</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={departmentWrite} />
-									<span>Update departments (assigned departments)</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={facilityReadAll} />
-									<span>Read all facilities</span>
-								</label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={facilityWrite} />
-									<span>Update facilities (assigned facilities)</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={pharmacyReadAll} />
-									<span>Read pharmacy master</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={pharmacyWrite} />
-									<span>Manage pharmacy master</span>
-								</label>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-
-				<table class="role-dialog-section-table mt-6">
-					<thead>
-						<tr>
-							<th colspan="3">
-								<div class="role-dialog-section-header">
-									<div>
-										<span class="font-semibold">Sidebar navigation</span>
-										<p class="mt-1 text-xs font-normal text-base-content/60">
-											Controls which sidebar buttons this role grants. Users still need matching
-											permissions / tool assignment to access pages.
-										</p>
+				{#each FLAG_SECTIONS as section (section.title)}
+					<table class="role-dialog-section-table mt-6">
+						<thead>
+							<tr>
+								<th colspan="3">
+									<div class="role-dialog-section-header">
+										<div>
+											<span class="font-semibold">{section.title}</span>
+											{#if section.hint}
+												<p class="mt-1 text-xs font-normal text-base-content/60">{section.hint}</p>
+											{/if}
+										</div>
+										<label class="role-dialog-select-all shrink-0">
+											<span>Select all</span>
+											<input
+												type="checkbox"
+												class="checkbox checkbox-sm cursor-pointer"
+												checked={sectionSelected(section)}
+												onchange={(event) =>
+													setSection(section, (event.currentTarget as HTMLInputElement).checked)}
+											/>
+										</label>
 									</div>
-									<label class="role-dialog-select-all shrink-0">
-										<span>Select all</span>
-										<input
-											type="checkbox"
-											class="checkbox checkbox-sm"
-											checked={allNavSelected}
-											onchange={(event) =>
-												setAllNav((event.currentTarget as HTMLInputElement).checked)}
-										/>
-									</label>
-								</div>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navDashboard} />
-									<span>Dashboard</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navEmployees} />
-									<span>Employees</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navDepartments} />
-									<span>Departments</span>
-								</label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navFacilities} />
-									<span>Facilities</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navPharmacy} />
-									<span>Pharmacy</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navTools} />
-									<span>Tools</span>
-								</label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navSettings} />
-									<span>Settings</span>
-								</label>
-							</td>
-							<td>
-								<label class="role-dialog-checkbox">
-									<input type="checkbox" class="checkbox checkbox-sm" bind:checked={navCommunity} />
-									<span>Community</span>
-								</label>
-							</td>
-							<td></td>
-						</tr>
-					</tbody>
-				</table>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each chunk(section.flags, 3) as row, rowIndex (rowIndex)}
+								<tr>
+									{#each padRow(row, 3) as item, colIndex (item?.key ?? `empty-${section.title}-${rowIndex}-${colIndex}`)}
+										<td>
+											{#if item}
+												<label class="role-dialog-checkbox">
+													<input
+														type="checkbox"
+														class="checkbox checkbox-sm cursor-pointer"
+														checked={flags[item.key]}
+														onchange={(event) =>
+															setFlag(
+																item.key,
+																(event.currentTarget as HTMLInputElement).checked
+															)}
+													/>
+													<span>{item.label}</span>
+												</label>
+											{/if}
+										</td>
+									{/each}
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{/each}
 
 				<div class="mt-6">
 					<h4 class="font-semibold">Available tools</h4>
@@ -513,7 +488,7 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm"
+													class="checkbox checkbox-sm cursor-pointer"
 													checked={allServicesSelected}
 													onchange={(event) =>
 														setAllServices((event.currentTarget as HTMLInputElement).checked)}
@@ -540,7 +515,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm"
+															class="checkbox checkbox-sm cursor-pointer"
 															checked={selectedServiceIds.includes(item.id)}
 															onchange={(event) =>
 																toggleService(
@@ -577,7 +552,7 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm"
+													class="checkbox checkbox-sm cursor-pointer"
 													checked={allAppsSelected}
 													onchange={(event) =>
 														setAllApps((event.currentTarget as HTMLInputElement).checked)}
@@ -604,7 +579,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm"
+															class="checkbox checkbox-sm cursor-pointer"
 															checked={selectedAppIds.includes(item.id)}
 															onchange={(event) =>
 																toggleApp(
@@ -641,7 +616,7 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm"
+													class="checkbox checkbox-sm cursor-pointer"
 													checked={allCommunityLinksSelected}
 													onchange={(event) =>
 														setAllCommunityLinks(
@@ -657,9 +632,7 @@
 						<tbody>
 							{#if allCommunityLinks.length === 0}
 								<tr>
-									<td colspan="3" class="text-sm text-base-content/60">
-										No community links yet.
-									</td>
+									<td colspan="3" class="text-sm text-base-content/60">No community links yet.</td>
 								</tr>
 							{:else}
 								{#each communityLinkRows as row, rowIndex (rowIndex)}
@@ -671,7 +644,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm"
+															class="checkbox checkbox-sm cursor-pointer"
 															checked={selectedCommunityLinkIds.includes(item.id)}
 															onchange={(event) =>
 																toggleCommunityLink(
@@ -681,7 +654,9 @@
 														/>
 														<span class="flex items-center gap-2">
 															<span
-																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white {getCommunityPlatformColorClass(item.platform)}"
+																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white {getCommunityPlatformColorClass(
+																	item.platform
+																)}"
 															>
 																<LinkIcon class="h-3 w-3" />
 															</span>
@@ -710,10 +685,10 @@
 				{/if}
 
 				<div class="modal-action">
-					<button type="button" class="btn btn-ghost" onclick={close} disabled={submitting}
+					<button type="button" class="btn btn-ghost cursor-pointer" onclick={close} disabled={submitting}
 						>Cancel</button
 					>
-					<button type="submit" class="btn btn-primary" disabled={submitting}>
+					<button type="submit" class="btn btn-primary cursor-pointer" disabled={submitting}>
 						{#if submitting}
 							<LoadingSpinner size="sm" />
 						{:else}

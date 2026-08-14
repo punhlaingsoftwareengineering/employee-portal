@@ -13,14 +13,11 @@ import {
 	PORTAL_FONT_CONFIG_ROW_ID,
 	portalFontConfig
 } from '$lib/server/db/schema/portal-font-config';
-import type { UserPermissions } from '$lib/server/permissions';
+import { canSettingsThemeUpdate, type UserPermissions } from '$lib/server/permissions';
 
 const VALID_FONTS = new Set<AppFont>(APP_FONT_VALUES);
 
-function normalizePolicy(raw: {
-	allowedFonts: string[];
-	defaultFont: string;
-}): PortalFontPolicy {
+function normalizePolicy(raw: { allowedFonts: string[]; defaultFont: string }): PortalFontPolicy {
 	let allowedFonts = raw.allowedFonts.filter((font): font is AppFont =>
 		VALID_FONTS.has(font as AppFont)
 	);
@@ -38,8 +35,8 @@ function normalizePolicy(raw: {
 	return { allowedFonts, defaultFont };
 }
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsThemeUpdate(perms)) error(403, 'Forbidden');
 }
 
 export async function getPortalFontPolicy(): Promise<PortalFontPolicy> {
@@ -60,7 +57,7 @@ export async function updatePortalFontPolicy(
 	perms: UserPermissions,
 	input: unknown
 ): Promise<PortalFontPolicy> {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	const data = portalFontPolicySchema.parse(input);
 	const policy = normalizePolicy(data);

@@ -5,10 +5,15 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { permissionFlag } from '$lib/constants/permissions';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteToolGuide, getToolGuides } from '$lib/remotes/tool-guide.remote';
 
-	const isAdmin = $derived(page.data.permissions?.isAdmin ?? false);
+	const permissions = $derived(page.data.permissions);
+	const canCreate = $derived(permissionFlag(permissions, 'toolsGuideCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'toolsGuideUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'toolsGuideDelete'));
+
 	let guideDialog = $state<ToolGuideDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 </script>
@@ -18,9 +23,13 @@
 
 	<ToolGuideDialog bind:this={guideDialog} />
 
-	{#if isAdmin}
+	{#if canCreate}
 		<div class="mb-4 flex justify-end">
-			<button type="button" class="btn btn-primary btn-sm gap-2" onclick={() => guideDialog?.open()}>
+			<button
+				type="button"
+				class="btn btn-primary btn-sm gap-2 cursor-pointer"
+				onclick={() => guideDialog?.open()}
+			>
 				<Plus class="h-4 w-4" />
 				Add guide
 			</button>
@@ -32,7 +41,7 @@
 			<div class="card-body items-center text-center">
 				<BookOpen class="h-10 w-10 text-base-content/30" />
 				<p class="text-base-content/70">No guides yet.</p>
-				{#if isAdmin}
+				{#if canCreate}
 					<p class="text-sm text-base-content/50">Add a PDF link to get started.</p>
 				{/if}
 			</div>
@@ -58,38 +67,42 @@
 									{/if}
 								</div>
 							</div>
-							{#if isAdmin}
+							{#if canUpdate || canDelete}
 								<div class="flex shrink-0 gap-1">
-									<IconActionButton
-										label="Edit"
-										variant="secondary"
-										onclick={() => guideDialog?.open(item)}
-									>
-										<Pencil class="h-4 w-4" />
-									</IconActionButton>
-									<IconActionButton
-										label="Delete"
-										variant="error"
-										disabled={deleteLoading.isPending(item.id)}
-										onclick={async () => {
-											if (!confirm(`Delete guide "${item.title}"?`)) return;
-											await deleteLoading.run(item.id, async () => {
-												await deleteToolGuide(item.id);
-											});
-										}}
-									>
-										{#if deleteLoading.isPending(item.id)}
-											<LoadingSpinner size="sm" />
-										{:else}
-											<Trash2 class="h-4 w-4" />
-										{/if}
-									</IconActionButton>
+									{#if canUpdate}
+										<IconActionButton
+											label="Edit"
+											variant="secondary"
+											onclick={() => guideDialog?.open(item)}
+										>
+											<Pencil class="h-4 w-4" />
+										</IconActionButton>
+									{/if}
+									{#if canDelete}
+										<IconActionButton
+											label="Delete"
+											variant="error"
+											disabled={deleteLoading.isPending(item.id)}
+											onclick={async () => {
+												if (!confirm(`Delete guide "${item.title}"?`)) return;
+												await deleteLoading.run(item.id, async () => {
+													await deleteToolGuide(item.id);
+												});
+											}}
+										>
+											{#if deleteLoading.isPending(item.id)}
+												<LoadingSpinner size="sm" />
+											{:else}
+												<Trash2 class="h-4 w-4" />
+											{/if}
+										</IconActionButton>
+									{/if}
 								</div>
 							{/if}
 						</div>
 						<a
 							href={item.pdfUrl}
-							class="btn btn-outline btn-sm gap-2 self-start"
+							class="btn btn-outline btn-sm gap-2 self-start cursor-pointer"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

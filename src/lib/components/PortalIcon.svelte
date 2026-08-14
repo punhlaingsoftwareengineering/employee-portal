@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Building2 } from '@lucide/svelte';
+	import { normalizePublicDriveUrl } from '$lib/utils/drive-public-url';
 
 	let {
 		iconUrl = null,
@@ -8,10 +9,12 @@
 		iconUrl?: string | null;
 		class?: string;
 	} = $props();
+
+	const src = $derived(normalizePublicDriveUrl(iconUrl));
 </script>
 
-{#if iconUrl}
-	<img src={iconUrl} alt="" class="{className} rounded-sm object-contain" />
+{#if src}
+	<img src={src} alt="" class="{className} rounded-sm object-contain" />
 {:else}
 	<Building2 class={className} />
 {/if}

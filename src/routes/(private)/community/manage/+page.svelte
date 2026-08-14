@@ -14,6 +14,16 @@
 		getCommunityPlatformColorClass,
 		getCommunityPlatformIcon
 	} from '$lib/utils/community-platform';
+	import { page } from '$app/state';
+	import { permissionFlag } from '$lib/constants/permissions';
+
+	const permissions = $derived(page.data.permissions);
+	const canCategoryCreate = $derived(permissionFlag(permissions, 'communityCategoryCreate'));
+	const canCategoryUpdate = $derived(permissionFlag(permissions, 'communityCategoryUpdate'));
+	const canCategoryDelete = $derived(permissionFlag(permissions, 'communityCategoryDelete'));
+	const canLinkCreate = $derived(permissionFlag(permissions, 'communityLinkCreate'));
+	const canLinkUpdate = $derived(permissionFlag(permissions, 'communityLinkUpdate'));
+	const canLinkDelete = $derived(permissionFlag(permissions, 'communityLinkDelete'));
 
 	let categoryDialog = $state<CommunityCategoryDialog | null>(null);
 	let linkDialog = $state<CommunityLinkDialog | null>(null);
@@ -33,16 +43,18 @@
 		Organize community links by category for the public community page.
 	</p>
 
-	<div class="mb-6 flex justify-end">
-		<button
-			type="button"
-			class="btn btn-primary btn-sm gap-2"
-			onclick={() => categoryDialog?.open()}
-		>
-			<Plus class="h-4 w-4" />
-			Add category
-		</button>
-	</div>
+	{#if canCategoryCreate}
+		<div class="mb-6 flex justify-end">
+			<button
+				type="button"
+				class="btn btn-primary btn-sm cursor-pointer gap-2"
+				onclick={() => categoryDialog?.open()}
+			>
+				<Plus class="h-4 w-4" />
+				Add category
+			</button>
+		</div>
+	{/if}
 
 	{#if categories.length === 0}
 		<div class="card bg-base-100 shadow-sm">
@@ -68,44 +80,50 @@
 								{/if}
 							</div>
 							<div class="flex flex-wrap gap-2">
-								<button
-									type="button"
-									class="btn btn-outline btn-sm gap-2"
-									onclick={() => linkDialog?.open(null, category.id)}
-								>
-									<Plus class="h-4 w-4" />
-									Add link
-								</button>
-								<IconActionButton
-									label="Edit category"
-									variant="secondary"
-									onclick={() => categoryDialog?.open(category)}
-								>
-									<Pencil class="h-4 w-4" />
-								</IconActionButton>
-								<IconActionButton
-									label="Delete category"
-									variant="error"
-									disabled={deleteCategoryLoading.isPending(category.id)}
-									onclick={async () => {
-										if (
-											!confirm(
-												`Delete category "${category.name}" and all of its links?`
-											)
-										) {
-											return;
-										}
-										await deleteCategoryLoading.run(category.id, async () => {
-											await deleteCommunityCategory(category.id);
-										});
-									}}
-								>
+								{#if canLinkCreate}
+									<button
+										type="button"
+										class="btn btn-outline btn-sm cursor-pointer gap-2"
+										onclick={() => linkDialog?.open(null, category.id)}
+									>
+										<Plus class="h-4 w-4" />
+										Add link
+									</button>
+								{/if}
+								{#if canCategoryUpdate}
+									<IconActionButton
+										label="Edit category"
+										variant="secondary"
+										onclick={() => categoryDialog?.open(category)}
+									>
+										<Pencil class="h-4 w-4" />
+									</IconActionButton>
+								{/if}
+								{#if canCategoryDelete}
+									<IconActionButton
+										label="Delete category"
+										variant="error"
+										disabled={deleteCategoryLoading.isPending(category.id)}
+										onclick={async () => {
+											if (
+												!confirm(
+													`Delete category "${category.name}" and all of its links?`
+												)
+											) {
+												return;
+											}
+											await deleteCategoryLoading.run(category.id, async () => {
+												await deleteCommunityCategory(category.id);
+											});
+										}}
+									>
 									{#if deleteCategoryLoading.isPending(category.id)}
 										<LoadingSpinner size="sm" />
 									{:else}
 										<Trash2 class="h-4 w-4" />
 									{/if}
 								</IconActionButton>
+								{/if}
 							</div>
 						</div>
 
@@ -155,30 +173,34 @@
 											</div>
 										</div>
 										<div class="flex shrink-0 gap-1">
-											<IconActionButton
-												label="Edit link"
-												variant="secondary"
-												onclick={() => linkDialog?.open(link)}
-											>
-												<Pencil class="h-4 w-4" />
-											</IconActionButton>
-											<IconActionButton
-												label="Delete link"
-												variant="error"
-												disabled={deleteLinkLoading.isPending(link.id)}
-												onclick={async () => {
-													if (!confirm(`Delete link "${link.title}"?`)) return;
-													await deleteLinkLoading.run(link.id, async () => {
-														await deleteCommunityLink(link.id);
-													});
-												}}
-											>
-												{#if deleteLinkLoading.isPending(link.id)}
-													<LoadingSpinner size="sm" />
-												{:else}
-													<Trash2 class="h-4 w-4" />
-												{/if}
-											</IconActionButton>
+											{#if canLinkUpdate}
+												<IconActionButton
+													label="Edit link"
+													variant="secondary"
+													onclick={() => linkDialog?.open(link)}
+												>
+													<Pencil class="h-4 w-4" />
+												</IconActionButton>
+											{/if}
+											{#if canLinkDelete}
+												<IconActionButton
+													label="Delete link"
+													variant="error"
+													disabled={deleteLinkLoading.isPending(link.id)}
+													onclick={async () => {
+														if (!confirm(`Delete link "${link.title}"?`)) return;
+														await deleteLinkLoading.run(link.id, async () => {
+															await deleteCommunityLink(link.id);
+														});
+													}}
+												>
+													{#if deleteLinkLoading.isPending(link.id)}
+														<LoadingSpinner size="sm" />
+													{:else}
+														<Trash2 class="h-4 w-4" />
+													{/if}
+												</IconActionButton>
+											{/if}
 										</div>
 									</li>
 								{/each}

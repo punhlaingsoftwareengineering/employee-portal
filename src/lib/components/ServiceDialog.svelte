@@ -7,6 +7,7 @@
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingService = $state<Service | null>(null);
@@ -165,11 +166,12 @@
 								bind:value={iconUrl}
 								category="services"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.square}
 								placeholder="https://example.com/icon.png"
 								disabled={submitting}
 							/>
 							<p class="mt-1 text-xs text-base-content/60">
-								Shown large on the bottom-right of the service card.
+								Shown large on the bottom-right of the service card. Use a square (1:1) icon.
 							</p>
 						</td>
 					</tr>

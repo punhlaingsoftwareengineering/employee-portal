@@ -11,7 +11,11 @@ import {
 	canAccessDepartmentsPage,
 	canAccessFacilitiesPage,
 	canAccessPharmacyPage,
-	canAccessSettings
+	canAccessDoctorsPage,
+	canAccessSettings,
+	canAccessUsersPage,
+	canAccessRolesPage,
+	canAccessToolsManage
 } from '$lib/server/permissions';
 import type { UserPermissions } from '$lib/server/permissions';
 
@@ -66,6 +70,10 @@ export async function requirePharmacyAccess(event: RequestEvent): Promise<UserPe
 	return requirePageAccess(event, canAccessPharmacyPage);
 }
 
+export async function requireDoctorsAccess(event: RequestEvent): Promise<UserPermissions> {
+	return requirePageAccess(event, canAccessDoctorsPage);
+}
+
 export async function requireSettingsAccess(event: RequestEvent): Promise<UserPermissions> {
 	return requirePageAccess(event, canAccessSettings);
 }
@@ -76,6 +84,18 @@ export async function requireCommunityManage(event: RequestEvent): Promise<UserP
 
 export async function requireToolsAccess(event: RequestEvent): Promise<UserPermissions> {
 	return requirePageAccess(event, canAccessTools);
+}
+
+export async function requireUsersAccess(event: RequestEvent): Promise<UserPermissions> {
+	return requirePageAccess(event, canAccessUsersPage);
+}
+
+export async function requireRolesAccess(event: RequestEvent): Promise<UserPermissions> {
+	return requirePageAccess(event, canAccessRolesPage);
+}
+
+export async function requireToolsManageAccess(event: RequestEvent): Promise<UserPermissions> {
+	return requirePageAccess(event, canAccessToolsManage);
 }
 
 export async function requireServiceAccess(

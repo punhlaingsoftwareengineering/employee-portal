@@ -9,12 +9,14 @@ import {
 	type CreateAccessRoleInput,
 	type UpdateAccessRoleInput
 } from '$lib/schemas/access-role';
+import { emptyPermissionFlags } from '$lib/constants/access-role-permissions';
 import { getServiceCountsByRole, setRoleServices } from '$lib/server/services/service';
 import { getAppCountsByRole, setRoleApps } from '$lib/server/services/app';
 import {
 	getCommunityLinkCountsByRole,
 	setRoleCommunityLinks
 } from '$lib/server/services/community-link';
+import { revokeUserSessions } from '$lib/server/revoke-user-sessions';
 import { slugifyName } from '$lib/utils/slug';
 
 const DEFAULT_ROLES: CreateAccessRoleInput[] = [
@@ -22,67 +24,71 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 		name: 'Manager',
 		slug: 'manager',
 		description: 'Full employee CRUD in assigned departments; read-only elsewhere.',
-		navDashboard: true,
-		navEmployees: true,
-		navDepartments: true,
-		navFacilities: true,
-		navPharmacy: true,
-		navTools: true,
-		navSettings: false,
-		navCommunity: false,
-		employeeReadAll: true,
-		employeeWrite: true,
-		employeeDelete: true,
-		departmentReadAll: true,
-		departmentWrite: false,
-		facilityReadAll: true,
-		facilityWrite: false,
-		pharmacyReadAll: true,
-		pharmacyWrite: true
+		...emptyPermissionFlags({
+			navDashboard: true,
+			navEmployees: true,
+			navDepartments: true,
+			navFacilities: true,
+			navPharmacy: true,
+			navDoctors: true,
+			navTools: true,
+			employeeReadAll: true,
+			employeeCreate: true,
+			employeeUpdate: true,
+			employeeDelete: true,
+			employeeExcelOverride: true,
+			departmentReadAll: true,
+			facilityReadAll: true,
+			pharmacyReadAll: true,
+			pharmacyCreate: true,
+			pharmacyUpdate: true,
+			pharmacyDelete: true,
+			pharmacyExcelOverride: true,
+			doctorReadAll: true,
+			doctorCreate: true,
+			doctorUpdate: true,
+			doctorDelete: true,
+			doctorExcelOverride: true
+		})
 	},
 	{
 		name: 'HR',
 		slug: 'hr',
 		description: 'Manage employees in assigned departments only.',
-		navDashboard: true,
-		navEmployees: true,
-		navDepartments: true,
-		navFacilities: true,
-		navPharmacy: true,
-		navTools: true,
-		navSettings: false,
-		navCommunity: false,
-		employeeReadAll: false,
-		employeeWrite: true,
-		employeeDelete: true,
-		departmentReadAll: false,
-		departmentWrite: false,
-		facilityReadAll: false,
-		facilityWrite: false,
-		pharmacyReadAll: false,
-		pharmacyWrite: false
+		...emptyPermissionFlags({
+			navDashboard: true,
+			navEmployees: true,
+			navDepartments: true,
+			navFacilities: true,
+			navPharmacy: true,
+			navDoctors: true,
+			navTools: true,
+			employeeCreate: true,
+			employeeUpdate: true,
+			employeeDelete: true,
+			employeeExcelOverride: true,
+			doctorCreate: true,
+			doctorUpdate: true,
+			doctorDelete: true,
+			doctorExcelOverride: true
+		})
 	},
 	{
 		name: 'Viewer',
 		slug: 'viewer',
 		description: 'Read-only access in assigned departments.',
-		navDashboard: true,
-		navEmployees: true,
-		navDepartments: true,
-		navFacilities: true,
-		navPharmacy: true,
-		navTools: true,
-		navSettings: false,
-		navCommunity: false,
-		employeeReadAll: false,
-		employeeWrite: false,
-		employeeDelete: false,
-		departmentReadAll: false,
-		departmentWrite: false,
-		facilityReadAll: true,
-		facilityWrite: false,
-		pharmacyReadAll: true,
-		pharmacyWrite: false
+		...emptyPermissionFlags({
+			navDashboard: true,
+			navEmployees: true,
+			navDepartments: true,
+			navFacilities: true,
+			navPharmacy: true,
+			navDoctors: true,
+			navTools: true,
+			facilityReadAll: true,
+			pharmacyReadAll: true,
+			doctorReadAll: true
+		})
 	}
 ];
 
@@ -208,6 +214,12 @@ export async function updateAccessRole(input: UpdateAccessRoleInput) {
 	if (communityLinkIds !== undefined) {
 		await setRoleCommunityLinks(id, communityLinkIds);
 	}
+
+	const assignees = await db
+		.select({ userId: userDepartmentRole.userId })
+		.from(userDepartmentRole)
+		.where(eq(userDepartmentRole.roleId, id));
+	await revokeUserSessions(assignees.map((row) => row.userId));
 
 	return record;
 }

@@ -1,10 +1,12 @@
 import { eq, asc, and, gt, count } from 'drizzle-orm';
+import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { userProfile } from '$lib/server/db/schema/user-profile';
 import { userDepartmentRole } from '$lib/server/db/schema/user-department-role';
 import { userInvite } from '$lib/server/db/schema/user-invite';
 import { user } from '$lib/server/db/schema/auth.schema';
-import type { UserPermissions } from '$lib/server/permissions';
+import { pickRolePermissions, type UserPermissions } from '$lib/server/permissions';
+import { revokeUserSessions } from '$lib/server/revoke-user-sessions';
 import type { PortalRole } from '$lib/constants/user-roles';
 import type { UpdateUserAccessInput } from '$lib/schemas/portal-user';
 
@@ -32,25 +34,7 @@ export async function getUserPermissions(userId: string): Promise<UserPermission
 			facilityId: assignment.facilityId,
 			roleName: assignment.role.name,
 			roleSlug: assignment.role.slug,
-			permissions: {
-				navDashboard: assignment.role.navDashboard,
-				navEmployees: assignment.role.navEmployees,
-				navDepartments: assignment.role.navDepartments,
-				navFacilities: assignment.role.navFacilities,
-				navPharmacy: assignment.role.navPharmacy,
-				navTools: assignment.role.navTools,
-				navSettings: assignment.role.navSettings,
-				navCommunity: assignment.role.navCommunity,
-				employeeReadAll: assignment.role.employeeReadAll,
-				employeeWrite: assignment.role.employeeWrite,
-				employeeDelete: assignment.role.employeeDelete,
-				departmentReadAll: assignment.role.departmentReadAll,
-				departmentWrite: assignment.role.departmentWrite,
-				facilityReadAll: assignment.role.facilityReadAll,
-				facilityWrite: assignment.role.facilityWrite,
-				pharmacyReadAll: assignment.role.pharmacyReadAll,
-				pharmacyWrite: assignment.role.pharmacyWrite
-			}
+			permissions: pickRolePermissions(assignment.role)
 		}))
 	};
 }
@@ -115,7 +99,39 @@ export async function updateUserAccess(input: UpdateUserAccessInput) {
 		);
 	}
 
+	await revokeUserSessions(input.userId);
+
 	return getUserPermissions(input.userId);
+}
+
+export async function deletePortalUser(actor: UserPermissions, userId: string) {
+	if (!actor.isAdmin) error(403, 'Forbidden');
+	if (actor.userId === userId) error(400, 'Cannot delete your own account');
+
+	const existing = await db.query.user.findFirst({
+		where: eq(user.id, userId),
+		with: { profile: true }
+	});
+
+	if (!existing) error(404, 'User not found');
+
+	if (existing.profile?.portalRole === 'admin') {
+		const [adminCount] = await db
+			.select({ value: count() })
+			.from(userProfile)
+			.where(eq(userProfile.portalRole, 'admin'));
+		if ((adminCount?.value ?? 0) <= 1) {
+			error(400, 'Cannot delete the last admin');
+		}
+	}
+
+	// invited_by is ON DELETE RESTRICT — reassign invites to the acting admin
+	await db
+		.update(userInvite)
+		.set({ invitedBy: actor.userId, updatedAt: new Date() })
+		.where(eq(userInvite.invitedBy, userId));
+
+	await db.delete(user).where(eq(user.id, userId));
 }
 
 export async function hasPendingInviteForEmail(email: string): Promise<boolean> {

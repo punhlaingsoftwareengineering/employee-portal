@@ -6,6 +6,7 @@ import {
 import { hasAppAccess } from '$lib/server/permissions';
 import { getPortalThemePolicy } from '$lib/server/services/portal-theme-config';
 import { getPortalFontPolicy } from '$lib/server/services/portal-font-config';
+import { getPortalFontSizePolicy } from '$lib/server/services/portal-font-size-config';
 import { getUserPermissions } from '$lib/server/services/portal-user';
 import type { LayoutServerLoad } from './$types';
 
@@ -33,18 +34,21 @@ function parseBrandingCookie(raw: string | undefined): AppBranding | undefined {
 
 export const load: LayoutServerLoad = async ({ cookies, locals }) => {
 	const appBranding = parseBrandingCookie(cookies.get(APP_BRANDING_COOKIE));
-	const [portalThemePolicy, portalFontPolicy, appAccess] = await Promise.all([
-		getPortalThemePolicy(),
-		getPortalFontPolicy(),
-		locals.user
-			? getUserPermissions(locals.user.id).then((perms) => hasAppAccess(perms))
-			: Promise.resolve(false)
-	]);
+	const [portalThemePolicy, portalFontPolicy, portalFontSizePolicy, appAccess] =
+		await Promise.all([
+			getPortalThemePolicy(),
+			getPortalFontPolicy(),
+			getPortalFontSizePolicy(),
+			locals.user
+				? getUserPermissions(locals.user.id).then((perms) => hasAppAccess(perms))
+				: Promise.resolve(false)
+		]);
 
 	return {
 		appBranding,
 		portalThemePolicy,
 		portalFontPolicy,
+		portalFontSizePolicy,
 		user: locals.user ?? null,
 		/** Member (with role) or admin — not guest / anonymous. */
 		canUseAiChat: appAccess,

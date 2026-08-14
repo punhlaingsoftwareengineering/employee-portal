@@ -57,7 +57,7 @@ export async function createInvite(invitedBy: string, input: CreateInviteInput) 
 		})
 		.returning();
 
-	sendInviteEmail({ email, name: data.name, inviteUrl: inviteUrl(token) });
+	await sendInviteEmail({ email, name: data.name, inviteUrl: inviteUrl(token) });
 
 	return invite;
 }
@@ -84,7 +84,7 @@ export async function resendInvite(inviteId: string) {
 		.where(eq(userInvite.id, inviteId))
 		.returning();
 
-	sendInviteEmail({ email: invite.email, name: invite.name, inviteUrl: inviteUrl(token) });
+	await sendInviteEmail({ email: invite.email, name: invite.name, inviteUrl: inviteUrl(token) });
 
 	return updated;
 }

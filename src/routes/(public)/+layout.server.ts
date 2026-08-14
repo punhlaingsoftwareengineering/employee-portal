@@ -14,7 +14,7 @@ function isOnboardingPath(pathname: string) {
 
 const emptyNotifications = {
 	notifications: [] as Awaited<ReturnType<typeof listUserNotifications>>['notifications'],
-	dismissedIds: [] as string[],
+	readIds: [] as string[],
 	defaultSoundUrl: null as string | null
 };
 
@@ -38,7 +38,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	return {
 		announcement,
 		notifications: notificationData.notifications,
-		dismissedNotificationIds: notificationData.dismissedIds,
+		readNotificationIds: notificationData.readIds,
 		defaultSoundUrl: notificationData.defaultSoundUrl,
 		canUseNotifications,
 		user: locals.user ?? null,

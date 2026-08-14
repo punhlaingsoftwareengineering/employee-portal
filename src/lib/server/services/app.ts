@@ -10,7 +10,12 @@ import {
 	type CreateAppInput,
 	type UpdateAppInput
 } from '$lib/schemas/app';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canToolsAppCreate,
+	canToolsAppDelete,
+	canToolsAppUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 import { normalizeDownloadUrls } from '$lib/utils/app-download';
 
 function normalizeScreenshotUrls(urls: string[] | undefined): string[] {
@@ -74,7 +79,20 @@ export async function getApp(id: string) {
 	return record;
 }
 
-export async function createApp(input: CreateAppInput) {
+function assertCanCreate(perms: UserPermissions) {
+	if (!canToolsAppCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canToolsAppUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canToolsAppDelete(perms)) error(403, 'Forbidden');
+}
+
+export async function createApp(perms: UserPermissions, input: CreateAppInput) {
+	assertCanCreate(perms);
 	const data = createAppSchema.parse(input);
 	const { screenshotUrls, downloadUrls, isPublic, ...rest } = data;
 	const [record] = await db
@@ -89,7 +107,8 @@ export async function createApp(input: CreateAppInput) {
 	return record;
 }
 
-export async function updateApp(input: UpdateAppInput) {
+export async function updateApp(perms: UserPermissions, input: UpdateAppInput) {
+	assertCanUpdate(perms);
 	const data = updateAppSchema.parse(input);
 	await getApp(data.id);
 
@@ -98,9 +117,7 @@ export async function updateApp(input: UpdateAppInput) {
 		.update(app)
 		.set({
 			...patch,
-			...(downloadUrls !== undefined
-				? { downloadUrls: normalizeDownloadUrls(downloadUrls) }
-				: {}),
+			...(downloadUrls !== undefined ? { downloadUrls: normalizeDownloadUrls(downloadUrls) } : {}),
 			...(screenshotUrls !== undefined
 				? { screenshotUrls: normalizeScreenshotUrls(screenshotUrls) }
 				: {}),
@@ -112,7 +129,8 @@ export async function updateApp(input: UpdateAppInput) {
 	return record;
 }
 
-export async function deleteApp(id: string) {
+export async function deleteApp(perms: UserPermissions, id: string) {
+	assertCanDelete(perms);
 	await getApp(id);
 	await db.delete(app).where(eq(app.id, id));
 }
@@ -184,7 +202,10 @@ export async function getAppsForUser(permissions: UserPermissions) {
 	return mergeAppsByName(publicApps, roleApps);
 }
 
-export async function canUserAccessApp(permissions: UserPermissions, appId: string): Promise<boolean> {
+export async function canUserAccessApp(
+	permissions: UserPermissions,
+	appId: string
+): Promise<boolean> {
 	const record = await db.query.app.findFirst({
 		where: eq(app.id, appId),
 		columns: { id: true, isPublic: true }

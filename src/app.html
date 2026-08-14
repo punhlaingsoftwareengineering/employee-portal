@@ -30,6 +30,11 @@
 					if (sharedFont) {
 						settings.font = sharedFont;
 					}
+					var sharedFontSize =
+						readCookie('phh-ui-font-size') || localStorage.getItem('phh-ui-font-size');
+					if (sharedFontSize) {
+						settings.fontSize = sharedFontSize;
+					}
 					if (settings.theme) {
 						var theme = settings.theme;
 						if (theme === 'system') {
@@ -40,6 +45,18 @@
 					}
 					if (settings.font) {
 						root.dataset.appFont = settings.font;
+					}
+					var sizeScales = {
+						'extra-small': '0.8125',
+						smaller: '0.875',
+						normal: '1',
+						larger: '1.125',
+						'extra-large': '1.25'
+					};
+					var fontSize = settings.fontSize;
+					if (fontSize && sizeScales[fontSize]) {
+						root.dataset.appFontSize = fontSize;
+						root.style.setProperty('--app-font-scale', sizeScales[fontSize]);
 					}
 				} catch (error) {
 					/* ignore invalid stored settings */

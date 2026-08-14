@@ -8,12 +8,25 @@ import {
 	type CreateToolLearningInput,
 	type UpdateToolLearningInput
 } from '$lib/schemas/tool-learning';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canToolsLearningCreate,
+	canToolsLearningDelete,
+	canToolsLearningUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
 const learningOrder = [asc(toolLearning.sortOrder), desc(toolLearning.createdAt)];
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canToolsLearningCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canToolsLearningUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canToolsLearningDelete(perms)) error(403, 'Forbidden');
 }
 
 export async function listToolLearnings(_perms: UserPermissions) {
@@ -32,7 +45,7 @@ export async function getToolLearning(perms: UserPermissions, id: string) {
 }
 
 export async function createToolLearning(perms: UserPermissions, input: CreateToolLearningInput) {
-	requireAdmin(perms);
+	assertCanCreate(perms);
 
 	const data = createToolLearningSchema.parse(input);
 	const [record] = await db.insert(toolLearning).values(data).returning();
@@ -44,7 +57,7 @@ export async function updateToolLearning(
 	id: string,
 	input: UpdateToolLearningInput
 ) {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	await getToolLearning(perms, id);
 	const data = updateToolLearningSchema.parse(input);
@@ -59,7 +72,7 @@ export async function updateToolLearning(
 }
 
 export async function deleteToolLearning(perms: UserPermissions, id: string) {
-	requireAdmin(perms);
+	assertCanDelete(perms);
 
 	await getToolLearning(perms, id);
 	await db.delete(toolLearning).where(eq(toolLearning.id, id));

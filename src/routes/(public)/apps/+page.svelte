@@ -8,7 +8,7 @@
 
 <PageTitle title="Apps" />
 
-<div class="container mx-auto max-w-5xl px-4 py-8">
+<div class="container mx-auto max-w-5xl px-4 py-4">
 	<ToolsSections
 		services={[]}
 		apps={data.publicApps}

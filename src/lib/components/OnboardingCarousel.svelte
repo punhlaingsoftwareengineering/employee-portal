@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import { DEFAULT_ONBOARDING_CAROUSEL_INTERVAL_MS } from '$lib/constants/onboarding-carousel';
+	import { normalizePublicDriveUrl } from '$lib/utils/drive-public-url';
 
 	type Slide = {
 		id: string;
@@ -98,9 +99,9 @@
 		<div id={slideId(index)} class="carousel-item relative w-full">
 			<figure class="relative w-full">
 				<img
-					src={slide.imageUrl}
+					src={normalizePublicDriveUrl(slide.imageUrl)}
 					alt={slide.title}
-					class="h-[28rem] w-full object-cover sm:h-[36rem] lg:h-[42rem]"
+					class="aspect-[21/9] w-full object-cover"
 				/>
 				{#if showCaption}
 					<figcaption

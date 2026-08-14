@@ -8,10 +8,28 @@ import {
 	type CreateNotificationSoundInput,
 	type UpdateNotificationSoundInput
 } from '$lib/schemas/notification-sound';
-import { canAccessSettings, type UserPermissions } from '$lib/server/permissions';
+import {
+	canAccessSettings,
+	canSettingsSoundCreate,
+	canSettingsSoundDelete,
+	canSettingsSoundUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
-function requireSettingsAccess(perms: UserPermissions) {
+function assertCanRead(perms: UserPermissions) {
 	if (!canAccessSettings(perms)) error(403, 'Forbidden');
+}
+
+function assertCanCreate(perms: UserPermissions) {
+	if (!canSettingsSoundCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsSoundUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canSettingsSoundDelete(perms)) error(403, 'Forbidden');
 }
 
 async function clearOtherDefaults(excludeId?: string) {
@@ -22,7 +40,7 @@ async function clearOtherDefaults(excludeId?: string) {
 }
 
 export async function listNotificationSounds(perms: UserPermissions) {
-	requireSettingsAccess(perms);
+	assertCanRead(perms);
 
 	return db.query.notificationSound.findMany({
 		orderBy: [desc(notificationSound.isDefault), asc(notificationSound.name)]
@@ -30,7 +48,7 @@ export async function listNotificationSounds(perms: UserPermissions) {
 }
 
 export async function getNotificationSound(perms: UserPermissions, id: string) {
-	requireSettingsAccess(perms);
+	assertCanRead(perms);
 
 	const record = await db.query.notificationSound.findFirst({
 		where: eq(notificationSound.id, id)
@@ -56,7 +74,7 @@ export async function createNotificationSound(
 	perms: UserPermissions,
 	input: CreateNotificationSoundInput
 ) {
-	requireSettingsAccess(perms);
+	assertCanCreate(perms);
 
 	const data = createNotificationSoundSchema.parse(input);
 
@@ -81,7 +99,7 @@ export async function updateNotificationSound(
 	id: string,
 	input: UpdateNotificationSoundInput
 ) {
-	requireSettingsAccess(perms);
+	assertCanUpdate(perms);
 
 	await getNotificationSound(perms, id);
 	const data = updateNotificationSoundSchema.parse(input);
@@ -100,7 +118,7 @@ export async function updateNotificationSound(
 }
 
 export async function deleteNotificationSound(perms: UserPermissions, id: string) {
-	requireSettingsAccess(perms);
+	assertCanDelete(perms);
 
 	await getNotificationSound(perms, id);
 	await db.delete(notificationSound).where(eq(notificationSound.id, id));

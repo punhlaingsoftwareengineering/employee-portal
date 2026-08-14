@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { Announcement } from '$lib/server/db/schema/announcement';
-	import type { AnnouncementAccentPreset } from '$lib/constants/announcement';
+	import {
+		ANNOUNCEMENT_IMAGE_HEIGHT_PX,
+		type AnnouncementAccentPreset
+	} from '$lib/constants/announcement';
 
 	let { announcement }: { announcement: Announcement } = $props();
 
@@ -27,21 +30,26 @@
 	{#if announcement.linkUrl}
 		<a
 			href={announcement.linkUrl}
-			class="block h-24 w-full overflow-hidden"
+			class="block w-full overflow-hidden"
+			style="height: {ANNOUNCEMENT_IMAGE_HEIGHT_PX}px"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
 			<img
 				src={announcement.imageUrl ?? ''}
 				alt={announcement.title}
+				width="1440"
+				height={ANNOUNCEMENT_IMAGE_HEIGHT_PX}
 				class="h-full w-full object-cover"
 			/>
 		</a>
 	{:else}
-		<div class="h-24 w-full overflow-hidden">
+		<div class="w-full overflow-hidden" style="height: {ANNOUNCEMENT_IMAGE_HEIGHT_PX}px">
 			<img
 				src={announcement.imageUrl ?? ''}
 				alt={announcement.title}
+				width="1440"
+				height={ANNOUNCEMENT_IMAGE_HEIGHT_PX}
 				class="h-full w-full object-cover"
 			/>
 		</div>

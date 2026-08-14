@@ -17,13 +17,13 @@
 		deletePharmacyMaster,
 		overridePharmacyMastersFromExcel
 	} from '$lib/remotes/pharmacy-master.remote';
+	import { permissionFlag } from '$lib/constants/permissions';
 
 	const permissions = $derived(page.data.permissions);
-	const canManage = $derived(
-		permissions?.isAdmin ||
-			(permissions?.departmentRoles?.some((assignment) => assignment.permissions.pharmacyWrite) ??
-				false)
-	);
+	const canCreate = $derived(permissionFlag(permissions, 'pharmacyCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'pharmacyUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'pharmacyDelete'));
+	const canExcel = $derived(permissionFlag(permissions, 'pharmacyExcelOverride'));
 
 	let pharmacyDialog = $state<PharmacyMasterDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
@@ -50,24 +50,32 @@
 
 	<PrivatePageHeader title="Pharmacy Master" icon={Pill} />
 
-	{#if canManage}
+	{#if canExcel || canCreate}
 		<div class="mb-4 flex flex-wrap justify-end gap-2">
-			<ExcelOverrideButton
-				confirmMessage="Override all pharmacy master rows with this Excel file? Existing records will be replaced."
-				onImport={async (payload) => {
-					await overridePharmacyMastersFromExcel(payload);
-				}}
-			/>
-			<button type="button" class="btn btn-primary gap-2" onclick={() => pharmacyDialog?.open()}>
-				<Plus class="h-4 w-4" />
-				Add item
-			</button>
+			{#if canExcel}
+				<ExcelOverrideButton
+					confirmMessage="Override all pharmacy master rows with this Excel file? Existing records will be replaced."
+					onImport={async (payload) => {
+						await overridePharmacyMastersFromExcel(payload);
+					}}
+				/>
+			{/if}
+			{#if canCreate}
+				<button
+					type="button"
+					class="btn btn-primary cursor-pointer gap-2"
+					onclick={() => pharmacyDialog?.open()}
+				>
+					<Plus class="h-4 w-4" />
+					Add item
+				</button>
+			{/if}
 		</div>
 	{/if}
 
 	<DataTable rows={items} rowKey={(item) => item.id} emptyMessage="No pharmacy items yet.">
 		{#snippet actions({ row: item })}
-			{#if canManage}
+			{#if canUpdate}
 				<IconActionButton
 					label="Edit"
 					variant="secondary"
@@ -75,6 +83,8 @@
 				>
 					<Pencil class="h-4 w-4" />
 				</IconActionButton>
+			{/if}
+			{#if canDelete}
 				<IconActionButton
 					label="Delete"
 					variant="error"

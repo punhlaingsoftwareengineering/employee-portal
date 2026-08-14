@@ -8,12 +8,25 @@ import {
 	type CreateToolGuideInput,
 	type UpdateToolGuideInput
 } from '$lib/schemas/tool-guide';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canToolsGuideCreate,
+	canToolsGuideDelete,
+	canToolsGuideUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
 const guideOrder = [asc(toolGuide.sortOrder), desc(toolGuide.createdAt)];
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canToolsGuideCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canToolsGuideUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canToolsGuideDelete(perms)) error(403, 'Forbidden');
 }
 
 export async function listToolGuides(_perms: UserPermissions) {
@@ -32,7 +45,7 @@ export async function getToolGuide(perms: UserPermissions, id: string) {
 }
 
 export async function createToolGuide(perms: UserPermissions, input: CreateToolGuideInput) {
-	requireAdmin(perms);
+	assertCanCreate(perms);
 
 	const data = createToolGuideSchema.parse(input);
 	const [record] = await db.insert(toolGuide).values(data).returning();
@@ -44,7 +57,7 @@ export async function updateToolGuide(
 	id: string,
 	input: UpdateToolGuideInput
 ) {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	await getToolGuide(perms, id);
 	const data = updateToolGuideSchema.parse(input);
@@ -59,7 +72,7 @@ export async function updateToolGuide(
 }
 
 export async function deleteToolGuide(perms: UserPermissions, id: string) {
-	requireAdmin(perms);
+	assertCanDelete(perms);
 
 	await getToolGuide(perms, id);
 	await db.delete(toolGuide).where(eq(toolGuide.id, id));

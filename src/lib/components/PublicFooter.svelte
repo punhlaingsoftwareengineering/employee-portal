@@ -3,7 +3,7 @@
 </script>
 
 <footer class="bg-neutral text-neutral-content">
-	<div class="container mx-auto max-w-6xl px-6 py-8">
+	<div class="container mx-auto max-w-6xl px-4 py-4">
 		<div
 			class="flex flex-col gap-2 text-sm text-neutral-content/50 sm:flex-row sm:items-center sm:justify-between"
 		>

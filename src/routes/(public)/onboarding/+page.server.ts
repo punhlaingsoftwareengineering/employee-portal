@@ -1,14 +1,14 @@
 import { listPublicApps } from '$lib/server/services/app';
 import { getOnboardingCarouselConfig } from '$lib/server/services/onboarding-carousel-config';
 import { listOnboardingFacilities } from '$lib/server/services/facility';
-import { listPublicNewsletters } from '$lib/server/services/newsletter';
+import {
+	countNewsletters,
+	listPublicNewsletters
+} from '$lib/server/services/newsletter';
 import { listPublicOnboardingSlides } from '$lib/server/services/onboarding-slide';
 import { listPublicPharmacyMasters } from '$lib/server/services/pharmacy-master';
 import { listPublicServices } from '$lib/server/services/service';
-import {
-	ONBOARDING_FACILITY_DISPLAY_LIMIT,
-	ONBOARDING_NEWSLETTER_DISPLAY_LIMIT
-} from '$lib/constants/onboarding';
+import { ONBOARDING_NEWSLETTER_DISPLAY_LIMIT } from '$lib/constants/onboarding';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -19,14 +19,16 @@ export const load: PageServerLoad = async () => {
 		facilities,
 		carouselConfig,
 		newsletters,
+		newsletterTotal,
 		pharmacyMasters
 	] = await Promise.all([
 		listPublicServices(),
 		listPublicApps(),
 		listPublicOnboardingSlides(),
-		listOnboardingFacilities(ONBOARDING_FACILITY_DISPLAY_LIMIT),
+		listOnboardingFacilities(),
 		getOnboardingCarouselConfig(),
 		listPublicNewsletters(ONBOARDING_NEWSLETTER_DISPLAY_LIMIT),
+		countNewsletters(),
 		listPublicPharmacyMasters()
 	]);
 
@@ -37,6 +39,7 @@ export const load: PageServerLoad = async () => {
 		facilities,
 		carouselIntervalMs: carouselConfig.intervalMs,
 		newsletters,
+		newsletterTotal,
 		pharmacyMasters
 	};
 };

@@ -6,7 +6,6 @@
 	'btn-primary btn-secondary btn-error btn-square btn-sm btn-xs badge-xs tooltip-primary tooltip-secondary tooltip-error tooltip-left tooltip-right status status-xs status-sm status-neutral status-success status-error animate-ping hover-3d app-card app-card-face'
 );
 
-@plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @plugin 'daisyui' {
 	themes: all;
@@ -21,11 +20,22 @@
 	--font-times-new-roman: 'Times New Roman', Times, serif;
 	--font-comic-relief: 'Comic Sans MS', 'Comic Neue', cursive;
 	--font-pangolin: 'Pangolin', 'Comic Sans MS', cursive;
+	/* DaisyUI OTP letter-spacing is based on mono `ch` units */
+	--font-mono: 'Maple Mono', ui-monospace, monospace;
 }
 
 html {
 	font-family: var(--font-maple-mono);
+	font-size: calc(100% * var(--app-font-scale, 1));
 	scroll-behavior: smooth;
+	overscroll-behavior: none;
+}
+
+html,
+body {
+	overscroll-behavior: none;
+	/* Match app chrome so any residual bounce is not bare white */
+	background-color: var(--color-base-200, oklch(98% 0 0));
 }
 
 html[data-app-font='maple-mono'] {
@@ -168,7 +178,7 @@ html[data-app-font='pangolin'] {
 
 	.card-masonry > * {
 		@apply mb-4 w-full min-w-0 break-inside-avoid sm:mb-6;
-		overflow: hidden;
+		overflow: visible;
 	}
 
 	.card-grid {
@@ -293,6 +303,38 @@ html[data-app-font='pangolin'] {
 	.data-table thead .sticky-col-serial,
 	.data-table thead .sticky-col-first {
 		@apply bg-base-200;
+	}
+
+	.icon-action-floating-tip {
+		@apply pointer-events-none fixed z-[200] max-w-[min(16rem,calc(100vw-1rem))] rounded-field px-2 py-1 text-center text-xs leading-snug font-medium whitespace-nowrap shadow-md;
+	}
+
+	.icon-action-floating-tip-top {
+		transform: translate(-50%, -100%);
+	}
+
+	.icon-action-floating-tip-bottom {
+		transform: translate(-50%, 0);
+	}
+
+	.icon-action-floating-tip-left {
+		transform: translate(-100%, -50%);
+	}
+
+	.icon-action-floating-tip-right {
+		transform: translate(0, -50%);
+	}
+
+	.icon-action-floating-tip-primary {
+		@apply bg-primary text-primary-content;
+	}
+
+	.icon-action-floating-tip-secondary {
+		@apply bg-secondary text-secondary-content;
+	}
+
+	.icon-action-floating-tip-error {
+		@apply bg-error text-error-content;
 	}
 }
 

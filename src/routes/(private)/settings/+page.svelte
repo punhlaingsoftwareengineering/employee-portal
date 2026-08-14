@@ -10,20 +10,34 @@
 	import NotificationDialog from '$lib/components/NotificationDialog.svelte';
 	import PortalThemePolicyDialog from '$lib/components/PortalThemePolicyDialog.svelte';
 	import PortalFontPolicyDialog from '$lib/components/PortalFontPolicyDialog.svelte';
+	import PortalFontSizePolicyDialog from '$lib/components/PortalFontSizePolicyDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 	import {
 		APP_FONTS,
+		APP_FONT_SIZES,
 		APP_THEMES,
 		DEFAULT_APP_TITLE,
 		type AppFont,
+		type AppFontSize,
 		type AppTheme
 	} from '$lib/constants/app-settings';
-	import { appSettings, portalFontPolicy, portalThemePolicy, resetAppSettings, updateAppSettings } from '$lib/app-settings.svelte';
+	import {
+		appSettings,
+		portalFontPolicy,
+		portalFontSizePolicy,
+		portalThemePolicy,
+		resetAppSettings,
+		resetFontSizeToDefault,
+		resetFontToDefault,
+		resetThemeToDefault,
+		updateAppSettings
+	} from '$lib/app-settings.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteNewsletter, getNewsletters } from '$lib/remotes/newsletter.remote';
 	import {
@@ -55,12 +69,30 @@
 		Sparkles,
 		Trash2,
 		Type,
+		ALargeSmall,
 		Volume2
 	} from '@lucide/svelte';
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import SettingsCardTitle from '$lib/components/SettingsCardTitle.svelte';
+	import { permissionFlag } from '$lib/constants/permissions';
 
-	const isAdmin = $derived(page.data.permissions?.isAdmin ?? false);
+	const permissions = $derived(page.data.permissions);
+	const canThemeUpdate = $derived(permissionFlag(permissions, 'settingsThemeUpdate'));
+	const canNewsletterCreate = $derived(permissionFlag(permissions, 'settingsNewsletterCreate'));
+	const canNewsletterUpdate = $derived(permissionFlag(permissions, 'settingsNewsletterUpdate'));
+	const canNewsletterDelete = $derived(permissionFlag(permissions, 'settingsNewsletterDelete'));
+	const canOnboardingCreate = $derived(permissionFlag(permissions, 'settingsOnboardingCreate'));
+	const canOnboardingUpdate = $derived(permissionFlag(permissions, 'settingsOnboardingUpdate'));
+	const canOnboardingDelete = $derived(permissionFlag(permissions, 'settingsOnboardingDelete'));
+	const canAnnouncementCreate = $derived(permissionFlag(permissions, 'settingsAnnouncementCreate'));
+	const canAnnouncementUpdate = $derived(permissionFlag(permissions, 'settingsAnnouncementUpdate'));
+	const canAnnouncementDelete = $derived(permissionFlag(permissions, 'settingsAnnouncementDelete'));
+	const canSoundCreate = $derived(permissionFlag(permissions, 'settingsSoundCreate'));
+	const canSoundUpdate = $derived(permissionFlag(permissions, 'settingsSoundUpdate'));
+	const canSoundDelete = $derived(permissionFlag(permissions, 'settingsSoundDelete'));
+	const canNotificationCreate = $derived(permissionFlag(permissions, 'settingsNotificationCreate'));
+	const canNotificationUpdate = $derived(permissionFlag(permissions, 'settingsNotificationUpdate'));
+	const canNotificationDelete = $derived(permissionFlag(permissions, 'settingsNotificationDelete'));
 
 	let title = $state(appSettings.title);
 	let iconUrl = $state(appSettings.iconUrl ?? '');
@@ -71,6 +103,7 @@
 	let notificationDialog = $state<NotificationDialog | null>(null);
 	let themePolicyDialog = $state<PortalThemePolicyDialog | null>(null);
 	let fontPolicyDialog = $state<PortalFontPolicyDialog | null>(null);
+	let fontSizePolicyDialog = $state<PortalFontSizePolicyDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 
 	function themeLabel(value: AppTheme): string {
@@ -81,10 +114,16 @@
 		return APP_FONTS.find((option) => option.value === value)?.label ?? value;
 	}
 
+	function fontSizeLabel(value: AppFontSize): string {
+		return APP_FONT_SIZES.find((option) => option.value === value)?.label ?? value;
+	}
+
 	const defaultThemeLabel = $derived(themeLabel(portalThemePolicy.defaultTheme));
 	const allowedThemeCount = $derived(portalThemePolicy.allowedThemes.length);
 	const defaultFontLabel = $derived(fontLabel(portalFontPolicy.defaultFont));
 	const allowedFontCount = $derived(portalFontPolicy.allowedFonts.length);
+	const defaultFontSizeLabel = $derived(fontSizeLabel(portalFontSizePolicy.defaultFontSize));
+	const allowedFontSizeCount = $derived(portalFontSizePolicy.allowedFontSizes.length);
 
 	function saveTitle() {
 		const trimmed = title.trim() || DEFAULT_APP_TITLE;
@@ -112,8 +151,8 @@
 
 <PrivatePageHeader title="Settings" />
 
-<div class="grid grid-cols-1 items-start gap-4 sm:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
-	{#if isAdmin}
+<div class="card-masonry">
+	{#if canThemeUpdate}
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body">
 				<PortalThemePolicyDialog bind:this={themePolicyDialog} />
@@ -135,7 +174,7 @@
 									</span>
 									<button
 										type="button"
-										class="btn btn-outline btn-sm"
+										class="btn btn-outline btn-sm cursor-pointer"
 										onclick={() => themePolicyDialog?.open()}
 									>
 										Edit theme policy
@@ -146,9 +185,21 @@
 						<tr>
 							<td class="form-table-label">Default theme</td>
 							<td class="form-table-field">
-								<span class="badge badge-outline max-w-full py-1.5 leading-snug">{defaultThemeLabel}</span>
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="badge badge-outline max-w-full py-1.5 leading-snug"
+										>{defaultThemeLabel}</span
+									>
+									<button
+										type="button"
+										class="btn btn-ghost btn-sm gap-2 cursor-pointer"
+										onclick={() => resetThemeToDefault()}
+									>
+										<RotateCcw class="h-4 w-4 shrink-0" />
+										Reset theme
+									</button>
+								</div>
 								<p class="mt-1 text-xs text-base-content/60">
-									Shown to new visitors and anyone who has not picked a theme from the FAB.
+									Shown to new visitors and anyone who resets this device’s theme.
 								</p>
 							</td>
 						</tr>
@@ -158,7 +209,7 @@
 		</div>
 	{/if}
 
-	{#if isAdmin}
+	{#if canThemeUpdate}
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body">
 				<PortalFontPolicyDialog bind:this={fontPolicyDialog} />
@@ -180,7 +231,7 @@
 									</span>
 									<button
 										type="button"
-										class="btn btn-outline btn-sm"
+										class="btn btn-outline btn-sm cursor-pointer"
 										onclick={() => fontPolicyDialog?.open()}
 									>
 										Edit font policy
@@ -191,9 +242,78 @@
 						<tr>
 							<td class="form-table-label">Default font</td>
 							<td class="form-table-field">
-								<span class="badge badge-outline max-w-full py-1.5 leading-snug">{defaultFontLabel}</span>
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="badge badge-outline max-w-full py-1.5 leading-snug"
+										>{defaultFontLabel}</span
+									>
+									<button
+										type="button"
+										class="btn btn-ghost btn-sm gap-2 cursor-pointer"
+										onclick={() => resetFontToDefault()}
+									>
+										<RotateCcw class="h-4 w-4 shrink-0" />
+										Reset font
+									</button>
+								</div>
 								<p class="mt-1 text-xs text-base-content/60">
-									Shown to new visitors and anyone who has not picked a font from the FAB.
+									Shown to new visitors and anyone who resets this device’s font.
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
+
+	{#if canThemeUpdate}
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body">
+				<PortalFontSizePolicyDialog bind:this={fontSizePolicyDialog} />
+
+				<SettingsCardTitle icon={ALargeSmall} title="Text size" />
+				<p class="mb-4 text-sm text-base-content/70">
+					Configure which text sizes users can pick from the FAB, and the default for visitors who
+					have not chosen one yet.
+				</p>
+
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<td class="form-table-label">Size policy</td>
+							<td class="form-table-field">
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="min-w-0 text-sm">
+										{allowedFontSizeCount} size{allowedFontSizeCount === 1 ? '' : 's'} allowed
+									</span>
+									<button
+										type="button"
+										class="btn btn-outline btn-sm cursor-pointer"
+										onclick={() => fontSizePolicyDialog?.open()}
+									>
+										Edit size policy
+									</button>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="form-table-label">Default size</td>
+							<td class="form-table-field">
+								<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+									<span class="badge badge-outline max-w-full py-1.5 leading-snug"
+										>{defaultFontSizeLabel}</span
+									>
+									<button
+										type="button"
+										class="btn btn-ghost btn-sm gap-2 cursor-pointer"
+										onclick={() => resetFontSizeToDefault()}
+									>
+										<RotateCcw class="h-4 w-4 shrink-0" />
+										Reset text size
+									</button>
+								</div>
+								<p class="mt-1 text-xs text-base-content/60">
+									Shown to new visitors and anyone who resets this device’s text size.
 								</p>
 							</td>
 						</tr>
@@ -231,11 +351,12 @@
 								bind:value={iconUrl}
 								category="branding"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.square}
 								placeholder="https://example.com/logo.png"
 								onchange={saveIconUrl}
 							/>
 							<p class="mt-1 text-xs text-base-content/60">
-								Leave empty for the default building icon. Use a square PNG or SVG URL.
+								Leave empty for the default building icon. Use a square (1:1) PNG or SVG URL.
 							</p>
 						</td>
 					</tr>
@@ -266,13 +387,14 @@
 					<div class="min-w-0">
 						<SettingsCardTitle icon={Newspaper} title="Newsletters" />
 						<p class="text-sm text-base-content/70">
-							PDF newsletter links for users with Settings access.
-							{#if isAdmin}
+							PDF or image newsletter links. Higher serial order shows first; onboarding shows the
+							latest 8.
+							{#if canNewsletterCreate || canNewsletterUpdate || canNewsletterDelete}
 								Admins can add, edit, and remove entries.
 							{/if}
 						</p>
 					</div>
-					{#if isAdmin}
+					{#if canNewsletterCreate}
 						<div class="shrink-0">
 							<IconActionButton
 								label="Add newsletter"
@@ -293,7 +415,7 @@
 						emptyMessage="No newsletters yet."
 					>
 						{#snippet actions({ row: item })}
-							{#if isAdmin}
+							{#if canNewsletterUpdate}
 								<IconActionButton
 									label="Edit"
 									variant="secondary"
@@ -301,6 +423,8 @@
 								>
 									<Pencil class="h-4 w-4" />
 								</IconActionButton>
+							{/if}
+							{#if canNewsletterDelete}
 								<IconActionButton
 									label="Delete"
 									variant="error"
@@ -321,13 +445,19 @@
 							{/if}
 						{/snippet}
 
+						<DataTableColumn label="Order" filterText={(item) => String(item.sortOrder)}>
+							{#snippet children({ row: item })}
+								<span class="font-mono text-sm">{item.sortOrder}</span>
+							{/snippet}
+						</DataTableColumn>
+
 						<DataTableColumn label="Title" firstData filterText={(item) => item.title}>
 							{#snippet children({ row: item })}
 								{item.title}
 							{/snippet}
 						</DataTableColumn>
 
-						<DataTableColumn label="PDF" filterText={(item) => item.pdfUrl}>
+						<DataTableColumn label="File" filterText={(item) => item.pdfUrl}>
 							{#snippet children({ row: item })}
 								<a
 									href={item.pdfUrl}
@@ -335,7 +465,7 @@
 									target="_blank"
 									rel="noopener noreferrer"
 								>
-									Download PDF
+									Open file
 									<ExternalLink class="h-3.5 w-3.5" />
 								</a>
 							{/snippet}
@@ -369,12 +499,12 @@
 						<SettingsCardTitle icon={Images} title="Onboarding carousel" />
 						<p class="text-sm text-base-content/70">
 							Slides shown on the public onboarding page.
-							{#if isAdmin}
+							{#if canOnboardingCreate || canOnboardingUpdate || canOnboardingDelete}
 								Admins can add, edit, and remove entries.
 							{/if}
 						</p>
 					</div>
-					{#if isAdmin}
+					{#if canOnboardingCreate}
 						<div class="shrink-0">
 							<IconActionButton
 								label="Add slide"
@@ -391,7 +521,7 @@
 				{:else}
 					<DataTable rows={slides} rowKey={(item) => item.id} emptyMessage="No slides yet.">
 						{#snippet actions({ row: item })}
-							{#if isAdmin}
+							{#if canOnboardingUpdate}
 								<IconActionButton
 									label="Edit"
 									variant="secondary"
@@ -399,6 +529,8 @@
 								>
 									<Pencil class="h-4 w-4" />
 								</IconActionButton>
+							{/if}
+							{#if canOnboardingDelete}
 								<IconActionButton
 									label="Delete"
 									variant="error"
@@ -479,13 +611,14 @@
 					<div class="min-w-0">
 						<SettingsCardTitle icon={Megaphone} title="Announcements" />
 						<p class="text-sm text-base-content/70">
-							Full-width banner above the navbar on onboarding pages.
-							{#if isAdmin}
+							Full-width image strip (72px tall, 20:1) or text banner above the navbar on
+							onboarding pages.
+							{#if canAnnouncementCreate || canAnnouncementUpdate || canAnnouncementDelete}
 								Admins can add, edit, and remove entries. Only one can be active.
 							{/if}
 						</p>
 					</div>
-					{#if isAdmin}
+					{#if canAnnouncementCreate}
 						<div class="shrink-0">
 							<IconActionButton
 								label="Add announcement"
@@ -506,7 +639,7 @@
 						emptyMessage="No announcements yet."
 					>
 						{#snippet actions({ row: item })}
-							{#if isAdmin}
+							{#if canAnnouncementUpdate}
 								<IconActionButton
 									label="Edit"
 									variant="secondary"
@@ -514,6 +647,8 @@
 								>
 									<Pencil class="h-4 w-4" />
 								</IconActionButton>
+							{/if}
+							{#if canAnnouncementDelete}
 								<IconActionButton
 									label="Delete"
 									variant="error"
@@ -595,14 +730,16 @@
 							MP3, WAV, or other direct audio URLs played when new notifications arrive. One can be marked as the portal default.
 						</p>
 					</div>
-					<div class="shrink-0">
-						<IconActionButton
-							label="Add sound"
-							onclick={() => notificationSoundDialog?.open()}
-						>
-							<Plus class="h-4 w-4" />
-						</IconActionButton>
-					</div>
+					{#if canSoundCreate}
+						<div class="shrink-0">
+							<IconActionButton
+								label="Add sound"
+								onclick={() => notificationSoundDialog?.open()}
+							>
+								<Plus class="h-4 w-4" />
+							</IconActionButton>
+						</div>
+					{/if}
 				</div>
 
 				{#if sounds.length === 0}
@@ -610,30 +747,34 @@
 				{:else}
 					<DataTable rows={sounds} rowKey={(item) => item.id} emptyMessage="No sounds yet.">
 						{#snippet actions({ row: item })}
-							<IconActionButton
-								label="Edit"
-								variant="secondary"
-								onclick={() => notificationSoundDialog?.open(item)}
-							>
-								<Pencil class="h-4 w-4" />
-							</IconActionButton>
-							<IconActionButton
-								label="Delete"
-								variant="error"
-								disabled={deleteLoading.isPending(item.id)}
-								onclick={async () => {
-									if (!confirm('Delete this sound?')) return;
-									await deleteLoading.run(item.id, async () => {
-										await deleteNotificationSound(item.id);
-									});
-								}}
-							>
-								{#if deleteLoading.isPending(item.id)}
-									<LoadingSpinner size="sm" />
-								{:else}
-									<Trash2 class="h-4 w-4" />
-								{/if}
-							</IconActionButton>
+							{#if canSoundUpdate}
+								<IconActionButton
+									label="Edit"
+									variant="secondary"
+									onclick={() => notificationSoundDialog?.open(item)}
+								>
+									<Pencil class="h-4 w-4" />
+								</IconActionButton>
+							{/if}
+							{#if canSoundDelete}
+								<IconActionButton
+									label="Delete"
+									variant="error"
+									disabled={deleteLoading.isPending(item.id)}
+									onclick={async () => {
+										if (!confirm('Delete this sound?')) return;
+										await deleteLoading.run(item.id, async () => {
+											await deleteNotificationSound(item.id);
+										});
+									}}
+								>
+									{#if deleteLoading.isPending(item.id)}
+										<LoadingSpinner size="sm" />
+									{:else}
+										<Trash2 class="h-4 w-4" />
+									{/if}
+								</IconActionButton>
+							{/if}
 						{/snippet}
 
 						<DataTableColumn label="Name" firstData filterText={(item) => item.name}>
@@ -696,14 +837,16 @@
 							Bell dropdown on public pages. New items are pushed in real time via SSE.
 						</p>
 					</div>
-					<div class="shrink-0">
-						<IconActionButton
-							label="Add notification"
-							onclick={() => notificationDialog?.open()}
-						>
-							<Plus class="h-4 w-4" />
-						</IconActionButton>
-					</div>
+					{#if canNotificationCreate}
+						<div class="shrink-0">
+							<IconActionButton
+								label="Add notification"
+								onclick={() => notificationDialog?.open()}
+							>
+								<Plus class="h-4 w-4" />
+							</IconActionButton>
+						</div>
+					{/if}
 				</div>
 
 				{#if portalNotifications.length === 0}
@@ -715,30 +858,34 @@
 						emptyMessage="No notifications yet."
 					>
 						{#snippet actions({ row: item })}
-							<IconActionButton
-								label="Edit"
-								variant="secondary"
-								onclick={() => notificationDialog?.open(item)}
-							>
-								<Pencil class="h-4 w-4" />
-							</IconActionButton>
-							<IconActionButton
-								label="Delete"
-								variant="error"
-								disabled={deleteLoading.isPending(item.id)}
-								onclick={async () => {
-									if (!confirm('Delete this notification?')) return;
-									await deleteLoading.run(item.id, async () => {
-										await deleteNotification(item.id);
-									});
-								}}
-							>
-								{#if deleteLoading.isPending(item.id)}
-									<LoadingSpinner size="sm" />
-								{:else}
-									<Trash2 class="h-4 w-4" />
-								{/if}
-							</IconActionButton>
+							{#if canNotificationUpdate}
+								<IconActionButton
+									label="Edit"
+									variant="secondary"
+									onclick={() => notificationDialog?.open(item)}
+								>
+									<Pencil class="h-4 w-4" />
+								</IconActionButton>
+							{/if}
+							{#if canNotificationDelete}
+								<IconActionButton
+									label="Delete"
+									variant="error"
+									disabled={deleteLoading.isPending(item.id)}
+									onclick={async () => {
+										if (!confirm('Delete this notification?')) return;
+										await deleteLoading.run(item.id, async () => {
+											await deleteNotification(item.id);
+										});
+									}}
+								>
+									{#if deleteLoading.isPending(item.id)}
+										<LoadingSpinner size="sm" />
+									{:else}
+										<Trash2 class="h-4 w-4" />
+									{/if}
+								</IconActionButton>
+							{/if}
 						{/snippet}
 
 						<DataTableColumn label="Priority" filterText={(item) => item.priority}>

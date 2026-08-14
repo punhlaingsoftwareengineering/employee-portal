@@ -1,53 +1,53 @@
 <script lang="ts">
 	import { Building2, MapPin, Phone } from '@lucide/svelte';
 	import type { Facility } from '$lib/server/db/schema/facility';
+	import { normalizePublicDriveUrl } from '$lib/utils/drive-public-url';
 
 	let { facilities }: { facilities: Facility[] } = $props();
 </script>
 
 <ul class="onboarding-facility-grid">
 	{#each facilities as item (item.id)}
+		{@const imageSrc = normalizePublicDriveUrl(item.imageUrl)}
 		<li>
-			<div class="aura aura-glow aura-md text-primary block w-full [--aura-radius:1rem]">
-				<button type="button" class="onboarding-facility-card group">
-					<div class="onboarding-facility-media">
-						{#if item.imageUrl}
-							<img
-								src={item.imageUrl}
-								alt={item.name}
-								class="onboarding-facility-image"
-								loading="lazy"
-							/>
-						{:else}
-							<div class="onboarding-facility-placeholder" aria-hidden="true">
-								<Building2 class="h-12 w-12 text-base-content/25" />
-							</div>
-						{/if}
-
-						<div class="onboarding-facility-caption">
-							<p class="text-sm font-semibold leading-snug">{item.name}</p>
+			<button type="button" class="onboarding-facility-card group">
+				<div class="onboarding-facility-media">
+					{#if imageSrc}
+						<img
+							src={imageSrc}
+							alt={item.name}
+							class="onboarding-facility-image"
+							loading="lazy"
+						/>
+					{:else}
+						<div class="onboarding-facility-placeholder" aria-hidden="true">
+							<Building2 class="h-12 w-12 text-base-content/25" />
 						</div>
+					{/if}
 
-						<div class="onboarding-facility-overlay">
-							<div class="onboarding-facility-overlay-content">
-								<h3 class="text-lg font-bold leading-tight">{item.name}</h3>
-								{#if item.address?.trim()}
-									<p class="mt-3 flex items-start gap-2 text-sm text-white/85">
-										<MapPin class="mt-0.5 h-4 w-4 shrink-0" />
-										<span>{item.address}</span>
-									</p>
-								{/if}
-								{#if item.phone}
-									<p class="mt-3 flex items-center gap-2 text-sm text-white/85">
-										<Phone class="h-4 w-4 shrink-0" />
-										<span>{item.phone}</span>
-									</p>
-								{/if}
-							</div>
+					<div class="onboarding-facility-caption">
+						<p class="text-sm font-semibold leading-snug">{item.name}</p>
+					</div>
+
+					<div class="onboarding-facility-overlay">
+						<div class="onboarding-facility-overlay-content">
+							<h3 class="text-lg font-bold leading-tight">{item.name}</h3>
+							{#if item.address?.trim()}
+								<p class="mt-3 flex items-start gap-2 text-sm text-white/85">
+									<MapPin class="mt-0.5 h-4 w-4 shrink-0" />
+									<span>{item.address}</span>
+								</p>
+							{/if}
+							{#if item.phone}
+								<p class="mt-3 flex items-center gap-2 text-sm text-white/85">
+									<Phone class="h-4 w-4 shrink-0" />
+									<span>{item.phone}</span>
+								</p>
+							{/if}
 						</div>
 					</div>
-				</button>
-			</div>
+				</div>
+			</button>
 		</li>
 	{/each}
 </ul>
@@ -56,7 +56,7 @@
 	.onboarding-facility-grid {
 		display: grid;
 		grid-template-columns: repeat(1, minmax(0, 1fr));
-		gap: 1rem;
+		gap: 0.75rem;
 		list-style: none;
 		padding: 0;
 		margin: 0;

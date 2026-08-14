@@ -54,7 +54,7 @@
 
 	setContext('data-table-actions', {
 		size: 'xs' as const,
-		tooltipPlacement: 'tooltip-right' as const
+		tooltipPlacement: 'auto' as const
 	});
 
 	onDestroy(() => {

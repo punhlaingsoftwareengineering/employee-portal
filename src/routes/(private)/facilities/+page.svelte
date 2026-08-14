@@ -11,16 +11,27 @@
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { getFacilities, deleteFacility } from '$lib/remotes/facility.remote';
+	import { permissionFlag } from '$lib/constants/permissions';
 
 	const permissions = $derived(page.data.permissions);
-	const isAdmin = $derived(permissions?.isAdmin ?? false);
+	const canCreate = $derived(permissionFlag(permissions, 'facilityCreate'));
 
-	function canWriteFacilityRow(facilityId: string): boolean {
-		if (isAdmin) return true;
+	function canUpdateFacilityRow(facilityId: string): boolean {
+		if (permissions?.isAdmin) return true;
 		return (
 			permissions?.departmentRoles?.some(
 				(assignment) =>
-					assignment.facilityId === facilityId && assignment.permissions.facilityWrite
+					assignment.facilityId === facilityId && assignment.permissions.facilityUpdate
+			) ?? false
+		);
+	}
+
+	function canDeleteFacilityRow(facilityId: string): boolean {
+		if (permissions?.isAdmin) return true;
+		return (
+			permissions?.departmentRoles?.some(
+				(assignment) =>
+					assignment.facilityId === facilityId && assignment.permissions.facilityDelete
 			) ?? false
 		);
 	}
@@ -36,9 +47,13 @@
 
 	<PrivatePageHeader title="Facilities" />
 
-	{#if isAdmin}
+	{#if canCreate}
 		<div class="flex justify-end">
-			<button type="button" class="btn btn-primary gap-2" onclick={() => facilityDialog?.open()}>
+			<button
+				type="button"
+				class="btn btn-primary cursor-pointer gap-2"
+				onclick={() => facilityDialog?.open()}
+			>
 				<Plus class="h-4 w-4" />
 				Add facility
 			</button>
@@ -47,7 +62,7 @@
 
 	<DataTable rows={facilities} rowKey={(item) => item.id} emptyMessage="No facilities yet.">
 		{#snippet actions({ row: item })}
-			{#if canWriteFacilityRow(item.id)}
+			{#if canUpdateFacilityRow(item.id)}
 				<IconActionButton
 					label="Edit"
 					variant="secondary"
@@ -55,6 +70,8 @@
 				>
 					<Pencil class="h-4 w-4" />
 				</IconActionButton>
+			{/if}
+			{#if canDeleteFacilityRow(item.id)}
 				<IconActionButton
 					label="Delete"
 					variant="error"
@@ -93,6 +110,19 @@
 		<DataTableColumn label="Name" firstData filterText={(item) => item.name}>
 			{#snippet children({ row: item })}
 				{item.name}
+			{/snippet}
+		</DataTableColumn>
+
+		<DataTableColumn
+			label="Onboarding"
+			filterText={(item) => (item.showOnOnboarding ? 'yes shown' : 'no hidden')}
+		>
+			{#snippet children({ row: item })}
+				{#if item.showOnOnboarding}
+					<span class="badge badge-success badge-sm">Shown</span>
+				{:else}
+					<span class="badge badge-ghost badge-sm">Hidden</span>
+				{/if}
 			{/snippet}
 		</DataTableColumn>
 

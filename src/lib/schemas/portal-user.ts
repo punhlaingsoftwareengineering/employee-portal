@@ -15,4 +15,7 @@ export const updateUserAccessSchema = z.object({
 	assignments: z.array(departmentRoleAssignmentSchema).default([])
 });
 
+export const deletePortalUserSchema = z.string().min(1);
+
 export type UpdateUserAccessInput = z.infer<typeof updateUserAccessSchema>;
+export type DeletePortalUserInput = z.infer<typeof deletePortalUserSchema>;

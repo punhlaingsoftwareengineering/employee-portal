@@ -1,6 +1,7 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
+import { isOptionalFeatureDbError } from '$lib/server/db/errors';
 import { newsletter } from '$lib/server/db/schema/newsletter';
 import {
 	createNewsletterSchema,
@@ -8,24 +9,88 @@ import {
 	type CreateNewsletterInput,
 	type UpdateNewsletterInput
 } from '$lib/schemas/newsletter';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canSettingsNewsletterCreate,
+	canSettingsNewsletterDelete,
+	canSettingsNewsletterUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
+import { resolveNewsletterMediaKind } from '$lib/server/newsletter-media-kind';
+import type { NewsletterMediaKind } from '$lib/utils/newsletter-media';
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+const newsletterOrder = [desc(newsletter.sortOrder), desc(newsletter.createdAt)];
+
+async function withMediaKinds<T extends { pdfUrl: string; title: string }>(
+	rows: T[]
+): Promise<Array<T & { mediaKind: NewsletterMediaKind }>> {
+	return Promise.all(
+		rows.map(async (row) => ({
+			...row,
+			mediaKind: await resolveNewsletterMediaKind(row.pdfUrl, row.title)
+		}))
+	);
+}
+
+function assertCanCreate(perms: UserPermissions) {
+	if (!canSettingsNewsletterCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsNewsletterUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canSettingsNewsletterDelete(perms)) error(403, 'Forbidden');
+}
+
+async function nextSortOrder(): Promise<number> {
+	const [row] = await db
+		.select({ max: sql<number>`coalesce(max(${newsletter.sortOrder}), 0)` })
+		.from(newsletter);
+	return Number(row?.max ?? 0) + 1;
 }
 
 export async function listNewsletters(_perms: UserPermissions) {
-	return db.query.newsletter.findMany({
-		orderBy: [desc(newsletter.createdAt)]
-	});
+	try {
+		return await db.query.newsletter.findMany({
+			orderBy: newsletterOrder
+		});
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) return [];
+		throw err;
+	}
 }
 
-/** Newest newsletters for the public onboarding page (max `limit`). */
+export async function countNewsletters(): Promise<number> {
+	const [row] = await db.select({ count: sql<number>`count(*)::int` }).from(newsletter);
+	return Number(row?.count ?? 0);
+}
+
+/** Latest newsletters for public onboarding (by sort order, then created). */
 export async function listPublicNewsletters(limit = 8) {
-	return db.query.newsletter.findMany({
-		orderBy: [desc(newsletter.createdAt)],
-		limit
-	});
+	try {
+		const rows = await db.query.newsletter.findMany({
+			orderBy: newsletterOrder,
+			limit
+		});
+		return withMediaKinds(rows);
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) return [];
+		throw err;
+	}
+}
+
+/** Full public list (see more page). */
+export async function listAllPublicNewsletters() {
+	try {
+		const rows = await db.query.newsletter.findMany({
+			orderBy: newsletterOrder
+		});
+		return withMediaKinds(rows);
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) return [];
+		throw err;
+	}
 }
 
 export async function getNewsletter(perms: UserPermissions, id: string) {
@@ -38,10 +103,18 @@ export async function getNewsletter(perms: UserPermissions, id: string) {
 }
 
 export async function createNewsletter(perms: UserPermissions, input: CreateNewsletterInput) {
-	requireAdmin(perms);
+	assertCanCreate(perms);
 
 	const data = createNewsletterSchema.parse(input);
-	const [record] = await db.insert(newsletter).values(data).returning();
+	const sortOrder = data.sortOrder ?? (await nextSortOrder());
+	const [record] = await db
+		.insert(newsletter)
+		.values({
+			title: data.title,
+			pdfUrl: data.pdfUrl,
+			sortOrder
+		})
+		.returning();
 	return record;
 }
 
@@ -50,7 +123,7 @@ export async function updateNewsletter(
 	id: string,
 	input: UpdateNewsletterInput
 ) {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	await getNewsletter(perms, id);
 	const data = updateNewsletterSchema.parse(input);
@@ -65,7 +138,7 @@ export async function updateNewsletter(
 }
 
 export async function deleteNewsletter(perms: UserPermissions, id: string) {
-	requireAdmin(perms);
+	assertCanDelete(perms);
 
 	await getNewsletter(perms, id);
 	await db.delete(newsletter).where(eq(newsletter.id, id));

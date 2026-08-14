@@ -6,7 +6,6 @@
 	import { NOTIFICATIONS_ROUTE } from '$lib/constants/notification';
 	import NotificationListItem from '$lib/components/NotificationListItem.svelte';
 	import {
-		loadDismissedNotificationIds,
 		loadNotificationsMuted,
 		playNotificationSound,
 		saveNotificationsMuted
@@ -25,7 +24,7 @@
 	} = $props();
 
 	let streamNotifications = $state<PublicNotification[]>([]);
-	let locallyDismissed = $state<Set<string>>(loadDismissedNotificationIds());
+	let locallyRead = $state<Set<string>>(new Set());
 	let muted = $state(loadNotificationsMuted());
 
 	const userId = $derived(page.data.user?.id ?? null);
@@ -37,41 +36,42 @@
 		for (const item of serverNotifications) merged.set(item.id, item);
 
 		return [...merged.values()]
-			.filter((item) => !locallyDismissed.has(item.id))
+			.map((item) =>
+				locallyRead.has(item.id) || item.isRead ? { ...item, isRead: true } : item
+			)
 			.sort(
 				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 			);
 	});
 
 	const dropdownNotifications = $derived(notifications.slice(0, 20));
-	const unreadCount = $derived(notifications.length);
+	const unreadCount = $derived(notifications.filter((item) => !item.isRead).length);
 	const hasMore = $derived(notifications.length > 20);
 
-	async function handleDismiss(id: string) {
+	async function handleMarkRead(id: string) {
 		if (!userId) return;
-		locallyDismissed = new Set([...locallyDismissed, id]);
+		const previous = locallyRead;
+		locallyRead = new Set([...locallyRead, id]);
 
 		try {
 			await dismissNotification(id);
 		} catch {
-			const next = new Set(locallyDismissed);
-			next.delete(id);
-			locallyDismissed = next;
+			locallyRead = previous;
 		}
 	}
 
-	async function handleDismissAll() {
+	async function handleMarkAllRead() {
 		if (!userId) return;
-		const ids = notifications.map((item) => item.id);
+		const ids = notifications.filter((item) => !item.isRead).map((item) => item.id);
 		if (ids.length === 0) return;
 
-		const previous = locallyDismissed;
-		locallyDismissed = new Set([...locallyDismissed, ...ids]);
+		const previous = locallyRead;
+		locallyRead = new Set([...locallyRead, ...ids]);
 
 		try {
 			await dismissAllNotifications(ids);
 		} catch {
-			locallyDismissed = previous;
+			locallyRead = previous;
 		}
 	}
 
@@ -89,9 +89,8 @@
 			try {
 				const payload = JSON.parse(event.data) as PublicNotification;
 				if (streamNotifications.some((item) => item.id === payload.id)) return;
-				if (locallyDismissed.has(payload.id)) return;
 
-				streamNotifications = [payload, ...streamNotifications];
+				streamNotifications = [{ ...payload, isRead: false }, ...streamNotifications];
 				if (!muted) {
 					playNotificationSound(payload.soundMp3Url ?? defaultSoundUrl);
 				}
@@ -127,7 +126,7 @@
 		{:else}
 			<div class="max-h-80 divide-y divide-base-200 overflow-y-auto">
 				{#each dropdownNotifications as notification (notification.id)}
-					<NotificationListItem {notification} onDismiss={handleDismiss} />
+					<NotificationListItem {notification} onMarkRead={handleMarkRead} />
 				{/each}
 			</div>
 		{/if}
@@ -137,7 +136,7 @@
 				type="button"
 				class="btn btn-ghost btn-xs"
 				disabled={unreadCount === 0}
-				onclick={handleDismissAll}
+				onclick={handleMarkAllRead}
 			>
 				Mark all as read
 			</button>

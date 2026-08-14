@@ -8,6 +8,7 @@
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingSlide = $state<OnboardingSlide | null>(null);
@@ -126,6 +127,7 @@
 								bind:value={imageUrl}
 								category="onboarding-slides"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.carousel}
 								required
 								placeholder="https://example.com/slide.png"
 								disabled={submitting}

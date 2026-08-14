@@ -58,7 +58,8 @@
 
 		try {
 			await withFormFeedback({
-				successMessage: 'User access updated',
+				successMessage:
+					'User access updated. They must sign in again for the new access to apply.',
 				action: async () => {
 					await updateUserAccess({
 						userId: portalUser!.id,

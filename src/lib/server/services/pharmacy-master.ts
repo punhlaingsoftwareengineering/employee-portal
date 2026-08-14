@@ -10,8 +10,11 @@ import {
 	type UpdatePharmacyMasterInput
 } from '$lib/schemas/pharmacy-master';
 import {
-	canManagePharmacy,
+	canCreatePharmacy,
+	canDeletePharmacy,
+	canExcelOverridePharmacy,
 	canReadPharmacy,
+	canUpdatePharmacy,
 	type UserPermissions
 } from '$lib/server/permissions';
 import {
@@ -22,12 +25,32 @@ import {
 	parseExcelTimestamp
 } from '$lib/server/excel-import';
 
+function isUniqueViolation(err: unknown): boolean {
+	return (
+		typeof err === 'object' &&
+		err !== null &&
+		'code' in err &&
+		(err as { code?: string }).code === '23505'
+	);
+}
 function assertCanRead(perms: UserPermissions) {
 	if (!canReadPharmacy(perms)) error(403, 'Forbidden');
 }
 
-function assertCanManage(perms: UserPermissions) {
-	if (!canManagePharmacy(perms)) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canCreatePharmacy(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canUpdatePharmacy(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canDeletePharmacy(perms)) error(403, 'Forbidden');
+}
+
+function assertCanExcelOverride(perms: UserPermissions) {
+	if (!canExcelOverridePharmacy(perms)) error(403, 'Forbidden');
 }
 
 function normalizeEntryDate(value: CreatePharmacyMasterInput['entryDate']) {
@@ -60,31 +83,49 @@ export async function getPharmacyMaster(perms: UserPermissions, id: string) {
 	return record;
 }
 
-export async function createPharmacyMaster(perms: UserPermissions, input: CreatePharmacyMasterInput) {
-	assertCanManage(perms);
+export async function createPharmacyMaster(
+	perms: UserPermissions,
+	input: CreatePharmacyMasterInput
+) {
+	assertCanCreate(perms);
 	const data = createPharmacyMasterSchema.parse(input);
 
 	const existing = await db.query.pharmacyMaster.findFirst({
 		where: eq(pharmacyMaster.id, data.id)
 	});
-	if (existing) error(409, 'Pharmacy item id already exists');
+	if (existing) {
+		error(
+			409,
+			`Pharmacy item ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+		);
+	}
 
-	const [record] = await db
-		.insert(pharmacyMaster)
-		.values({
-			id: data.id,
-			itemClass: data.itemClass ?? null,
-			subClass: data.subClass ?? null,
-			itemName: data.itemName ?? null,
-			genericName: data.genericName ?? null,
-			strengthValue: data.strengthValue ?? null,
-			issueUnit: data.issueUnit ?? null,
-			facilityId: data.facilityId ?? null,
-			entryDate: normalizeEntryDate(data.entryDate),
-			active: data.active ?? null
-		})
-		.returning();
-	return record;
+	try {
+		const [record] = await db
+			.insert(pharmacyMaster)
+			.values({
+				id: data.id,
+				itemClass: data.itemClass ?? null,
+				subClass: data.subClass ?? null,
+				itemName: data.itemName ?? null,
+				genericName: data.genericName ?? null,
+				strengthValue: data.strengthValue ?? null,
+				issueUnit: data.issueUnit ?? null,
+				facilityId: data.facilityId ?? null,
+				entryDate: normalizeEntryDate(data.entryDate),
+				active: data.active ?? null
+			})
+			.returning();
+		return record;
+	} catch (err) {
+		if (isUniqueViolation(err)) {
+			error(
+				409,
+				`Pharmacy item ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+			);
+		}
+		throw err;
+	}
 }
 
 export async function updatePharmacyMaster(
@@ -92,7 +133,7 @@ export async function updatePharmacyMaster(
 	id: string,
 	input: UpdatePharmacyMasterInput
 ) {
-	assertCanManage(perms);
+	assertCanUpdate(perms);
 	await getPharmacyMaster(perms, id);
 	const data = updatePharmacyMasterSchema.parse(input);
 
@@ -115,7 +156,7 @@ export async function updatePharmacyMaster(
 }
 
 export async function deletePharmacyMaster(perms: UserPermissions, id: string) {
-	assertCanManage(perms);
+	assertCanDelete(perms);
 	await getPharmacyMaster(perms, id);
 	await db.delete(pharmacyMaster).where(eq(pharmacyMaster.id, id));
 }
@@ -124,7 +165,7 @@ export async function overridePharmacyMastersFromExcel(
 	perms: UserPermissions,
 	input: OverridePharmacyMastersFromExcelInput
 ) {
-	assertCanManage(perms);
+	assertCanExcelOverride(perms);
 	const bytes = decodeExcelBase64(input.fileBase64);
 	const rows = parseExcelRows(bytes);
 

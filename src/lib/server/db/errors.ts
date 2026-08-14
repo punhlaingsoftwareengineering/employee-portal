@@ -17,6 +17,14 @@ export function isMissingRelationError(error: unknown): boolean {
 	});
 }
 
+/** True when Postgres reports a missing column (schema drift vs app). */
+export function isMissingColumnError(error: unknown): boolean {
+	return walkErrors(error, (err) => {
+		if (err.code === '42703') return true;
+		return typeof err.message === 'string' && /column .+ does not exist/i.test(err.message);
+	});
+}
+
 /** True when the app cannot reach Postgres (bad URL, network, DNS, auth). */
 export function isDbConnectionError(error: unknown): boolean {
 	return walkErrors(error, (err) => {
@@ -31,5 +39,5 @@ export function isDbConnectionError(error: unknown): boolean {
 }
 
 export function isOptionalFeatureDbError(error: unknown): boolean {
-	return isMissingRelationError(error) || isDbConnectionError(error);
+	return isMissingRelationError(error) || isMissingColumnError(error) || isDbConnectionError(error);
 }

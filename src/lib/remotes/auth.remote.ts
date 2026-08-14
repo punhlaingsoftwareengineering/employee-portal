@@ -1,10 +1,7 @@
 import { command, getRequestEvent } from '$app/server';
-import { ORIGIN } from '$app/env/private';
 import { error } from '@sveltejs/kit';
-import { APIError } from 'better-auth/api';
-import { AUTH_ROUTES } from '$lib/constants/auth-routes';
-import { auth } from '$lib/server/auth';
 import { requireUser } from '$lib/server/auth-guard';
+import { requestPasswordResetEmail } from '$lib/server/services/password-reset';
 
 /** Send a password-reset email for the signed-in user (same as forgot-password flow). */
 export const requestOwnPasswordReset = command(async () => {
@@ -12,18 +9,12 @@ export const requestOwnPasswordReset = command(async () => {
 	const user = requireUser(event);
 
 	try {
-		await auth.api.requestPasswordReset({
-			body: {
-				email: user.email,
-				redirectTo: `${ORIGIN}${AUTH_ROUTES.resetPassword}`
-			},
-			headers: event.request.headers
-		});
+		await requestPasswordResetEmail(user.email);
 	} catch (err) {
-		if (err instanceof APIError) {
-			error(400, err.message || 'Could not send reset email');
-		}
-		throw err;
+		console.error('[requestOwnPasswordReset] failed', err);
+		const message =
+			err instanceof Error ? err.message : 'Could not send reset email. Check server mail logs.';
+		error(500, message);
 	}
 
 	return { ok: true as const };

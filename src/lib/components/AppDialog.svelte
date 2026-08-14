@@ -11,6 +11,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
 	import DriveMediaAppendButton from '$lib/components/drive/DriveMediaAppendButton.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingApp = $state<App | null>(null);
@@ -203,6 +204,7 @@
 								bind:value={iconUrl}
 								category="apps"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.square}
 								placeholder="https://example.com/icon.png"
 								disabled={submitting}
 							/>
@@ -215,6 +217,7 @@
 								bind:value={bannerUrl}
 								category="apps"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.banner}
 								placeholder="https://example.com/banner.png"
 								disabled={submitting}
 							/>
@@ -342,6 +345,7 @@
 								<DriveMediaAppendButton
 									category="apps"
 									accept="image/*"
+									aspectRatio={IMAGE_ASPECT.screenshot}
 									disabled={submitting}
 									onAppend={appendScreenshotUrl}
 								/>

@@ -12,12 +12,12 @@
 	} = $props();
 </script>
 
-<header class="mb-6">
+<header class="mb-3">
 	<h2 class="flex items-center gap-2 text-2xl font-bold">
 		<Icon class="h-6 w-6 text-primary" />
 		{title}
 	</h2>
 	{#if description}
-		<p class="mt-2 text-base-content/70">{description}</p>
+		<p class="mt-1 text-base-content/70">{description}</p>
 	{/if}
 </header>

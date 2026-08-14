@@ -12,7 +12,12 @@ import {
 	type UpdateServiceInput,
 	type ServiceSummary
 } from '$lib/schemas/service';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canToolsServiceCreate,
+	canToolsServiceDelete,
+	canToolsServiceUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 import {
 	checkServiceLinkHealth,
 	mapWithConcurrency,
@@ -82,7 +87,20 @@ export async function getService(id: string) {
 	return record;
 }
 
-export async function createService(input: CreateServiceInput) {
+function assertCanCreate(perms: UserPermissions) {
+	if (!canToolsServiceCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canToolsServiceUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canToolsServiceDelete(perms)) error(403, 'Forbidden');
+}
+
+export async function createService(perms: UserPermissions, input: CreateServiceInput) {
+	assertCanCreate(perms);
 	const data = createServiceSchema.parse(input);
 	const [record] = await db
 		.insert(service)
@@ -91,7 +109,8 @@ export async function createService(input: CreateServiceInput) {
 	return record;
 }
 
-export async function updateService(input: UpdateServiceInput) {
+export async function updateService(perms: UserPermissions, input: UpdateServiceInput) {
+	assertCanUpdate(perms);
 	const data = updateServiceSchema.parse(input);
 	await getService(data.id);
 
@@ -105,7 +124,8 @@ export async function updateService(input: UpdateServiceInput) {
 	return record;
 }
 
-export async function deleteService(id: string) {
+export async function deleteService(perms: UserPermissions, id: string) {
+	assertCanDelete(perms);
 	if (isBuiltinServiceId(id)) {
 		error(400, 'Built-in portal services cannot be deleted');
 	}

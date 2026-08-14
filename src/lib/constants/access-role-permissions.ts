@@ -1,0 +1,94 @@
+/** All access_role permission flags (nav + capabilities). Shared by client + server. */
+export const ACCESS_ROLE_PERMISSION_KEYS = [
+	'navDashboard',
+	'navEmployees',
+	'navDepartments',
+	'navFacilities',
+	'navPharmacy',
+	'navDoctors',
+	'navTools',
+	'navSettings',
+	'navCommunity',
+	'navUsers',
+	'navRoles',
+	'employeeReadAll',
+	'employeeCreate',
+	'employeeUpdate',
+	'employeeDelete',
+	'employeeExcelOverride',
+	'departmentReadAll',
+	'departmentCreate',
+	'departmentUpdate',
+	'departmentDelete',
+	'facilityReadAll',
+	'facilityCreate',
+	'facilityUpdate',
+	'facilityDelete',
+	'pharmacyReadAll',
+	'pharmacyCreate',
+	'pharmacyUpdate',
+	'pharmacyDelete',
+	'pharmacyExcelOverride',
+	'doctorReadAll',
+	'doctorCreate',
+	'doctorUpdate',
+	'doctorDelete',
+	'doctorExcelOverride',
+	'usersRead',
+	'usersInvite',
+	'usersUpdate',
+	'usersInviteResend',
+	'usersInviteRevoke',
+	'rolesRead',
+	'rolesCreate',
+	'rolesUpdate',
+	'rolesDelete',
+	'communityCategoryCreate',
+	'communityCategoryUpdate',
+	'communityCategoryDelete',
+	'communityLinkCreate',
+	'communityLinkUpdate',
+	'communityLinkDelete',
+	'settingsThemeUpdate',
+	'settingsNewsletterCreate',
+	'settingsNewsletterUpdate',
+	'settingsNewsletterDelete',
+	'settingsOnboardingCreate',
+	'settingsOnboardingUpdate',
+	'settingsOnboardingDelete',
+	'settingsAnnouncementCreate',
+	'settingsAnnouncementUpdate',
+	'settingsAnnouncementDelete',
+	'settingsSoundCreate',
+	'settingsSoundUpdate',
+	'settingsSoundDelete',
+	'settingsNotificationCreate',
+	'settingsNotificationUpdate',
+	'settingsNotificationDelete',
+	'toolsServiceCreate',
+	'toolsServiceUpdate',
+	'toolsServiceDelete',
+	'toolsAppCreate',
+	'toolsAppUpdate',
+	'toolsAppDelete',
+	'toolsGuideCreate',
+	'toolsGuideUpdate',
+	'toolsGuideDelete',
+	'toolsLearningCreate',
+	'toolsLearningUpdate',
+	'toolsLearningDelete'
+] as const;
+
+export type AccessRolePermissionKey = (typeof ACCESS_ROLE_PERMISSION_KEYS)[number];
+
+export type AccessRolePermissionFlags = Record<AccessRolePermissionKey, boolean>;
+
+export function emptyPermissionFlags(
+	overrides: Partial<AccessRolePermissionFlags> = {}
+): AccessRolePermissionFlags {
+	const flags = {} as AccessRolePermissionFlags;
+	for (const key of ACCESS_ROLE_PERMISSION_KEYS) {
+		flags[key] = false;
+	}
+	return { ...flags, ...overrides };
+}

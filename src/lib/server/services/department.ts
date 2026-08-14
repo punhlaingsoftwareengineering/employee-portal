@@ -10,8 +10,9 @@ import {
 } from '$lib/schemas/department';
 import {
 	canReadDepartment,
-	canWriteDepartment,
 	canCreateDepartment,
+	canDeleteDepartment,
+	canUpdateDepartment,
 	type UserPermissions
 } from '$lib/server/permissions';
 
@@ -54,7 +55,7 @@ export async function updateDepartment(
 	id: string,
 	input: UpdateDepartmentInput
 ) {
-	if (!canWriteDepartment(perms, id)) error(403, 'Forbidden');
+	if (!canUpdateDepartment(perms, id)) error(403, 'Forbidden');
 
 	await getDepartment(perms, id);
 	const data = updateDepartmentSchema.parse(input);
@@ -69,7 +70,7 @@ export async function updateDepartment(
 }
 
 export async function deleteDepartment(perms: UserPermissions, id: string) {
-	if (!canWriteDepartment(perms, id)) error(403, 'Forbidden');
+	if (!canDeleteDepartment(perms, id)) error(403, 'Forbidden');
 
 	await getDepartment(perms, id);
 	await db.delete(department).where(eq(department.id, id));

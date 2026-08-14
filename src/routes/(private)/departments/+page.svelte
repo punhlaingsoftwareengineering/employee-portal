@@ -11,16 +11,27 @@
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import { getDepartments, deleteDepartment } from '$lib/remotes/department.remote';
+	import { permissionFlag } from '$lib/constants/permissions';
 
 	const permissions = $derived(page.data.permissions);
-	const isAdmin = $derived(permissions?.isAdmin ?? false);
+	const canCreate = $derived(permissionFlag(permissions, 'departmentCreate'));
 
-	function canWriteDepartmentRow(departmentId: string): boolean {
-		if (isAdmin) return true;
+	function canUpdateDepartmentRow(departmentId: string): boolean {
+		if (permissions?.isAdmin) return true;
 		return (
 			permissions?.departmentRoles?.some(
 				(assignment) =>
-					assignment.departmentId === departmentId && assignment.permissions.departmentWrite
+					assignment.departmentId === departmentId && assignment.permissions.departmentUpdate
+			) ?? false
+		);
+	}
+
+	function canDeleteDepartmentRow(departmentId: string): boolean {
+		if (permissions?.isAdmin) return true;
+		return (
+			permissions?.departmentRoles?.some(
+				(assignment) =>
+					assignment.departmentId === departmentId && assignment.permissions.departmentDelete
 			) ?? false
 		);
 	}
@@ -36,9 +47,13 @@
 
 	<PrivatePageHeader title="Departments" />
 
-	{#if isAdmin}
+	{#if canCreate}
 		<div class="flex justify-end">
-			<button type="button" class="btn btn-primary gap-2" onclick={() => departmentDialog?.open()}>
+			<button
+				type="button"
+				class="btn btn-primary cursor-pointer gap-2"
+				onclick={() => departmentDialog?.open()}
+			>
 				<Plus class="h-4 w-4" />
 				Add department
 			</button>
@@ -47,7 +62,7 @@
 
 	<DataTable rows={departments} rowKey={(department) => department.id} emptyMessage="No departments yet.">
 		{#snippet actions({ row: department })}
-			{#if canWriteDepartmentRow(department.id)}
+			{#if canUpdateDepartmentRow(department.id)}
 				<IconActionButton
 					label="Edit"
 					variant="secondary"
@@ -55,6 +70,8 @@
 				>
 					<Pencil class="h-4 w-4" />
 				</IconActionButton>
+			{/if}
+			{#if canDeleteDepartmentRow(department.id)}
 				<IconActionButton
 					label="Delete"
 					variant="error"

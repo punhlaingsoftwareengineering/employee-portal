@@ -1,4 +1,4 @@
-import { desc, eq, notInArray } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { notification } from '$lib/server/db/schema/notification';
@@ -13,15 +13,33 @@ import {
 import { isOptionalFeatureDbError } from '$lib/server/db/errors';
 import { publishNotification } from '$lib/server/notification-bus';
 import { getDefaultNotificationSound } from '$lib/server/services/notification-sound';
-import { canAccessSettings, type UserPermissions } from '$lib/server/permissions';
+import {
+	canAccessSettings,
+	canSettingsNotificationCreate,
+	canSettingsNotificationDelete,
+	canSettingsNotificationUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
 const emptyPublicNotifications = {
 	notifications: [] as PublicNotification[],
-	dismissedIds: [] as string[],
+	readIds: [] as string[],
 	defaultSoundUrl: null as string | null
 };
 
-function requireSettingsAccess(perms: UserPermissions) {
+function assertCanCreate(perms: UserPermissions) {
+	if (!canSettingsNotificationCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsNotificationUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canSettingsNotificationDelete(perms)) error(403, 'Forbidden');
+}
+
+function assertCanRead(perms: UserPermissions) {
 	if (!canAccessSettings(perms)) error(403, 'Forbidden');
 }
 
@@ -37,7 +55,8 @@ function toPublicNotification(
 		createdAt: Date;
 		sound?: { mp3Url: string } | null;
 	},
-	defaultMp3Url: string | null
+	defaultMp3Url: string | null,
+	isRead = false
 ): PublicNotification {
 	return {
 		id: record.id,
@@ -48,7 +67,8 @@ function toPublicNotification(
 		iconName: record.iconName,
 		imageUrl: record.imageUrl,
 		soundMp3Url: record.sound?.mp3Url ?? defaultMp3Url,
-		createdAt: record.createdAt.toISOString()
+		createdAt: record.createdAt.toISOString(),
+		isRead
 	};
 }
 
@@ -57,7 +77,7 @@ async function getDefaultMp3Url() {
 	return sound?.mp3Url ?? null;
 }
 
-async function listDismissedIds(userId: string) {
+async function listReadIds(userId: string) {
 	const rows = await db.query.notificationRead.findMany({
 		where: eq(notificationRead.userId, userId),
 		columns: { notificationId: true }
@@ -66,7 +86,7 @@ async function listDismissedIds(userId: string) {
 }
 
 export async function listNotifications(perms: UserPermissions) {
-	requireSettingsAccess(perms);
+	assertCanRead(perms);
 
 	return db.query.notification.findMany({
 		with: { sound: true },
@@ -77,19 +97,19 @@ export async function listNotifications(perms: UserPermissions) {
 export async function listUserNotifications(userId: string) {
 	try {
 		const defaultMp3Url = await getDefaultMp3Url();
-		const dismissedIds = await listDismissedIds(userId);
+		const readIds = await listReadIds(userId);
+		const readSet = new Set(readIds);
 
 		const rows = await db.query.notification.findMany({
 			with: { sound: true },
-			...(dismissedIds.length > 0
-				? { where: notInArray(notification.id, dismissedIds) }
-				: {}),
 			orderBy: [desc(notification.createdAt)]
 		});
 
 		return {
-			notifications: rows.map((row) => toPublicNotification(row, defaultMp3Url)),
-			dismissedIds,
+			notifications: rows.map((row) =>
+				toPublicNotification(row, defaultMp3Url, readSet.has(row.id))
+			),
+			readIds,
 			defaultSoundUrl: defaultMp3Url
 		};
 	} catch (err) {
@@ -102,7 +122,7 @@ export async function listUserNotifications(userId: string) {
 }
 
 export async function getNotification(perms: UserPermissions, id: string) {
-	requireSettingsAccess(perms);
+	assertCanRead(perms);
 
 	const record = await db.query.notification.findFirst({
 		where: eq(notification.id, id),
@@ -114,7 +134,7 @@ export async function getNotification(perms: UserPermissions, id: string) {
 }
 
 export async function createNotification(perms: UserPermissions, input: CreateNotificationInput) {
-	requireSettingsAccess(perms);
+	assertCanCreate(perms);
 
 	const data = createNotificationSchema.parse(input);
 	const [record] = await db
@@ -138,7 +158,7 @@ export async function createNotification(perms: UserPermissions, input: CreateNo
 	if (!withSound) error(500, 'Failed to load created notification');
 
 	const defaultMp3Url = await getDefaultMp3Url();
-	const payload = toPublicNotification(withSound, defaultMp3Url);
+	const payload = toPublicNotification(withSound, defaultMp3Url, false);
 	publishNotification(payload);
 
 	return withSound;
@@ -149,7 +169,7 @@ export async function updateNotification(
 	id: string,
 	input: UpdateNotificationInput
 ) {
-	requireSettingsAccess(perms);
+	assertCanUpdate(perms);
 
 	await getNotification(perms, id);
 	const data = updateNotificationSchema.parse(input);
@@ -176,12 +196,13 @@ export async function updateNotification(
 }
 
 export async function deleteNotification(perms: UserPermissions, id: string) {
-	requireSettingsAccess(perms);
+	assertCanDelete(perms);
 
 	await getNotification(perms, id);
 	await db.delete(notification).where(eq(notification.id, id));
 }
 
+/** Mark as read for this user — does not hide the notification from history. */
 export async function dismissNotification(userId: string, notificationId: string) {
 	const existing = await db.query.notification.findFirst({
 		where: eq(notification.id, notificationId)

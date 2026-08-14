@@ -3,7 +3,10 @@ export const PUBLIC_ROUTES = {
 	community: '/community',
 	tipsAndTutorials: '/tips-and-tutorials',
 	services: '/services',
-	apps: '/apps'
+	apps: '/apps',
+	newsletters: '/newsletters',
+	directoryEmployees: '/directory/employees',
+	directoryDoctors: '/directory/doctors'
 } as const;
 
 export function publicAppHref(id: string): string {

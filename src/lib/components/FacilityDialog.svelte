@@ -8,6 +8,7 @@
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import DriveMediaUrlField from '$lib/components/drive/DriveMediaUrlField.svelte';
+	import { IMAGE_ASPECT } from '$lib/constants/image-aspect';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editingFacility = $state<Facility | null>(null);
@@ -16,6 +17,7 @@
 	let address = $state('');
 	let imageUrl = $state('');
 	let phone = $state('');
+	let showOnOnboarding = $state(false);
 	let submitting = $state(false);
 	let error = $state<string | null>(null);
 
@@ -29,6 +31,7 @@
 		address = existing?.address ?? '';
 		imageUrl = existing?.imageUrl ?? '';
 		phone = existing?.phone ?? '';
+		showOnOnboarding = existing?.showOnOnboarding ?? false;
 		dialog?.showModal();
 	}
 
@@ -46,6 +49,7 @@
 		address = '';
 		imageUrl = '';
 		phone = '';
+		showOnOnboarding = false;
 		error = null;
 		submitting = false;
 	}
@@ -70,7 +74,8 @@
 						description: description.trim() || undefined,
 						address: address.trim() || undefined,
 						imageUrl: imageUrl.trim() || null,
-						phone: phone.trim() || undefined
+						phone: phone.trim() || undefined,
+						showOnOnboarding
 					};
 
 					if (editingFacility?.id) {
@@ -139,6 +144,7 @@
 								bind:value={imageUrl}
 								category="facilities"
 								accept="image/*"
+								aspectRatio={IMAGE_ASPECT.facility}
 								placeholder="https://example.com/facility.jpg"
 								disabled={submitting}
 							/>
@@ -154,6 +160,20 @@
 								placeholder="+1 555 0100"
 								maxlength="30"
 							/>
+						</td>
+					</tr>
+					<tr>
+						<td class="form-table-label">Onboarding</td>
+						<td class="form-table-field">
+							<label class="label cursor-pointer justify-start gap-3">
+								<input
+									type="checkbox"
+									bind:checked={showOnOnboarding}
+									class="checkbox checkbox-primary"
+									disabled={submitting}
+								/>
+								<span class="label-text">Show on the onboarding page</span>
+							</label>
 						</td>
 					</tr>
 				</tbody>

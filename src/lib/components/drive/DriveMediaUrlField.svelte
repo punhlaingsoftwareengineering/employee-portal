@@ -1,12 +1,20 @@
 <script lang="ts">
 	import type { PortalDriveCategory } from '$lib/constants/drive-media-categories';
+	import type { ImageAspectRatio } from '$lib/constants/image-aspect';
+	import { aspectHint } from '$lib/constants/image-aspect';
 	import DriveMediaPickerDialog from '$lib/components/drive/DriveMediaPickerDialog.svelte';
 	import { LucideHardDriveUpload } from '@lucide/svelte';
+	import { normalizePublicDriveUrl } from '$lib/utils/drive-public-url';
+	import {
+		assertImageUrlAspect,
+		isImageUrl
+	} from '$lib/utils/image-aspect-ratio';
 
 	let {
 		category,
 		value = $bindable(''),
 		accept = 'image/*',
+		aspectRatio = null,
 		placeholder = 'https://…',
 		required = false,
 		disabled = false,
@@ -16,6 +24,7 @@
 		category: PortalDriveCategory;
 		value?: string;
 		accept?: string;
+		aspectRatio?: ImageAspectRatio | null;
 		placeholder?: string;
 		required?: boolean;
 		disabled?: boolean;
@@ -24,12 +33,53 @@
 	} = $props();
 
 	let picker = $state<DriveMediaPickerDialog | null>(null);
+	let aspectError = $state<string | null>(null);
+	let checkingAspect = $state(false);
 
-	const isImage = $derived(accept.includes('image'));
+	const acceptsImages = $derived(accept.includes('image'));
+	const isImage = $derived(
+		acceptsImages || isImageUrl(value) || /\.(avif|bmp|gif|jpe?g|png|svg|webp)(\?|#|$)/i.test(value)
+	);
+
+	const previewStyle = $derived.by(() => {
+		if (!aspectRatio) return undefined;
+		const maxH = 64;
+		const h = maxH;
+		const w = Math.round((maxH * aspectRatio.width) / aspectRatio.height);
+		return `width:${Math.min(w, 200)}px;height:${h}px;`;
+	});
 
 	function applyUrl(url: string) {
-		value = url;
+		aspectError = null;
+		value = normalizePublicDriveUrl(url);
 		onchange?.();
+	}
+
+	async function validateCurrentUrl() {
+		aspectError = null;
+		const trimmed = value.trim();
+		if (!trimmed || !aspectRatio || !acceptsImages) {
+			onchange?.();
+			return;
+		}
+		checkingAspect = true;
+		try {
+			await assertImageUrlAspect(trimmed, aspectRatio, {
+				allowNonImage: accept.includes('pdf') || accept.includes('video')
+			});
+			onchange?.();
+		} catch (e) {
+			aspectError = e instanceof Error ? e.message : 'Invalid image aspect ratio';
+			value = '';
+			onchange?.();
+		} finally {
+			checkingAspect = false;
+		}
+	}
+
+	function onInputChange() {
+		value = normalizePublicDriveUrl(value);
+		void validateCurrentUrl();
 	}
 </script>
 
@@ -42,7 +92,7 @@
 			{placeholder}
 			{required}
 			{disabled}
-			onchange={() => onchange?.()}
+			onchange={onInputChange}
 		/>
 		<button
 			type="button"
@@ -54,9 +104,29 @@
 			Upload
 		</button>
 	</div>
+	{#if aspectRatio && acceptsImages}
+		<p class="text-xs text-base-content/60">{aspectHint(aspectRatio)}</p>
+	{/if}
+	{#if checkingAspect}
+		<p class="text-xs text-base-content/60">Checking image aspect ratio…</p>
+	{/if}
+	{#if aspectError}
+		<p class="text-sm text-error">{aspectError}</p>
+	{/if}
 	{#if value && isImage}
-		<img src={value} alt="" class="h-16 w-16 rounded-box border border-base-300 object-cover" />
+		<img
+			src={normalizePublicDriveUrl(value)}
+			alt=""
+			class="rounded-box border border-base-300 object-cover"
+			style={previewStyle ?? 'width:4rem;height:4rem;'}
+		/>
 	{/if}
 </div>
 
-<DriveMediaPickerDialog bind:this={picker} {category} {accept} onSelect={applyUrl} />
+<DriveMediaPickerDialog
+	bind:this={picker}
+	{category}
+	{accept}
+	{aspectRatio}
+	onSelect={applyUrl}
+/>

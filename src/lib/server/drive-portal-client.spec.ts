@@ -68,6 +68,17 @@ describe('drive-portal-client', () => {
 		);
 	});
 
+	it('rewriteDriveUrlForServerFetch maps public Drive URL to internal origin', async () => {
+		mockEnv.DRIVE_ORIGIN = 'https://drive.phh.com';
+		mockEnv.DRIVE_INTERNAL_ORIGIN = 'http://phh-drive:1025';
+		const { rewriteDriveUrlForServerFetch } = await import('./drive-portal-client');
+		const result = rewriteDriveUrlForServerFetch(
+			'https://drive.phh.com/api/public/files/XeuKjnK05uVo'
+		);
+		expect(result.url).toBe('http://phh-drive:1025/api/public/files/XeuKjnK05uVo');
+		expect((result.headers as Record<string, string>).Host).toBe('drive.phh.com');
+	});
+
 	it('uploadToCategory creates folders, uploads, and returns public url', async () => {
 		const { uploadToCategory } = await import('./drive-portal-client');
 		const bytes = new Uint8Array([1, 2, 3]);

@@ -1,5 +1,7 @@
 # Shared Better Auth SSO (employee-portal ↔ PHH-DRIVE ↔ docs ↔ OAI Order Sender)
 
+**New application?** Follow the step-by-step guide: [authenticate-new-application.md](./authenticate-new-application.md).
+
 All apps must use the **same** values for:
 
 | Variable | Example (local) | Example (production) |
@@ -8,7 +10,8 @@ All apps must use the **same** values for:
 | `AUTH_DATABASE_URL` | Portal Postgres URL | Portal Postgres URL |
 | `AUTH_SESSION_EXPIRES_IN` | `7d` | `7d` |
 | `AUTH_SESSION_UPDATE_AGE` | `30m` | `30m` |
-| `AUTH_SESSION_COOKIE_CACHE_MAX_AGE` | `30m` | `30m` |
+| `AUTH_SESSION_COOKIE_CACHE_ENABLED` | `false` | `false` |
+| `AUTH_SESSION_COOKIE_CACHE_MAX_AGE` | `30m` | `30m` (only if cache enabled) |
 | `AUTH_COOKIE_DOMAIN` | `.local.test` | `.phh.com` |
 
 Per-app public URLs (must match the browser address):

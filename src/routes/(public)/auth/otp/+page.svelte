@@ -30,6 +30,13 @@
 		const s = cooldownSeconds % 60;
 		return `${m}:${s.toString().padStart(2, '0')}`;
 	});
+
+	/** Keep value digits-only (max 6). Format checks run on the server. */
+	function sanitizeOtp(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const next = input.value.replace(/\D/g, '').slice(0, 6);
+		if (input.value !== next) input.value = next;
+	}
 </script>
 
 <h1 class="text-2xl font-bold">Verification code</h1>
@@ -79,8 +86,8 @@
 									autocomplete="one-time-code"
 									inputmode="numeric"
 									maxlength="6"
-									pattern="[0-9]{6}"
 									required
+									oninput={sanitizeOtp}
 								/>
 							</label>
 						</td>

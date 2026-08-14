@@ -18,9 +18,14 @@
 
 <PageTitle />
 
-<AppSettingsSync branding={data.appBranding} themePolicy={data.portalThemePolicy} fontPolicy={data.portalFontPolicy} />
+<AppSettingsSync
+	branding={data.appBranding}
+	themePolicy={data.portalThemePolicy}
+	fontPolicy={data.portalFontPolicy}
+	fontSizePolicy={data.portalFontSizePolicy}
+/>
 
-<div class="min-h-screen bg-base-200">
+<div class="min-h-screen overscroll-none bg-base-200">
 	{@render children?.()}
 </div>
 

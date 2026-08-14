@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const facility = pgTable('facility', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -7,6 +7,8 @@ export const facility = pgTable('facility', {
 	address: text('address'),
 	imageUrl: text('image_url'),
 	phone: text('phone'),
+	/** When true, facility appears on the public onboarding page. */
+	showOnOnboarding: boolean('show_on_onboarding').notNull().default(false),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });

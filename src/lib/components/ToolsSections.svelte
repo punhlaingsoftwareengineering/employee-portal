@@ -110,7 +110,7 @@
 		</div>
 	{/if}
 {:else}
-	<label class="input input-bordered mb-6 w-full">
+	<label class="input input-bordered mb-4 w-full">
 		<Search class="h-4 w-4 shrink-0 opacity-50" />
 		<input
 			type="search"
@@ -124,7 +124,7 @@
 		<p class="text-base-content/70">No tools match your search.</p>
 	{:else}
 		{#if hasPinnedTools}
-			<section class="mb-10 scroll-mt-24">
+			<section class="mb-6 scroll-mt-20">
 				<SectionHead
 					icon={Pin}
 					title="Pinned"
@@ -138,7 +138,7 @@
 					</h3>
 					<svelte:boundary>
 						{@const linkStatuses = await getServiceLinkStatuses(pinnedServiceIds)}
-						<div class="{serviceGridClass} mb-6">
+						<div class="{serviceGridClass} mb-4">
 							{#each pinnedServices as item (item.id)}
 								<ServiceCard
 									name={item.name}
@@ -156,7 +156,7 @@
 						</div>
 
 						{#snippet pending()}
-							<div class="{serviceGridClass} mb-6">
+							<div class="{serviceGridClass} mb-4">
 								{#each pinnedServices as item (item.id)}
 									<ServiceCard
 										name={item.name}
@@ -175,7 +175,7 @@
 						{/snippet}
 
 						{#snippet failed()}
-							<div class="{serviceGridClass} mb-6">
+							<div class="{serviceGridClass} mb-4">
 								{#each pinnedServices as item (item.id)}
 									<ServiceCard
 										name={item.name}
@@ -223,7 +223,7 @@
 
 		{#if unpinnedServices.length > 0}
 			<section
-				class="mb-10 scroll-mt-24"
+				class="mb-6 scroll-mt-20"
 				id={sectionHeadStyle === 'onboarding' ? ONBOARDING_SECTION_IDS.services : undefined}
 			>
 				{#if sectionHeadStyle === 'onboarding'}
@@ -233,7 +233,7 @@
 						description="Browse web-based tools and integrations available to everyone."
 					/>
 				{:else}
-					<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+					<h2 class="mb-3 flex items-center gap-2 text-lg font-semibold">
 						<Globe class="h-5 w-5" />
 						Services
 					</h2>
@@ -310,7 +310,7 @@
 						description="Explore our mobile applications for staff and patients."
 					/>
 				{:else}
-					<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+					<h2 class="mb-3 flex items-center gap-2 text-lg font-semibold">
 						<Smartphone class="h-5 w-5" />
 						Apps
 					</h2>

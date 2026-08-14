@@ -3,7 +3,7 @@ import { getRequestEvent } from '$app/server';
 import { z } from 'zod';
 import * as communityLinkService from '$lib/server/services/community-link';
 import { createCommunityLinkSchema, updateCommunityLinkSchema } from '$lib/schemas/community-link';
-import { requireCommunityManage, requireAdmin } from '$lib/server/auth-guard';
+import { requireCommunityManage } from '$lib/server/auth-guard';
 import { getCommunityCategories } from '$lib/remotes/community-category.remote';
 
 async function perms() {
@@ -46,6 +46,6 @@ export const deleteCommunityLink = command(z.string().uuid(), async (id) => {
 });
 
 export const getRoleCommunityLinkIds = query(z.string().uuid(), async (roleId) => {
-	await requireAdmin(getRequestEvent());
+	await requireCommunityManage(getRequestEvent());
 	return communityLinkService.getRoleCommunityLinkIds(roleId);
 });

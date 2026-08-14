@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Plus, Pencil, Trash2 } from '@lucide/svelte';
 	import RoleDialog from '$lib/components/RoleDialog.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
@@ -14,20 +15,43 @@
 	import { getApps } from '$lib/remotes/app.remote';
 	import { getCommunityLinks } from '$lib/remotes/community-link.remote';
 	import type { AccessRole } from '$lib/server/db/schema/access-role';
+	import { permissionFlag } from '$lib/constants/permissions';
+
+	const permissions = $derived(page.data.permissions);
+	const canCreate = $derived(permissionFlag(permissions, 'rolesCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'rolesUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'rolesDelete'));
 
 	let roleDialog = $state<RoleDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 
 	function permissionFilterText(role: AccessRole & { toolCount?: number }): string {
 		const parts: string[] = [];
-		if (role.employeeReadAll) parts.push('read all employees');
-		if (role.employeeWrite) parts.push('write employees');
-		if (role.departmentReadAll) parts.push('read all depts');
-		if (role.departmentWrite) parts.push('manage depts');
-		if (role.facilityReadAll) parts.push('read facilities');
-		if (role.facilityWrite) parts.push('manage facilities');
-		if (role.pharmacyReadAll) parts.push('read pharmacy');
-		if (role.pharmacyWrite) parts.push('manage pharmacy');
+		if (role.employeeReadAll) parts.push('view employees');
+		if (role.employeeCreate) parts.push('add employees');
+		if (role.employeeUpdate) parts.push('edit employees');
+		if (role.employeeDelete) parts.push('delete employees');
+		if (role.employeeExcelOverride) parts.push('excel employees');
+		if (role.departmentReadAll) parts.push('view depts');
+		if (role.departmentCreate) parts.push('add depts');
+		if (role.departmentUpdate) parts.push('edit depts');
+		if (role.departmentDelete) parts.push('delete depts');
+		if (role.facilityReadAll) parts.push('view facilities');
+		if (role.facilityCreate) parts.push('add facilities');
+		if (role.facilityUpdate) parts.push('edit facilities');
+		if (role.facilityDelete) parts.push('delete facilities');
+		if (role.pharmacyReadAll) parts.push('view pharmacy');
+		if (role.pharmacyCreate) parts.push('add pharmacy');
+		if (role.pharmacyUpdate) parts.push('edit pharmacy');
+		if (role.pharmacyDelete) parts.push('delete pharmacy');
+		if (role.pharmacyExcelOverride) parts.push('excel pharmacy');
+		if (role.doctorReadAll) parts.push('view doctors');
+		if (role.doctorCreate) parts.push('add doctors');
+		if (role.doctorUpdate) parts.push('edit doctors');
+		if (role.doctorDelete) parts.push('delete doctors');
+		if (role.doctorExcelOverride) parts.push('excel doctors');
+		if (role.usersRead) parts.push('view users');
+		if (role.rolesRead) parts.push('view roles');
 		return parts.join(' ');
 	}
 </script>
@@ -42,19 +66,27 @@
 
 	<PrivatePageHeader title="Roles" />
 
-	<div class="flex justify-end">
-		<button type="button" class="btn btn-primary gap-2" onclick={() => roleDialog?.open()}>
-			<Plus class="h-4 w-4" />
-			New role
-		</button>
-	</div>
+	{#if canCreate}
+		<div class="flex justify-end">
+			<button
+				type="button"
+				class="btn btn-primary cursor-pointer gap-2"
+				onclick={() => roleDialog?.open()}
+			>
+				<Plus class="h-4 w-4" />
+				New role
+			</button>
+		</div>
+	{/if}
 
 	<DataTable rows={roles} rowKey={(role) => role.id} emptyMessage="No roles yet.">
 		{#snippet actions({ row: role })}
-			<IconActionButton label="Edit" variant="secondary" onclick={() => roleDialog?.open(role)}>
-				<Pencil class="h-4 w-4" />
-			</IconActionButton>
-			{#if !role.isSystem}
+			{#if canUpdate}
+				<IconActionButton label="Edit" variant="secondary" onclick={() => roleDialog?.open(role)}>
+					<Pencil class="h-4 w-4" />
+				</IconActionButton>
+			{/if}
+			{#if canDelete && !role.isSystem}
 				<IconActionButton
 					label="Delete"
 					variant="error"
@@ -97,39 +129,33 @@
 
 		<DataTableColumn label="Permissions" filterText={permissionFilterText}>
 			{#snippet children({ row: role })}
-				<div class="text-sm">
-					{#if role.employeeReadAll}<span class="badge badge-outline badge-sm"
-							>read all employees</span
-						>{/if}
-					{#if role.employeeWrite}<span class="badge badge-outline badge-sm"
-							>write employees</span
-						>{/if}
-					{#if role.departmentReadAll}<span class="badge badge-outline badge-sm"
-							>read all depts</span
-						>{/if}
-					{#if role.departmentWrite}<span class="badge badge-outline badge-sm"
-							>manage depts</span
-						>{/if}
-					{#if role.facilityReadAll}<span class="badge badge-outline badge-sm"
-							>read facilities</span
-						>{/if}
-					{#if role.facilityWrite}<span class="badge badge-outline badge-sm"
-							>manage facilities</span
-						>{/if}
-					{#if role.pharmacyReadAll}<span class="badge badge-outline badge-sm"
-							>read pharmacy</span
-						>{/if}
-					{#if role.pharmacyWrite}<span class="badge badge-outline badge-sm"
-							>manage pharmacy</span
-						>{/if}
+				<div class="flex flex-wrap gap-1 text-sm">
+					{#if role.employeeCreate || role.employeeUpdate || role.employeeExcelOverride}
+						<span class="badge badge-outline badge-sm">employees</span>
+					{/if}
+					{#if role.doctorCreate || role.doctorUpdate || role.doctorExcelOverride}
+						<span class="badge badge-outline badge-sm">doctors</span>
+					{/if}
+					{#if role.pharmacyCreate || role.pharmacyUpdate || role.pharmacyExcelOverride}
+						<span class="badge badge-outline badge-sm">pharmacy</span>
+					{/if}
+					{#if role.departmentCreate || role.departmentUpdate}
+						<span class="badge badge-outline badge-sm">departments</span>
+					{/if}
+					{#if role.facilityCreate || role.facilityUpdate}
+						<span class="badge badge-outline badge-sm">facilities</span>
+					{/if}
+					{#if role.usersInvite || role.usersUpdate}
+						<span class="badge badge-outline badge-sm">users</span>
+					{/if}
+					{#if role.rolesCreate || role.rolesUpdate}
+						<span class="badge badge-outline badge-sm">roles</span>
+					{/if}
 				</div>
 			{/snippet}
 		</DataTableColumn>
 
-		<DataTableColumn
-			label="Tools"
-			filterText={(role) => String(role.toolCount ?? 0)}
-		>
+		<DataTableColumn label="Tools" filterText={(role) => String(role.toolCount ?? 0)}>
 			{#snippet children({ row: role })}
 				<span class="badge badge-outline badge-sm">{role.toolCount ?? 0}</span>
 			{/snippet}

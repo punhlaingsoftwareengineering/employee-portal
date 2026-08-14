@@ -114,7 +114,8 @@ async function upsertBuiltinService(definition: BuiltinServiceDefinition, origin
 		accentColor: definition.accentColor,
 		link: builtinServiceLink(definition, origin),
 		embedMode: definition.embedMode,
-		isPublic: definition.isPublic
+		isPublic: definition.isPublic,
+		assignToolsRoles: !definition.isPublic
 	});
 }
 

@@ -5,10 +5,15 @@
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
 	import LoadingCenter from '$lib/components/LoadingCenter.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { permissionFlag } from '$lib/constants/permissions';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { deleteToolLearning, getToolLearnings } from '$lib/remotes/tool-learning.remote';
 
-	const isAdmin = $derived(page.data.permissions?.isAdmin ?? false);
+	const permissions = $derived(page.data.permissions);
+	const canCreate = $derived(permissionFlag(permissions, 'toolsLearningCreate'));
+	const canUpdate = $derived(permissionFlag(permissions, 'toolsLearningUpdate'));
+	const canDelete = $derived(permissionFlag(permissions, 'toolsLearningDelete'));
+
 	let learningDialog = $state<ToolLearningDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
 </script>
@@ -18,11 +23,11 @@
 
 	<ToolLearningDialog bind:this={learningDialog} />
 
-	{#if isAdmin}
+	{#if canCreate}
 		<div class="mb-4 flex justify-end">
 			<button
 				type="button"
-				class="btn btn-primary btn-sm gap-2"
+				class="btn btn-primary btn-sm gap-2 cursor-pointer"
 				onclick={() => learningDialog?.open()}
 			>
 				<Plus class="h-4 w-4" />
@@ -36,7 +41,7 @@
 			<div class="card-body items-center text-center">
 				<GraduationCap class="h-10 w-10 text-base-content/30" />
 				<p class="text-base-content/70">No learning videos yet.</p>
-				{#if isAdmin}
+				{#if canCreate}
 					<p class="text-sm text-base-content/50">Add a video link to get started.</p>
 				{/if}
 			</div>
@@ -67,38 +72,42 @@
 									{/if}
 								</div>
 							</div>
-							{#if isAdmin}
+							{#if canUpdate || canDelete}
 								<div class="flex shrink-0 gap-1">
-									<IconActionButton
-										label="Edit"
-										variant="secondary"
-										onclick={() => learningDialog?.open(item)}
-									>
-										<Pencil class="h-4 w-4" />
-									</IconActionButton>
-									<IconActionButton
-										label="Delete"
-										variant="error"
-										disabled={deleteLoading.isPending(item.id)}
-										onclick={async () => {
-											if (!confirm(`Delete learning "${item.title}"?`)) return;
-											await deleteLoading.run(item.id, async () => {
-												await deleteToolLearning(item.id);
-											});
-										}}
-									>
-										{#if deleteLoading.isPending(item.id)}
-											<LoadingSpinner size="sm" />
-										{:else}
-											<Trash2 class="h-4 w-4" />
-										{/if}
-									</IconActionButton>
+									{#if canUpdate}
+										<IconActionButton
+											label="Edit"
+											variant="secondary"
+											onclick={() => learningDialog?.open(item)}
+										>
+											<Pencil class="h-4 w-4" />
+										</IconActionButton>
+									{/if}
+									{#if canDelete}
+										<IconActionButton
+											label="Delete"
+											variant="error"
+											disabled={deleteLoading.isPending(item.id)}
+											onclick={async () => {
+												if (!confirm(`Delete learning "${item.title}"?`)) return;
+												await deleteLoading.run(item.id, async () => {
+													await deleteToolLearning(item.id);
+												});
+											}}
+										>
+											{#if deleteLoading.isPending(item.id)}
+												<LoadingSpinner size="sm" />
+											{:else}
+												<Trash2 class="h-4 w-4" />
+											{/if}
+										</IconActionButton>
+									{/if}
 								</div>
 							{/if}
 						</div>
 						<a
 							href={item.videoUrl}
-							class="btn btn-outline btn-sm gap-2 self-start"
+							class="btn btn-outline btn-sm gap-2 self-start cursor-pointer"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

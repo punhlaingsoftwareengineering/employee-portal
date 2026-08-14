@@ -28,11 +28,15 @@ export const actions: Actions = {
 	verify: async (event) => {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
-		const otp = formData.get('otp')?.toString() ?? '';
+		const otp = (formData.get('otp')?.toString() ?? '').replace(/\D/g, '');
 		const redirectTo = resolveSafeRedirectTo(
 			formData.get('redirectTo')?.toString() ?? '/dashboard',
 			event.url.origin
 		);
+
+		if (!/^\d{6}$/.test(otp)) {
+			return fail(400, { message: 'Enter the 6-digit verification code' });
+		}
 
 		try {
 			await auth.api.verifyEmailOTP({

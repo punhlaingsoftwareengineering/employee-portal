@@ -9,17 +9,28 @@ alwaysApply: false
 
 | Role | Access |
 |------|--------|
-| `admin` | Full access + Users & roles management |
+| `admin` | Full access (all flags treated as true) |
 | `guest` | Sign in only; redirected to `/pending` |
 | `member` | Access via department role matrix |
 
 ## Department roles (`access_role` + `user_department_role`)
 
-Roles are **CRUD-managed** by admins at `/users` (Manager, HR, Viewer seeded by default).
+Roles are **CRUD-managed** at `/roles` (Manager, HR, Viewer seeded by default). Access to `/users` and `/roles` is controlled by `navUsers` / `navRoles` plus the matching users/roles capability flags — **not** admin-only.
 
-Each role defines permission flags: employee read/write/delete, department read/write, facility read/write.
+Each role defines permission flags (see `ACCESS_ROLE_PERMISSION_KEYS` in `src/lib/constants/access-role-permissions.ts`):
 
-**Org scope:** `employeeWrite`, `departmentWrite`, and `facilityWrite` apply only to the user’s assigned department/facility rows. Creating new departments or facilities is **admin-only**. `departmentReadAll` / `facilityReadAll` grant global read, not global write.
+- **Nav:** `navDashboard`, `navEmployees`, `navDepartments`, `navFacilities`, `navPharmacy`, `navDoctors`, `navTools`, `navSettings`, `navCommunity`, `navUsers`, `navRoles`
+- **Employees / doctors / pharmacy:** `*ReadAll`, `*Create`, `*Update`, `*Delete`, `*ExcelOverride` (where applicable)
+- **Departments / facilities:** `*ReadAll`, `*Create`, `*Update`, `*Delete`
+- **Users:** `usersRead`, `usersInvite`, `usersUpdate`, `usersInviteResend`, `usersInviteRevoke`. **Delete user** is portal **admin only** (not a role flag).
+- **Roles:** `rolesRead`, `rolesCreate`, `rolesUpdate`, `rolesDelete`
+- **Community:** `communityCategory*`, `communityLink*` Create/Update/Delete
+- **Settings:** `settingsThemeUpdate`, plus newsletter/onboarding/announcement/sound/notification Create/Update/Delete
+- **Tools manage:** `toolsService*`, `toolsApp*`, `toolsGuide*`, `toolsLearning*` Create/Update/Delete
+
+There are **no** `*Write` columns — use Create and Update separately. Excel override is independent of Create/Update.
+
+**Org scope:** `departmentUpdate` / `departmentDelete` and `facilityUpdate` / `facilityDelete` apply only to the user’s assigned department/facility rows. `departmentCreate` / `facilityCreate` are org-wide when the flag is set (not admin-only). `departmentReadAll` / `facilityReadAll` grant global read, not global update/delete.
 
 Users get per-department assignments via `roleId` FK.
 
@@ -33,24 +44,28 @@ Users get per-department assignments via `roleId` FK.
 
 - `requireUser` — authenticated
 - `requireAppAccess` — not guest; has admin or ≥1 department role
-- `requireAdmin` — portal admin only
+- `requireAdmin` — portal admin only (rare; most pages use capability guards)
 - `requireDashboardAccess` — `navDashboard` (or admin)
 - `requireEmployeesAccess` — `navEmployees` + employee capability
 - `requireDepartmentsAccess` — `navDepartments` + department capability
 - `requireFacilitiesAccess` — `navFacilities` + facility capability
 - `requirePharmacyAccess` — `navPharmacy` + pharmacy capability
+- `requireDoctorsAccess` — `navDoctors` + doctor capability
 - `requireToolsAccess` — `navTools` (or admin)
+- `requireToolsManageAccess` — any `tools*` manage flag (or admin)
 - `requireSettingsAccess` — `navSettings` (or admin)
+- `requireUsersAccess` — `navUsers` + users capability (or admin)
+- `requireRolesAccess` — `navRoles` + roles capability (or admin)
 - `requireCommunityManage` — `navCommunity` (or admin). **Not** `navDashboard`.
 
-Each private sidebar page has a matching layout/API guard. Nav flags only control visibility/access; content CRUD still uses the capability flags (employeeWrite, etc.).
+Each private sidebar page has a matching layout/API guard. Nav flags control visibility/access; content CRUD uses the Create/Update/Delete/Excel (and users/roles/community/settings/tools) capability flags.
 
 Services accept `UserPermissions` from `getUserPermissions(userId)`.
 
 ## Invites
 
-- Admin UI: `/users` → invite form → email with `/auth/accept-invite?token=…`
-- Single-use token, 24h expiry, resend/revoke from admin UI
+- UI: `/users` → invite form → email with `/auth/accept-invite?token=…` (requires `usersInvite`)
+- Single-use token, 24h expiry, resend/revoke from users UI (`usersInviteResend` / `usersInviteRevoke`)
 - Accept: password only (name/roles pre-chosen)
 
 Skill: `employee-portal-better-auth`

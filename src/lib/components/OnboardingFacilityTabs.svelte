@@ -33,11 +33,11 @@
 		>
 			{facility.name}
 		</button>
-		<div class="tab-content border-base-300 bg-base-100 p-6">
+		<div class="tab-content border-base-300 bg-base-100 p-3 sm:p-4">
 			{#if facilityItems.length === 0}
 				<p class="text-sm text-base-content/70">No pharmacy items for {facility.name} yet.</p>
 			{:else}
-				<div class="max-h-[50rem] overflow-auto">
+				<div class="max-h-[28rem] overflow-auto sm:max-h-[32rem]">
 					<DataTable
 						rows={facilityItems}
 						rowKey={(item) => item.id}

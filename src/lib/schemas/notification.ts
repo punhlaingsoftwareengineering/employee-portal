@@ -45,4 +45,6 @@ export type PublicNotification = {
 	imageUrl: string | null;
 	soundMp3Url: string | null;
 	createdAt: string;
+	/** True when this user has marked the notification as read (still visible in history). */
+	isRead: boolean;
 };

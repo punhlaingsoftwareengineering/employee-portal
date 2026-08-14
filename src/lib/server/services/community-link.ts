@@ -9,13 +9,26 @@ import {
 	type CreateCommunityLinkInput,
 	type UpdateCommunityLinkInput
 } from '$lib/schemas/community-link';
-import { canManageCommunity, type UserPermissions } from '$lib/server/permissions';
+import {
+	canCommunityLinkCreate,
+	canCommunityLinkDelete,
+	canCommunityLinkUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 import { getCommunityCategory } from '$lib/server/services/community-category';
 
 const linkOrder = [asc(communityLink.sortOrder), asc(communityLink.createdAt)];
 
-function requireCommunityManage(perms: UserPermissions) {
-	if (!canManageCommunity(perms)) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canCommunityLinkCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canCommunityLinkUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canCommunityLinkDelete(perms)) error(403, 'Forbidden');
 }
 
 function mergeLinksById(...lists: (typeof communityLink.$inferSelect)[][]) {
@@ -82,7 +95,7 @@ export async function getCommunityLink(perms: UserPermissions, id: string) {
 }
 
 export async function createCommunityLink(perms: UserPermissions, input: CreateCommunityLinkInput) {
-	requireCommunityManage(perms);
+	assertCanCreate(perms);
 
 	const data = createCommunityLinkSchema.parse(input);
 	await getCommunityCategory(perms, data.categoryId);
@@ -99,7 +112,7 @@ export async function updateCommunityLink(
 	id: string,
 	input: UpdateCommunityLinkInput
 ) {
-	requireCommunityManage(perms);
+	assertCanUpdate(perms);
 
 	const existing = await getCommunityLink(perms, id);
 	const data = updateCommunityLinkSchema.parse(input);
@@ -118,7 +131,7 @@ export async function updateCommunityLink(
 }
 
 export async function deleteCommunityLink(perms: UserPermissions, id: string) {
-	requireCommunityManage(perms);
+	assertCanDelete(perms);
 
 	await getCommunityLink(perms, id);
 	await db.delete(communityLink).where(eq(communityLink.id, id));

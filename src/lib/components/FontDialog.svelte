@@ -3,14 +3,16 @@
 	import {
 		appSettings,
 		getAllowedFontOptions,
+		getAllowedFontSizeOptions,
 		updateAppSettings
 	} from '$lib/app-settings.svelte';
-	import type { AppFont } from '$lib/constants/app-settings';
+	import type { AppFont, AppFontSize } from '$lib/constants/app-settings';
 	import { getPortalFontStack } from '$lib/constants/portal-fonts';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 
 	const fontOptions = $derived(getAllowedFontOptions());
+	const fontSizeOptions = $derived(getAllowedFontSizeOptions());
 
 	export function open() {
 		dialog?.showModal();
@@ -18,6 +20,10 @@
 
 	function close() {
 		dialog?.close();
+	}
+
+	function setFontSize(fontSize: AppFontSize) {
+		updateAppSettings({ fontSize });
 	}
 
 	function setFont(font: AppFont) {
@@ -32,21 +38,43 @@
 			<Type class="h-5 w-5 text-primary" />
 			Font
 		</h3>
-		<p class="mt-1 text-sm text-base-content/70">Choose a font for this device.</p>
+		<p class="mt-1 text-sm text-base-content/70">Choose text size and font for this device.</p>
 
-		<div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-			{#each fontOptions as option (option.value)}
-				<button
-					type="button"
-					class="font-picker-option"
-					class:font-picker-option--active={appSettings.font === option.value}
-					style:font-family={getPortalFontStack(option.value)}
-					onclick={() => setFont(option.value)}
-				>
-					<span class="font-picker-option__label">{option.label}</span>
-					<span class="font-picker-option__sample">The quick brown fox jumps over the lazy dog.</span>
-				</button>
-			{/each}
+		<div class="mt-4">
+			<p class="mb-2 text-sm font-medium">Text size</p>
+			<div class="flex flex-wrap gap-2">
+				{#each fontSizeOptions as option (option.value)}
+					<button
+						type="button"
+						class="btn btn-sm"
+						class:btn-primary={appSettings.fontSize === option.value}
+						class:btn-outline={appSettings.fontSize !== option.value}
+						onclick={() => setFontSize(option.value)}
+					>
+						{option.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<div class="mt-5">
+			<p class="mb-2 text-sm font-medium">Font</p>
+			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+				{#each fontOptions as option (option.value)}
+					<button
+						type="button"
+						class="font-picker-option"
+						class:font-picker-option--active={appSettings.font === option.value}
+						style:font-family={getPortalFontStack(option.value)}
+						onclick={() => setFont(option.value)}
+					>
+						<span class="font-picker-option__label">{option.label}</span>
+						<span class="font-picker-option__sample"
+							>The quick brown fox jumps over the lazy dog.</span
+						>
+					</button>
+				{/each}
+			</div>
 		</div>
 
 		<div class="modal-action">

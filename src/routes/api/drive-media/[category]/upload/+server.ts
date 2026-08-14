@@ -6,6 +6,7 @@ import { uploadToCategory } from '$lib/server/drive-portal-client';
 export const POST: RequestHandler = async (event) => {
 	await requireAdmin(event);
 	const category = parseDriveMediaCategory(event.params.category);
+	const uploaderId = event.locals.user!.id;
 
 	const form = await event.request.formData();
 	const file = form.get('file');
@@ -18,7 +19,7 @@ export const POST: RequestHandler = async (event) => {
 	const bytes = new Uint8Array(await file.arrayBuffer());
 
 	try {
-		const result = await uploadToCategory(category, fileName, mimeType, bytes);
+		const result = await uploadToCategory(category, fileName, mimeType, bytes, uploaderId);
 		return json(result);
 	} catch (e) {
 		handleDrivePortalError(e);

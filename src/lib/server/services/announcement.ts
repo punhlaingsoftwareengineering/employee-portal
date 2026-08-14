@@ -9,21 +9,29 @@ import {
 	type CreateAnnouncementInput,
 	type UpdateAnnouncementInput
 } from '$lib/schemas/announcement';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canSettingsAnnouncementCreate,
+	canSettingsAnnouncementDelete,
+	canSettingsAnnouncementUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canSettingsAnnouncementCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsAnnouncementUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canSettingsAnnouncementDelete(perms)) error(403, 'Forbidden');
 }
 
 async function deactivateOtherAnnouncements(excludeId?: string) {
-	const where = excludeId
-		? ne(announcement.id, excludeId)
-		: undefined;
+	const where = excludeId ? ne(announcement.id, excludeId) : undefined;
 
-	await db
-		.update(announcement)
-		.set({ isActive: false, updatedAt: new Date() })
-		.where(where);
+	await db.update(announcement).set({ isActive: false, updatedAt: new Date() }).where(where);
 }
 
 function normalizeAnnouncementInput(
@@ -75,7 +83,7 @@ export async function getAnnouncement(perms: UserPermissions, id: string) {
 }
 
 export async function createAnnouncement(perms: UserPermissions, input: CreateAnnouncementInput) {
-	requireAdmin(perms);
+	assertCanCreate(perms);
 
 	const parsed = createAnnouncementSchema.parse(input);
 	const data = normalizeAnnouncementInput(parsed) as CreateAnnouncementInput;
@@ -106,7 +114,7 @@ export async function updateAnnouncement(
 	id: string,
 	input: UpdateAnnouncementInput
 ) {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	const existing = await getAnnouncement(perms, id);
 	const data = updateAnnouncementSchema.parse(input);
@@ -148,7 +156,7 @@ export async function updateAnnouncement(
 }
 
 export async function deleteAnnouncement(perms: UserPermissions, id: string) {
-	requireAdmin(perms);
+	assertCanDelete(perms);
 
 	await getAnnouncement(perms, id);
 	await db.delete(announcement).where(eq(announcement.id, id));

@@ -1,6 +1,7 @@
 import { eq, asc, inArray } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
+import { isOptionalFeatureDbError } from '$lib/server/db/errors';
 import { facility } from '$lib/server/db/schema/facility';
 import {
 	createFacilitySchema,
@@ -10,9 +11,10 @@ import {
 } from '$lib/schemas/facility';
 import {
 	canReadFacility,
-	canWriteFacility,
 	canCreateFacility,
+	canDeleteFacility,
 	canReadFacilities,
+	canUpdateFacility,
 	getReadableFacilityIds,
 	type UserPermissions
 } from '$lib/server/permissions';
@@ -48,7 +50,13 @@ export async function createFacility(perms: UserPermissions, input: CreateFacili
 	if (!canCreateFacility(perms)) error(403, 'Forbidden');
 
 	const data = createFacilitySchema.parse(input);
-	const [record] = await db.insert(facility).values(data).returning();
+	const [record] = await db
+		.insert(facility)
+		.values({
+			...data,
+			showOnOnboarding: data.showOnOnboarding ?? false
+		})
+		.returning();
 	return record;
 }
 
@@ -57,7 +65,7 @@ export async function updateFacility(
 	id: string,
 	input: UpdateFacilityInput
 ) {
-	if (!canWriteFacility(perms, id)) error(403, 'Forbidden');
+	if (!canUpdateFacility(perms, id)) error(403, 'Forbidden');
 
 	await getFacility(perms, id);
 	const data = updateFacilitySchema.parse(input);
@@ -72,7 +80,7 @@ export async function updateFacility(
 }
 
 export async function deleteFacility(perms: UserPermissions, id: string) {
-	if (!canWriteFacility(perms, id)) error(403, 'Forbidden');
+	if (!canDeleteFacility(perms, id)) error(403, 'Forbidden');
 
 	await getFacility(perms, id);
 	await db.delete(facility).where(eq(facility.id, id));
@@ -84,10 +92,15 @@ export async function listAllFacilities() {
 	});
 }
 
-/** Public onboarding showcase — first N facilities by name. */
-export async function listOnboardingFacilities(limit = 6) {
-	return db.query.facility.findMany({
-		orderBy: [asc(facility.name)],
-		limit
-	});
+/** Public onboarding showcase — facilities marked to show on onboarding. */
+export async function listOnboardingFacilities() {
+	try {
+		return await db.query.facility.findMany({
+			where: eq(facility.showOnOnboarding, true),
+			orderBy: [asc(facility.name)]
+		});
+	} catch (err) {
+		if (isOptionalFeatureDbError(err)) return [];
+		throw err;
+	}
 }

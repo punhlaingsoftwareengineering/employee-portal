@@ -9,8 +9,11 @@
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
 	import ToolsSections from '$lib/components/ToolsSections.svelte';
-	import { ONBOARDING_SECTION_IDS } from '$lib/constants/onboarding';
-	import { publicAppHref } from '$lib/constants/public-routes';
+	import {
+		ONBOARDING_NEWSLETTER_DISPLAY_LIMIT,
+		ONBOARDING_SECTION_IDS
+	} from '$lib/constants/onboarding';
+	import { PUBLIC_ROUTES, publicAppHref } from '$lib/constants/public-routes';
 
 	let { data } = $props();
 
@@ -36,7 +39,7 @@
 <PageTitle />
 
 {#if data.slides.length > 0}
-	<section class="container mx-auto max-w-5xl px-4 py-8">
+	<section class="container mx-auto max-w-5xl px-4 pt-4 pb-6">
 		<OnboardingCarousel
 			slides={data.slides}
 			showCaption={false}
@@ -44,11 +47,11 @@
 		/>
 	</section>
 {:else}
-	<section class="hero py-16">
+	<section class="hero py-8">
 		<div class="hero-content flex-col text-center">
 			<div class="max-w-2xl">
 				<h1 class="text-4xl font-bold">Welcome to Employee Portal</h1>
-				<p class="py-6 text-lg opacity-80">
+				<p class="py-3 text-lg opacity-80">
 					Onboard your team, organize departments, and keep employee records in one secure place.
 				</p>
 			</div>
@@ -57,7 +60,7 @@
 {/if}
 
 {#if data.publicServices.length > 0 || data.publicApps.length > 0}
-	<section class="container mx-auto max-w-5xl px-4 pb-16">
+	<section class="container mx-auto max-w-5xl px-4 pb-8">
 		<ToolsSections
 			services={data.publicServices}
 			apps={data.publicApps}
@@ -70,7 +73,7 @@
 
 <section
 	id={ONBOARDING_SECTION_IDS.pharmacyMaster}
-	class="container mx-auto max-w-5xl scroll-mt-24 px-4 pb-16"
+	class="container mx-auto max-w-5xl scroll-mt-20 px-4 pb-8"
 >
 	<SectionHead
 		icon={Pill}
@@ -83,19 +86,24 @@
 {#if data.newsletters.length > 0}
 	<section
 		id={ONBOARDING_SECTION_IDS.newsletters}
-		class="container mx-auto max-w-5xl scroll-mt-24 px-4 pb-16"
+		class="container mx-auto max-w-5xl scroll-mt-20 px-4 pb-8"
 	>
 		<SectionHead
 			icon={Newspaper}
 			title="Newsletters"
-			description="Latest PDF newsletters. Open a paper to read the full edition."
+			description="Latest newsletters as PDF or image. Open a paper to view the full edition."
 		/>
 		<OnboardingNewsletterGrid newsletters={data.newsletters} />
+		{#if data.newsletterTotal > ONBOARDING_NEWSLETTER_DISPLAY_LIMIT}
+			<div class="mt-4 flex justify-center">
+				<a href={PUBLIC_ROUTES.newsletters} class="btn btn-ghost btn-sm">See more</a>
+			</div>
+		{/if}
 	</section>
 {/if}
 
 {#if data.facilities.length > 0}
-	<section class="container mx-auto max-w-5xl px-4 pb-16">
+	<section class="container mx-auto max-w-5xl px-4 pb-8">
 		<SectionHead
 			icon={Building2}
 			title="Facilities"

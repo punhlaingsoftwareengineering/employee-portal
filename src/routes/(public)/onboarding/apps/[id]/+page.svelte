@@ -9,8 +9,8 @@
 
 <PageTitle title={data.app.name} />
 
-<div class="container mx-auto max-w-4xl px-4 py-8">
-	<div class="mb-4 flex flex-wrap gap-2">
+<div class="container mx-auto max-w-4xl px-4 py-4">
+	<div class="mb-3 flex flex-wrap gap-2">
 		<a href={PUBLIC_ROUTES.apps} class="btn btn-ghost btn-sm gap-2">
 			<ArrowLeft class="h-4 w-4" />
 			Back to apps

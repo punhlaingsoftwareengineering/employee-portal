@@ -3,6 +3,15 @@ import type { ServiceEmbedMode } from '$lib/constants/service-embed';
 /** Stable ID — upserted by ensureBuiltinServices(). */
 export const E_SIGNATURE_SERVICE_ID = 'c8e4f2a1-9b3d-4e5f-a1b2-3c4d5e6f7081';
 
+/** Stable ID — upserted by ensureBuiltinServices(). */
+export const RATING_SERVICE_ID = 'd9f5a3b2-0c4e-5f6a-b2c3-4d5e6f708192';
+
+/** Stable ID — public employee directory card. */
+export const EMPLOYEE_DIRECTORY_SERVICE_ID = 'e0a1b2c3-d4e5-4f6a-8b9c-0d1e2f3a4b5c';
+
+/** Stable ID — public doctor directory card. */
+export const DOCTOR_DIRECTORY_SERVICE_ID = 'f1b2c3d4-e5f6-4a7b-9c0d-1e2f3a4b5c6d';
+
 /** Stable ID — link synced from DRIVE_ORIGIN env on startup. */
 export const PHH_DRIVE_SERVICE_ID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 
@@ -22,6 +31,9 @@ export const N8N_MONITOR_SERVICE_ID = 'd6e8f0a2-b4c5-6d8e-9f0a-1b2c3d4e5f6a';
 export const PHH_CALLTRACKER_DASHBOARD_SERVICE_ID = 'e7f9a1b3-c5d6-7e9f-0a1b-2c3d4e5f6a7b';
 
 export const E_SIGNATURE_SERVICE_PATH = '/tools/e-signature';
+export const RATING_SERVICE_PATH = '/tools/rating';
+export const EMPLOYEE_DIRECTORY_SERVICE_PATH = '/directory/employees';
+export const DOCTOR_DIRECTORY_SERVICE_PATH = '/directory/doctors';
 
 export type BuiltinServiceDefinition = {
 	id: string;
@@ -44,6 +56,36 @@ export const BUILTIN_SERVICES: readonly BuiltinServiceDefinition[] = [
 		path: E_SIGNATURE_SERVICE_PATH,
 		embedMode: 'external',
 		isPublic: false
+	},
+	{
+		id: RATING_SERVICE_ID,
+		name: 'Department Rating',
+		description: 'Rate departments with a quick five-level reaction.',
+		category: 'Internal',
+		accentColor: '#F37021',
+		path: RATING_SERVICE_PATH,
+		embedMode: 'external',
+		isPublic: false
+	},
+	{
+		id: EMPLOYEE_DIRECTORY_SERVICE_ID,
+		name: 'Employee Directory',
+		description: 'Public directory of active employees and loyalty tenure.',
+		category: 'Directory',
+		accentColor: '#0B2D5C',
+		path: EMPLOYEE_DIRECTORY_SERVICE_PATH,
+		embedMode: 'external',
+		isPublic: true
+	},
+	{
+		id: DOCTOR_DIRECTORY_SERVICE_ID,
+		name: 'Doctor Directory',
+		description: 'Public directory of active doctors.',
+		category: 'Directory',
+		accentColor: '#F37021',
+		path: DOCTOR_DIRECTORY_SERVICE_PATH,
+		embedMode: 'external',
+		isPublic: true
 	}
 ] as const;
 

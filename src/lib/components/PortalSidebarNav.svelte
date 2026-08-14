@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { APP_VERSION } from '$lib/app-version';
 	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
 	import { appSettings } from '$lib/app-settings.svelte';
 	import PortalIcon from '$lib/components/PortalIcon.svelte';
@@ -15,9 +16,15 @@
 		Wrench,
 		Share2,
 		Pill,
+		Stethoscope,
 		User,
 		Globe
 	} from '@lucide/svelte';
+	import {
+		canAccessRolesPage,
+		canAccessToolsManage,
+		canAccessUsersPage
+	} from '$lib/constants/permissions';
 
 	let {
 		logoutFormId = 'sidebar-logout',
@@ -39,6 +46,7 @@
 	const hasAnyTools = $derived(
 		isAdmin || availableServices.length > 0 || availableApps.length > 0
 	);
+	const canManageTools = $derived(canAccessToolsManage(permissions));
 
 	const canSeeDashboard = $derived(
 		isAdmin ||
@@ -64,14 +72,20 @@
 		isAdmin ||
 			(permissions?.departmentRoles?.some((a) => a.permissions.navPharmacy) ?? false)
 	);
+	const canSeeDoctors = $derived(
+		isAdmin ||
+			(permissions?.departmentRoles?.some((a) => a.permissions.navDoctors) ?? false)
+	);
 	const canSeeTools = $derived(
-		hasAnyTools &&
+		(hasAnyTools || canManageTools) &&
 			(isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navTools) ?? false))
 	);
 	const canSeeSettings = $derived(
 		isAdmin ||
 			(permissions?.departmentRoles?.some((a) => a.permissions.navSettings) ?? false)
 	);
+	const canSeeUsers = $derived(canAccessUsersPage(permissions));
+	const canSeeRoles = $derived(canAccessRolesPage(permissions));
 
 	const employeeNavAllowed = $derived(
 		canSeeEmployees &&
@@ -79,7 +93,13 @@
 			(isAdmin ||
 				(permissions?.departmentRoles?.some((a) => {
 					const p = a.permissions;
-					return p.employeeReadAll || p.employeeWrite || p.employeeDelete;
+					return (
+						p.employeeReadAll ||
+						p.employeeCreate ||
+						p.employeeUpdate ||
+						p.employeeDelete ||
+						p.employeeExcelOverride
+					);
 				}) ??
 					false))
 	);
@@ -90,7 +110,12 @@
 			(isAdmin ||
 				(permissions?.departmentRoles?.some((a) => {
 					const p = a.permissions;
-					return p.departmentReadAll || p.departmentWrite;
+					return (
+						p.departmentReadAll ||
+						p.departmentCreate ||
+						p.departmentUpdate ||
+						p.departmentDelete
+					);
 				}) ??
 					false))
 	);
@@ -100,7 +125,7 @@
 			(isAdmin ||
 				(permissions?.departmentRoles?.some((a) => {
 					const p = a.permissions;
-					return p.facilityReadAll || p.facilityWrite;
+					return p.facilityReadAll || p.facilityCreate || p.facilityUpdate || p.facilityDelete;
 				}) ??
 					false))
 	);
@@ -110,7 +135,29 @@
 			(isAdmin ||
 				(permissions?.departmentRoles?.some((a) => {
 					const p = a.permissions;
-					return p.pharmacyReadAll || p.pharmacyWrite;
+					return (
+						p.pharmacyReadAll ||
+						p.pharmacyCreate ||
+						p.pharmacyUpdate ||
+						p.pharmacyDelete ||
+						p.pharmacyExcelOverride
+					);
+				}) ??
+					false))
+	);
+	const doctorsNavAllowed = $derived(
+		canSeeDoctors &&
+			!permissions?.isGuest &&
+			(isAdmin ||
+				(permissions?.departmentRoles?.some((a) => {
+					const p = a.permissions;
+					return (
+						p.doctorReadAll ||
+						p.doctorCreate ||
+						p.doctorUpdate ||
+						p.doctorDelete ||
+						p.doctorExcelOverride
+					);
 				}) ??
 					false))
 	);
@@ -121,7 +168,7 @@
 			page.url.pathname.startsWith('/tools/manage') ||
 			page.url.pathname.startsWith('/apps/')
 	);
-	const toolsNavHref = $derived(isAdmin ? '/tools/manage/services' : '/tools');
+	const toolsNavHref = $derived(canManageTools ? '/tools/manage/services' : '/tools');
 
 	function handleNavigate() {
 		onNavigate?.();
@@ -141,7 +188,12 @@
 			class="btn btn-ghost portal-panel-header__title h-auto min-h-0 w-full justify-start"
 		>
 			<PortalIcon iconUrl={appSettings.iconUrl} class="h-5 w-5" />
-			{appSettings.title}
+			<span class="inline-flex min-w-0 items-baseline gap-1.5">
+				<span class="truncate">{appSettings.title}</span>
+				<span class="shrink-0 text-[10px] font-medium tracking-normal text-base-content/45"
+					>v{APP_VERSION}</span
+				>
+			</span>
 		</a>
 	</header>
 
@@ -226,6 +278,19 @@
 						</a>
 					</li>
 				{/if}
+				{#if doctorsNavAllowed}
+					<li>
+						<a
+							href="/doctors"
+							class:active={page.url.pathname.startsWith('/doctors')}
+							data-sveltekit-preload-data="hover"
+							onclick={handleNavigate}
+						>
+							<Stethoscope class="h-4 w-4" />
+							Doctors
+						</a>
+					</li>
+				{/if}
 				{#if canSeeTools}
 					<li>
 						<a
@@ -253,7 +318,7 @@
 					</li>
 				{/if}
 			{/if}
-			{#if isAdmin}
+			{#if canSeeRoles}
 				<li>
 					<a
 						href="/roles"
@@ -265,6 +330,8 @@
 						Roles
 					</a>
 				</li>
+			{/if}
+			{#if canSeeUsers}
 				<li>
 					<a
 						href="/users"

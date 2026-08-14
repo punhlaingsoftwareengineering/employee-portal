@@ -20,7 +20,7 @@
 </script>
 
 <div
-	class="portal-private relative min-h-screen lg:flex lg:h-screen lg:overflow-hidden"
+	class="portal-private relative min-h-screen overscroll-none lg:flex lg:h-screen lg:overflow-hidden"
 	style:--portal-navbar-height="4rem"
 >
 	<!-- Desktop sidebar -->
@@ -33,7 +33,9 @@
 		<SidebarResizeHandle />
 	</aside>
 
-	<div class="flex min-h-screen min-w-0 flex-1 flex-col bg-base-100 lg:min-h-0 lg:overflow-y-auto">
+	<div
+		class="flex min-h-screen min-w-0 flex-1 flex-col overscroll-none bg-base-100 lg:min-h-0 lg:overflow-y-auto"
+	>
 		<header class="navbar border-b border-base-content/10 bg-base-100 lg:hidden">
 			<label for="app-drawer" class="btn btn-ghost btn-square" aria-label="Open menu">
 				<svg

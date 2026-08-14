@@ -10,35 +10,42 @@
 
 	let { data } = $props();
 
-	let notifications = $state<PublicNotification[]>([...data.notifications]);
+	let notifications = $state<PublicNotification[]>(
+		data.notifications.map((item) => ({ ...item, isRead: item.isRead ?? false }))
+	);
 
 	const userId = $derived(data.user?.id ?? page.data.user?.id ?? null);
+	const unreadCount = $derived(notifications.filter((item) => !item.isRead).length);
 
-	async function handleDismiss(id: string) {
+	async function handleMarkRead(id: string) {
 		if (!userId) return;
 		await dismissNotification(id);
-		notifications = notifications.filter((item) => item.id !== id);
+		notifications = notifications.map((item) =>
+			item.id === id ? { ...item, isRead: true } : item
+		);
 	}
 
-	async function handleDismissAll() {
+	async function handleMarkAllRead() {
 		if (!userId) return;
-		const ids = notifications.map((item) => item.id);
+		const ids = notifications.filter((item) => !item.isRead).map((item) => item.id);
 		if (ids.length === 0) return;
 		await dismissAllNotifications(ids);
-		notifications = [];
+		notifications = notifications.map((item) => ({ ...item, isRead: true }));
 	}
 </script>
 
 <PageTitle title="Notifications" />
 
-<div class="container mx-auto max-w-3xl px-4 py-8">
-	<div class="mb-6 flex items-center justify-between gap-4">
+<div class="container mx-auto max-w-3xl px-4 py-4">
+	<div class="mb-4 flex items-center justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold">Notifications</h1>
-			<p class="text-sm text-base-content/70">All current portal notifications.</p>
+			<p class="text-sm text-base-content/70">
+				Portal notification history. Marking as read clears the badge but keeps items here.
+			</p>
 		</div>
-		{#if notifications.length > 0}
-			<button type="button" class="btn btn-ghost btn-sm" onclick={handleDismissAll}>
+		{#if unreadCount > 0}
+			<button type="button" class="btn btn-ghost btn-sm" onclick={handleMarkAllRead}>
 				Mark all as read
 			</button>
 		{/if}
@@ -50,7 +57,7 @@
 		{:else}
 			<div class="divide-y divide-base-200">
 				{#each notifications as notification (notification.id)}
-					<NotificationListItem {notification} onDismiss={handleDismiss} />
+					<NotificationListItem {notification} onMarkRead={handleMarkRead} />
 				{/each}
 			</div>
 		{/if}

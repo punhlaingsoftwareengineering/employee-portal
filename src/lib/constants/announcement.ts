@@ -1,6 +1,9 @@
 export const ANNOUNCEMENT_TYPES = ['image', 'text'] as const;
 export type AnnouncementType = (typeof ANNOUNCEMENT_TYPES)[number];
 
+/** Display height for image-type announcements (full width, object-cover). */
+export const ANNOUNCEMENT_IMAGE_HEIGHT_PX = 72;
+
 export const ANNOUNCEMENT_ACCENT_PRESETS = [
 	'primary',
 	'secondary',

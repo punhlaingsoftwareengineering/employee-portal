@@ -30,9 +30,9 @@
 
 <PageTitle title="Tips & Tutorials" />
 
-<div class="container mx-auto max-w-5xl px-4 py-8">
+<div class="container mx-auto max-w-5xl px-4 py-4">
 	{#if hasAnyContent}
-		<label class="input input-bordered mb-8 w-full">
+		<label class="input input-bordered mb-4 w-full">
 			<Search class="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
 			<input
 				type="search"
@@ -45,12 +45,12 @@
 	{/if}
 
 	{#if hasAnyContent && !hasFilteredResults}
-		<div class="alert alert-info mb-8">
+		<div class="alert alert-info mb-4">
 			<span>No guides or tutorials match “{searchQuery.trim()}”.</span>
 		</div>
 	{/if}
 
-	<section class="mb-12">
+	<section class="mb-6">
 		<SectionHead icon={BookOpen} title="Guides" />
 		{#if data.guides.length === 0}
 			<div class="card bg-base-100 shadow-sm">
@@ -62,7 +62,7 @@
 		{:else if filteredGuides.length === 0}
 			<p class="text-sm text-base-content/60">No guides match your search.</p>
 		{:else}
-			<div class="h-80 overflow-y-auto rounded-box border border-base-300">
+			<div class="h-[32rem] overflow-y-auto rounded-box border border-base-300 sm:h-[36rem]">
 				<table class="table table-zebra table-pin-rows">
 					<thead>
 						<tr>
@@ -117,7 +117,7 @@
 		{:else if filteredLearnings.length === 0}
 			<p class="text-sm text-base-content/60">No tutorials match your search.</p>
 		{:else}
-			<div class="h-80 overflow-y-auto rounded-box border border-base-300">
+			<div class="h-[32rem] overflow-y-auto rounded-box border border-base-300 sm:h-[36rem]">
 				<table class="table table-zebra table-pin-rows">
 					<thead>
 						<tr>

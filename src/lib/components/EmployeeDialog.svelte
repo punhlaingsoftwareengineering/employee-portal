@@ -6,7 +6,7 @@
 		updateEmployee,
 		getEmployees
 	} from '$lib/remotes/employee.remote';
-	import { withFormFeedback } from '$lib/form-feedback.svelte';
+	import { withFormFeedback, getErrorMessage } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
@@ -90,7 +90,7 @@
 			});
 			close();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to save employee';
+			error = getErrorMessage(err, 'Failed to save employee');
 		} finally {
 			submitting = false;
 		}
@@ -116,6 +116,11 @@
 								readonly={isEdit}
 								placeholder="Employee id"
 							/>
+							{#if !isEdit}
+								<p class="mt-1 text-xs text-base-content/60">
+									Must be unique. Creating with an existing ID is not allowed.
+								</p>
+							{/if}
 						</td>
 					</tr>
 					<tr>

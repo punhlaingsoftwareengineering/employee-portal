@@ -10,7 +10,7 @@
 
 <PageTitle title="Community" />
 
-<div class="container mx-auto max-w-5xl px-4 py-12">
+<div class="container mx-auto max-w-5xl px-4 py-4">
 	{#if data.sections.length === 0}
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body items-center text-center">
@@ -25,7 +25,7 @@
 			</div>
 		</div>
 	{:else}
-		<div class="flex flex-col gap-12 pb-8">
+		<div class="flex flex-col gap-6 pb-4">
 			{#each data.sections as section (section.id)}
 				<section>
 					<SectionHead
@@ -36,7 +36,7 @@
 					{#if section.links.length === 0}
 						<p class="text-sm text-base-content/60">No links in this section yet.</p>
 					{:else}
-						<ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{#each section.links as link (link.id)}
 								<li class="h-full">
 									<CommunityLinkCard {link} />

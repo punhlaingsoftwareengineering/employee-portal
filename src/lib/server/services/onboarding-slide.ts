@@ -8,10 +8,23 @@ import {
 	type CreateOnboardingSlideInput,
 	type UpdateOnboardingSlideInput
 } from '$lib/schemas/onboarding-slide';
-import type { UserPermissions } from '$lib/server/permissions';
+import {
+	canSettingsOnboardingCreate,
+	canSettingsOnboardingDelete,
+	canSettingsOnboardingUpdate,
+	type UserPermissions
+} from '$lib/server/permissions';
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanCreate(perms: UserPermissions) {
+	if (!canSettingsOnboardingCreate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsOnboardingUpdate(perms)) error(403, 'Forbidden');
+}
+
+function assertCanDelete(perms: UserPermissions) {
+	if (!canSettingsOnboardingDelete(perms)) error(403, 'Forbidden');
 }
 
 const slideOrder = [asc(onboardingSlide.sortOrder), asc(onboardingSlide.createdAt)];
@@ -41,7 +54,7 @@ export async function createOnboardingSlide(
 	perms: UserPermissions,
 	input: CreateOnboardingSlideInput
 ) {
-	requireAdmin(perms);
+	assertCanCreate(perms);
 
 	const data = createOnboardingSlideSchema.parse(input);
 	const [record] = await db.insert(onboardingSlide).values(data).returning();
@@ -53,7 +66,7 @@ export async function updateOnboardingSlide(
 	id: string,
 	input: UpdateOnboardingSlideInput
 ) {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	await getOnboardingSlide(perms, id);
 	const data = updateOnboardingSlideSchema.parse(input);
@@ -68,7 +81,7 @@ export async function updateOnboardingSlide(
 }
 
 export async function deleteOnboardingSlide(perms: UserPermissions, id: string) {
-	requireAdmin(perms);
+	assertCanDelete(perms);
 
 	await getOnboardingSlide(perms, id);
 	await db.delete(onboardingSlide).where(eq(onboardingSlide.id, id));

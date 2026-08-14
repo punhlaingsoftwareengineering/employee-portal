@@ -13,7 +13,7 @@ import {
 	PORTAL_THEME_CONFIG_ROW_ID,
 	portalThemeConfig
 } from '$lib/server/db/schema/portal-theme-config';
-import type { UserPermissions } from '$lib/server/permissions';
+import { canSettingsThemeUpdate, type UserPermissions } from '$lib/server/permissions';
 
 const VALID_THEMES = new Set<AppTheme>(APP_THEME_VALUES);
 
@@ -38,8 +38,8 @@ function normalizePolicy(raw: {
 	return { allowedThemes, defaultTheme };
 }
 
-function requireAdmin(perms: UserPermissions) {
-	if (!perms.isAdmin) error(403, 'Forbidden');
+function assertCanUpdate(perms: UserPermissions) {
+	if (!canSettingsThemeUpdate(perms)) error(403, 'Forbidden');
 }
 
 export async function getPortalThemePolicy(): Promise<PortalThemePolicy> {
@@ -60,7 +60,7 @@ export async function updatePortalThemePolicy(
 	perms: UserPermissions,
 	input: unknown
 ): Promise<PortalThemePolicy> {
-	requireAdmin(perms);
+	assertCanUpdate(perms);
 
 	const data = portalThemePolicySchema.parse(input);
 	const policy = normalizePolicy(data);
