@@ -3,6 +3,7 @@
 	import { Plus, Pencil, Trash2, Stethoscope } from '@lucide/svelte';
 	import DoctorDialog from '$lib/components/DoctorDialog.svelte';
 	import ExcelOverrideButton from '$lib/components/ExcelOverrideButton.svelte';
+	import TableExportButton from '$lib/components/TableExportButton.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
@@ -11,18 +12,17 @@
 	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import { createKeyedLoading } from '$lib/keyed-loading.svelte';
 	import { withFormFeedback } from '$lib/form-feedback.svelte';
-	import {
-		getDoctors,
-		deleteDoctor,
-		overrideDoctorsFromExcel
-	} from '$lib/remotes/doctor.remote';
+	import { getDoctors, deleteDoctor, overrideDoctorsFromExcel } from '$lib/remotes/doctor.remote';
 	import { permissionFlag } from '$lib/constants/permissions';
+	import type { ExportColumn } from '$lib/utils/table-export';
+	import type { Doctor } from '$lib/server/db/schema/doctor';
 
 	const permissions = $derived(page.data.permissions);
 	const canCreate = $derived(permissionFlag(permissions, 'doctorCreate'));
 	const canUpdate = $derived(permissionFlag(permissions, 'doctorUpdate'));
 	const canDelete = $derived(permissionFlag(permissions, 'doctorDelete'));
 	const canExcel = $derived(permissionFlag(permissions, 'doctorExcelOverride'));
+	const canExport = $derived(permissionFlag(permissions, 'doctorExport'));
 
 	let doctorDialog = $state<DoctorDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
@@ -32,6 +32,19 @@
 		const text = String(value).trim();
 		return text ? text : '—';
 	}
+
+	const exportColumns: ExportColumn<Doctor>[] = [
+		{ header: 'ID', value: (doctor) => doctor.id },
+		{ header: 'Facility', value: (doctor) => doctor.facilityName },
+		{ header: 'DRN no', value: (doctor) => doctor.drnno },
+		{ header: 'Name', value: (doctor) => doctor.doctorName },
+		{ header: 'Specialization', value: (doctor) => doctor.specialization },
+		{
+			header: 'Active',
+			value: (doctor) => (doctor.active == null ? '' : doctor.active ? 'active' : 'inactive')
+		},
+		{ header: 'HIS ID', value: (doctor) => doctor.hisid }
+	];
 </script>
 
 <svelte:boundary>
@@ -41,8 +54,11 @@
 
 	<PrivatePageHeader title="Doctor Master" icon={Stethoscope} />
 
-	{#if canExcel || canCreate}
+	{#if canExcel || canCreate || canExport}
 		<div class="mb-4 flex flex-wrap justify-end gap-2">
+			{#if canExport}
+				<TableExportButton rows={doctors} columns={exportColumns} fileBaseName="doctors" />
+			{/if}
 			{#if canExcel}
 				<ExcelOverrideButton
 					confirmMessage="Override all doctor master rows with this Excel file? Existing records will be replaced."
@@ -54,7 +70,7 @@
 			{#if canCreate}
 				<button
 					type="button"
-					class="btn btn-primary cursor-pointer gap-2"
+					class="btn cursor-pointer gap-2 btn-primary"
 					onclick={() => doctorDialog?.open()}
 				>
 					<Plus class="h-4 w-4" />
@@ -64,11 +80,7 @@
 		</div>
 	{/if}
 
-	<DataTable
-		rows={doctors}
-		rowKey={(doctor) => String(doctor.id)}
-		emptyMessage="No doctors yet."
-	>
+	<DataTable rows={doctors} rowKey={(doctor) => String(doctor.id)} emptyMessage="No doctors yet.">
 		{#snippet actions({ row: doctor })}
 			{#if canUpdate}
 				<IconActionButton

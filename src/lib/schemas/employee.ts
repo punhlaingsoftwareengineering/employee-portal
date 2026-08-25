@@ -10,8 +10,15 @@ const optionalText = z
 
 export const employeeIdSchema = z.string().trim().min(1).max(100);
 
+const optionalEmployeeId = z
+	.string()
+	.trim()
+	.max(100)
+	.optional()
+	.transform((value) => (value && value.length > 0 ? value : undefined));
+
 export const createEmployeeSchema = z.object({
-	id: employeeIdSchema,
+	id: optionalEmployeeId,
 	employeeNo: optionalText,
 	employeeName: optionalText,
 	position: optionalText,

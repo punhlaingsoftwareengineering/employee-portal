@@ -1,13 +1,10 @@
 <script lang="ts">
 	import type { Employee } from '$lib/server/db/schema/employee';
 	import { ONBOARDING_FACILITY_TABS } from '$lib/constants/onboarding';
-	import {
-		createEmployee,
-		updateEmployee,
-		getEmployees
-	} from '$lib/remotes/employee.remote';
+	import { createEmployee, updateEmployee, getEmployees } from '$lib/remotes/employee.remote';
 	import { withFormFeedback, getErrorMessage } from '$lib/form-feedback.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { isPlaceholderEmployeeId } from '$lib/utils/employee-id';
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let editing = $state<Employee | null>(null);
@@ -28,7 +25,7 @@
 	export function open(existing?: Employee | null) {
 		editing = existing ?? null;
 		error = null;
-		id = existing?.id ?? '';
+		id = existing && !isPlaceholderEmployeeId(existing.id) ? existing.id : '';
 		employeeNo = existing?.employeeNo ?? '';
 		employeeName = existing?.employeeName ?? '';
 		position = existing?.position ?? '';
@@ -82,7 +79,10 @@
 					if (editing?.id) {
 						await updateEmployee({ id: editing.id, ...payload });
 					} else {
-						await createEmployee({ id: id.trim(), ...payload });
+						await createEmployee({
+							...(id.trim() ? { id: id.trim() } : {}),
+							...payload
+						});
 					}
 
 					void getEmployees().refresh();
@@ -98,7 +98,7 @@
 </script>
 
 <dialog bind:this={dialog} class="modal" onclose={resetForm}>
-	<div class="modal-box modal-box-fit max-w-2xl">
+	<div class="modal-box-fit modal-box max-w-2xl">
 		<h3 class="text-lg font-bold">{isEdit ? 'Edit employee' : 'New employee'}</h3>
 
 		<form class="mt-6" onsubmit={handleSubmit}>
@@ -110,15 +110,14 @@
 							<input
 								type="text"
 								bind:value={id}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md cursor-text"
 								maxlength="100"
-								required
 								readonly={isEdit}
-								placeholder="Employee id"
+								placeholder="Leave empty if none"
 							/>
 							{#if !isEdit}
 								<p class="mt-1 text-xs text-base-content/60">
-									Must be unique. Creating with an existing ID is not allowed.
+									Optional. Leave empty when there is no employee ID.
 								</p>
 							{/if}
 						</td>
@@ -129,7 +128,7 @@
 							<input
 								type="text"
 								bind:value={employeeNo}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 								maxlength="50"
 							/>
 						</td>
@@ -140,7 +139,7 @@
 							<input
 								type="text"
 								bind:value={employeeName}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 								maxlength="200"
 							/>
 						</td>
@@ -151,7 +150,7 @@
 							<input
 								type="text"
 								bind:value={position}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 								maxlength="200"
 							/>
 						</td>
@@ -162,7 +161,7 @@
 							<input
 								type="text"
 								bind:value={department}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 								maxlength="200"
 							/>
 						</td>
@@ -173,14 +172,17 @@
 							<input
 								type="date"
 								bind:value={joinDate}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 							/>
 						</td>
 					</tr>
 					<tr>
 						<td class="form-table-label">Facility</td>
 						<td class="form-table-field">
-							<select class="select select-bordered w-full max-w-md" bind:value={facility}>
+							<select
+								class="select-bordered select w-full max-w-md cursor-pointer"
+								bind:value={facility}
+							>
 								<option value="">—</option>
 								{#each ONBOARDING_FACILITY_TABS as item (item.id)}
 									<option value={item.id}>{item.name} ({item.id})</option>
@@ -194,7 +196,7 @@
 							<input
 								type="text"
 								bind:value={userId}
-								class="input input-bordered w-full max-w-md"
+								class="input-bordered input w-full max-w-md"
 								maxlength="100"
 								placeholder="Optional"
 							/>
@@ -213,16 +215,23 @@
 			</table>
 
 			{#if error}
-				<div class="alert alert-error mt-4">
+				<div class="mt-4 alert alert-error">
 					<span>{error}</span>
 				</div>
 			{/if}
 
 			<div class="modal-action">
-				<button type="button" class="btn btn-ghost" onclick={close} disabled={submitting}
-					>Cancel</button
+				<button
+					type="button"
+					class="btn cursor-pointer btn-ghost disabled:cursor-not-allowed"
+					onclick={close}
+					disabled={submitting}>Cancel</button
 				>
-				<button type="submit" class="btn btn-primary" disabled={submitting}>
+				<button
+					type="submit"
+					class="btn cursor-pointer btn-primary disabled:cursor-not-allowed"
+					disabled={submitting}
+				>
 					{#if submitting}
 						<LoadingSpinner size="sm" />
 					{:else}

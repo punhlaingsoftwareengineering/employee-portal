@@ -37,6 +37,7 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 			employeeUpdate: true,
 			employeeDelete: true,
 			employeeExcelOverride: true,
+			employeeExport: true,
 			departmentReadAll: true,
 			facilityReadAll: true,
 			pharmacyReadAll: true,
@@ -44,11 +45,13 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 			pharmacyUpdate: true,
 			pharmacyDelete: true,
 			pharmacyExcelOverride: true,
+			pharmacyExport: true,
 			doctorReadAll: true,
 			doctorCreate: true,
 			doctorUpdate: true,
 			doctorDelete: true,
-			doctorExcelOverride: true
+			doctorExcelOverride: true,
+			doctorExport: true
 		})
 	},
 	{
@@ -67,10 +70,12 @@ const DEFAULT_ROLES: CreateAccessRoleInput[] = [
 			employeeUpdate: true,
 			employeeDelete: true,
 			employeeExcelOverride: true,
+			employeeExport: true,
 			doctorCreate: true,
 			doctorUpdate: true,
 			doctorDelete: true,
-			doctorExcelOverride: true
+			doctorExcelOverride: true,
+			doctorExport: true
 		})
 	},
 	{
@@ -189,11 +194,7 @@ export async function updateAccessRole(input: UpdateAccessRoleInput) {
 	const { id, serviceIds, appIds, communityLinkIds, slug: _slug, ...rest } = data;
 	const patch: Record<string, unknown> = { ...rest };
 
-	if (
-		data.name !== undefined &&
-		data.name !== existing.name &&
-		!existing.isSystem
-	) {
+	if (data.name !== undefined && data.name !== existing.name && !existing.isSystem) {
 		patch.slug = await resolveUniqueSlug(data.name, id);
 	}
 

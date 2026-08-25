@@ -36,6 +36,9 @@ services:
       AUTH_SESSION_COOKIE_CACHE_MAX_AGE: ${AUTH_SESSION_COOKIE_CACHE_MAX_AGE:-30m}
       AUTH_SESSION_SECURE_COOKIES: ${AUTH_SESSION_SECURE_COOKIES:-}
       # DRIVE_ORIGIN: http://drive.local.test
+      # DOCS_ORIGIN: http://docs.local.test
+      # PHH_CALLTRACKER_DASHBOARD_ORIGIN: http://dashboardroutetracker.local.test
+      # QMS_ORIGIN: http://qmsdashboard.local.test
       # DRIVE_INTERNAL_ORIGIN: http://host.docker.internal:1025
       # DRIVE_TEAM_API_KEY: znltv_...
       # DRIVE_STORAGE_PROVIDER: local

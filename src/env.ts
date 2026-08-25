@@ -55,6 +55,11 @@ export const variables = defineEnvVars({
 			'PHH CallTracker Dashboard public URL (e.g. `http://dashboardroutetracker.phh.com`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
+	QMS_ORIGIN: {
+		description:
+			'QMS (Queue Management System) public URL (e.g. `https://qmsdashboard.phh.com` or `http://qmsdashboard.local.test`). Used for SSO redirects and Tools tile link.',
+		schema: optionalString
+	},
 	DRIVE_TEAM_API_KEY: {
 		description:
 			'Team-scoped PHH-DRIVE API key (`znltv_…`) for server-side portal media uploads. Never expose to the browser.',

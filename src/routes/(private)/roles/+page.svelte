@@ -32,6 +32,7 @@
 		if (role.employeeUpdate) parts.push('edit employees');
 		if (role.employeeDelete) parts.push('delete employees');
 		if (role.employeeExcelOverride) parts.push('excel employees');
+		if (role.employeeExport) parts.push('export employees');
 		if (role.departmentReadAll) parts.push('view depts');
 		if (role.departmentCreate) parts.push('add depts');
 		if (role.departmentUpdate) parts.push('edit depts');
@@ -45,11 +46,13 @@
 		if (role.pharmacyUpdate) parts.push('edit pharmacy');
 		if (role.pharmacyDelete) parts.push('delete pharmacy');
 		if (role.pharmacyExcelOverride) parts.push('excel pharmacy');
+		if (role.pharmacyExport) parts.push('export pharmacy');
 		if (role.doctorReadAll) parts.push('view doctors');
 		if (role.doctorCreate) parts.push('add doctors');
 		if (role.doctorUpdate) parts.push('edit doctors');
 		if (role.doctorDelete) parts.push('delete doctors');
 		if (role.doctorExcelOverride) parts.push('excel doctors');
+		if (role.doctorExport) parts.push('export doctors');
 		if (role.usersRead) parts.push('view users');
 		if (role.rolesRead) parts.push('view roles');
 		return parts.join(' ');
@@ -70,7 +73,7 @@
 		<div class="flex justify-end">
 			<button
 				type="button"
-				class="btn btn-primary cursor-pointer gap-2"
+				class="btn cursor-pointer gap-2 btn-primary"
 				onclick={() => roleDialog?.open()}
 			>
 				<Plus class="h-4 w-4" />
@@ -116,7 +119,7 @@
 			{#snippet children({ row: role })}
 				{role.name}
 				{#if role.isSystem}
-					<span class="badge badge-ghost badge-sm ml-2">system</span>
+					<span class="ml-2 badge badge-ghost badge-sm">system</span>
 				{/if}
 			{/snippet}
 		</DataTableColumn>
@@ -130,13 +133,13 @@
 		<DataTableColumn label="Permissions" filterText={permissionFilterText}>
 			{#snippet children({ row: role })}
 				<div class="flex flex-wrap gap-1 text-sm">
-					{#if role.employeeCreate || role.employeeUpdate || role.employeeExcelOverride}
+					{#if role.employeeCreate || role.employeeUpdate || role.employeeExcelOverride || role.employeeExport}
 						<span class="badge badge-outline badge-sm">employees</span>
 					{/if}
-					{#if role.doctorCreate || role.doctorUpdate || role.doctorExcelOverride}
+					{#if role.doctorCreate || role.doctorUpdate || role.doctorExcelOverride || role.doctorExport}
 						<span class="badge badge-outline badge-sm">doctors</span>
 					{/if}
-					{#if role.pharmacyCreate || role.pharmacyUpdate || role.pharmacyExcelOverride}
+					{#if role.pharmacyCreate || role.pharmacyUpdate || role.pharmacyExcelOverride || role.pharmacyExport}
 						<span class="badge badge-outline badge-sm">pharmacy</span>
 					{/if}
 					{#if role.departmentCreate || role.departmentUpdate}

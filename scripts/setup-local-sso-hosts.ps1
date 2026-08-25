@@ -13,6 +13,7 @@ $portalOrigin = Get-EnvValue $envVars @('ORIGIN', 'PORTAL_ORIGIN')
 $driveOrigin = Get-EnvValue $envVars @('DRIVE_ORIGIN')
 $docsOrigin = Get-EnvValue $envVars @('DOCS_ORIGIN')
 $oaiOrderSenderOrigin = Get-EnvValue $envVars @('OAI_ORDER_SENDER_ORIGIN')
+$qmsOrigin = Get-EnvValue $envVars @('QMS_ORIGIN')
 
 if (-not $portalOrigin -or -not $driveOrigin) {
 	throw 'Set ORIGIN and DRIVE_ORIGIN in .env before running hosts setup.'
@@ -33,6 +34,10 @@ if ($oaiOrderSenderOrigin) {
 
 if ($mariChatbotOrigin) {
 	$entries += "127.0.0.1 $((Get-OriginUri $mariChatbotOrigin).Host)"
+}
+
+if ($qmsOrigin) {
+	$entries += "127.0.0.1 $((Get-OriginUri $qmsOrigin).Host)"
 }
 
 $content = Get-Content $hostsPath -Raw

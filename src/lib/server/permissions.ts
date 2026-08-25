@@ -103,8 +103,7 @@ export function canReadFacility(perms: UserPermissions, facilityId: string): boo
 export function canUpdateFacility(perms: UserPermissions, facilityId: string): boolean {
 	if (perms.isAdmin) return true;
 	return perms.departmentRoles.some(
-		(assignment) =>
-			assignment.facilityId === facilityId && assignment.permissions.facilityUpdate
+		(assignment) => assignment.facilityId === facilityId && assignment.permissions.facilityUpdate
 	);
 }
 
@@ -116,8 +115,7 @@ export function canWriteFacility(perms: UserPermissions, facilityId: string): bo
 export function canDeleteFacility(perms: UserPermissions, facilityId: string): boolean {
 	if (perms.isAdmin) return true;
 	return perms.departmentRoles.some(
-		(assignment) =>
-			assignment.facilityId === facilityId && assignment.permissions.facilityDelete
+		(assignment) => assignment.facilityId === facilityId && assignment.permissions.facilityDelete
 	);
 }
 
@@ -173,7 +171,8 @@ export function canReadPharmacy(perms: UserPermissions): boolean {
 			assignment.permissions.pharmacyCreate ||
 			assignment.permissions.pharmacyUpdate ||
 			assignment.permissions.pharmacyDelete ||
-			assignment.permissions.pharmacyExcelOverride
+			assignment.permissions.pharmacyExcelOverride ||
+			assignment.permissions.pharmacyExport
 	);
 }
 
@@ -193,6 +192,10 @@ export function canExcelOverridePharmacy(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'pharmacyExcelOverride');
 }
 
+export function canExportPharmacy(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'pharmacyExport');
+}
+
 /** @deprecated Prefer canCreate/Update/ExcelOverridePharmacy */
 export function canManagePharmacy(perms: UserPermissions): boolean {
 	return canCreatePharmacy(perms) || canUpdatePharmacy(perms) || canExcelOverridePharmacy(perms);
@@ -206,7 +209,8 @@ export function canReadDoctorMaster(perms: UserPermissions): boolean {
 			assignment.permissions.doctorCreate ||
 			assignment.permissions.doctorUpdate ||
 			assignment.permissions.doctorDelete ||
-			assignment.permissions.doctorExcelOverride
+			assignment.permissions.doctorExcelOverride ||
+			assignment.permissions.doctorExport
 	);
 }
 
@@ -226,6 +230,10 @@ export function canExcelOverrideDoctorMaster(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'doctorExcelOverride');
 }
 
+export function canExportDoctorMaster(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'doctorExport');
+}
+
 /** @deprecated Prefer canCreate/UpdateDoctorMaster */
 export function canManageDoctorMaster(perms: UserPermissions): boolean {
 	return (
@@ -243,7 +251,8 @@ export function canReadEmployeeMaster(perms: UserPermissions): boolean {
 			assignment.permissions.employeeCreate ||
 			assignment.permissions.employeeUpdate ||
 			assignment.permissions.employeeDelete ||
-			assignment.permissions.employeeExcelOverride
+			assignment.permissions.employeeExcelOverride ||
+			assignment.permissions.employeeExport
 	);
 }
 
@@ -261,6 +270,10 @@ export function canDeleteEmployeeMaster(perms: UserPermissions): boolean {
 
 export function canExcelOverrideEmployeeMaster(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'employeeExcelOverride');
+}
+
+export function canExportEmployeeMaster(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'employeeExport');
 }
 
 /** @deprecated Prefer canCreate/UpdateEmployeeMaster */
@@ -327,7 +340,8 @@ export function canAccessEmployeesPage(perms: UserPermissions): boolean {
 				p.employeeCreate ||
 				p.employeeUpdate ||
 				p.employeeDelete ||
-				p.employeeExcelOverride)
+				p.employeeExcelOverride ||
+				p.employeeExport)
 		);
 	});
 }
@@ -364,7 +378,8 @@ export function canAccessPharmacyPage(perms: UserPermissions): boolean {
 				p.pharmacyCreate ||
 				p.pharmacyUpdate ||
 				p.pharmacyDelete ||
-				p.pharmacyExcelOverride)
+				p.pharmacyExcelOverride ||
+				p.pharmacyExport)
 		);
 	});
 }
@@ -379,7 +394,8 @@ export function canAccessDoctorsPage(perms: UserPermissions): boolean {
 				p.doctorCreate ||
 				p.doctorUpdate ||
 				p.doctorDelete ||
-				p.doctorExcelOverride)
+				p.doctorExcelOverride ||
+				p.doctorExport)
 		);
 	});
 }
@@ -405,11 +421,7 @@ export function canAccessUsersPage(perms: UserPermissions): boolean {
 		const p = assignment.permissions;
 		return (
 			p.navUsers &&
-			(p.usersRead ||
-				p.usersInvite ||
-				p.usersUpdate ||
-				p.usersInviteResend ||
-				p.usersInviteRevoke)
+			(p.usersRead || p.usersInvite || p.usersUpdate || p.usersInviteResend || p.usersInviteRevoke)
 		);
 	});
 }
@@ -615,9 +627,6 @@ export function canToolsLearningDelete(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'toolsLearningDelete');
 }
 
-export function canAccessService(
-	availableServices: { id: string }[],
-	serviceId: string
-): boolean {
+export function canAccessService(availableServices: { id: string }[], serviceId: string): boolean {
 	return availableServices.some((service) => service.id === serviceId);
 }

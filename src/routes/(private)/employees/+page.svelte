@@ -3,6 +3,7 @@
 	import { Plus, Pencil, Trash2, Users } from '@lucide/svelte';
 	import EmployeeDialog from '$lib/components/EmployeeDialog.svelte';
 	import ExcelOverrideButton from '$lib/components/ExcelOverrideButton.svelte';
+	import TableExportButton from '$lib/components/TableExportButton.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
@@ -18,12 +19,17 @@
 		overrideEmployeesFromExcel
 	} from '$lib/remotes/employee.remote';
 	import { permissionFlag } from '$lib/constants/permissions';
+	import { displayEmployeeId } from '$lib/utils/employee-id';
+	import { formatLoyaltyTenure } from '$lib/utils/loyalty-tenure';
+	import type { ExportColumn } from '$lib/utils/table-export';
+	import type { Employee } from '$lib/server/db/schema/employee';
 
 	const permissions = $derived(page.data.permissions);
 	const canCreate = $derived(permissionFlag(permissions, 'employeeCreate'));
 	const canUpdate = $derived(permissionFlag(permissions, 'employeeUpdate'));
 	const canDelete = $derived(permissionFlag(permissions, 'employeeDelete'));
 	const canExcel = $derived(permissionFlag(permissions, 'employeeExcelOverride'));
+	const canExport = $derived(permissionFlag(permissions, 'employeeExport'));
 
 	let employeeDialog = $state<EmployeeDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
@@ -41,6 +47,23 @@
 		if (!value) return '—';
 		return value instanceof Date ? value.toLocaleString() : String(value);
 	}
+
+	const exportColumns: ExportColumn<Employee>[] = [
+		{ header: 'ID', value: (employee) => displayEmployeeId(employee.id) },
+		{ header: 'Employee no', value: (employee) => employee.employeeNo },
+		{ header: 'Name', value: (employee) => employee.employeeName },
+		{ header: 'Position', value: (employee) => employee.position },
+		{ header: 'Department', value: (employee) => employee.department },
+		{ header: 'Join date', value: (employee) => employee.joinDate },
+		{ header: 'Loyalty', value: (employee) => formatLoyaltyTenure(employee.joinDate) },
+		{ header: 'Facility', value: (employee) => facilityLabel(employee.facility) },
+		{ header: 'Entry date', value: (employee) => displayDate(employee.entryDate) },
+		{ header: 'User ID', value: (employee) => employee.userId },
+		{
+			header: 'Active',
+			value: (employee) => (employee.active == null ? '' : employee.active ? 'active' : 'inactive')
+		}
+	];
 </script>
 
 <svelte:boundary>
@@ -50,8 +73,11 @@
 
 	<PrivatePageHeader title="Employee Master" icon={Users} />
 
-	{#if canExcel || canCreate}
+	{#if canExcel || canCreate || canExport}
 		<div class="mb-4 flex flex-wrap justify-end gap-2">
+			{#if canExport}
+				<TableExportButton rows={employees} columns={exportColumns} fileBaseName="employees" />
+			{/if}
 			{#if canExcel}
 				<ExcelOverrideButton
 					confirmMessage="Override all employee master rows with this Excel file? Existing records will be replaced."
@@ -63,7 +89,7 @@
 			{#if canCreate}
 				<button
 					type="button"
-					class="btn btn-primary cursor-pointer gap-2"
+					class="btn cursor-pointer gap-2 btn-primary"
 					onclick={() => employeeDialog?.open()}
 				>
 					<Plus class="h-4 w-4" />
@@ -110,9 +136,14 @@
 			{/if}
 		{/snippet}
 
-		<DataTableColumn label="ID" firstData filterText={(employee) => employee.id}>
+		<DataTableColumn label="ID" firstData filterText={(employee) => displayEmployeeId(employee.id)}>
 			{#snippet children({ row: employee })}
-				<code class="text-xs">{employee.id}</code>
+				{@const idLabel = displayEmployeeId(employee.id)}
+				{#if idLabel === '—'}
+					<span class="text-base-content/50">—</span>
+				{:else}
+					<code class="text-xs">{idLabel}</code>
+				{/if}
 			{/snippet}
 		</DataTableColumn>
 
@@ -143,6 +174,15 @@
 		<DataTableColumn label="Join date" filterText={(employee) => employee.joinDate ?? ''}>
 			{#snippet children({ row: employee })}
 				{display(employee.joinDate)}
+			{/snippet}
+		</DataTableColumn>
+
+		<DataTableColumn
+			label="Loyalty"
+			filterText={(employee) => formatLoyaltyTenure(employee.joinDate)}
+		>
+			{#snippet children({ row: employee })}
+				{formatLoyaltyTenure(employee.joinDate)}
 			{/snippet}
 		</DataTableColumn>
 

@@ -3,6 +3,7 @@
 	import { Plus, Pencil, Trash2, Pill } from '@lucide/svelte';
 	import PharmacyMasterDialog from '$lib/components/PharmacyMasterDialog.svelte';
 	import ExcelOverrideButton from '$lib/components/ExcelOverrideButton.svelte';
+	import TableExportButton from '$lib/components/TableExportButton.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
 	import IconActionButton from '$lib/components/IconActionButton.svelte';
@@ -18,12 +19,15 @@
 		overridePharmacyMastersFromExcel
 	} from '$lib/remotes/pharmacy-master.remote';
 	import { permissionFlag } from '$lib/constants/permissions';
+	import type { ExportColumn } from '$lib/utils/table-export';
+	import type { PharmacyMaster } from '$lib/server/db/schema/pharmacy-master';
 
 	const permissions = $derived(page.data.permissions);
 	const canCreate = $derived(permissionFlag(permissions, 'pharmacyCreate'));
 	const canUpdate = $derived(permissionFlag(permissions, 'pharmacyUpdate'));
 	const canDelete = $derived(permissionFlag(permissions, 'pharmacyDelete'));
 	const canExcel = $derived(permissionFlag(permissions, 'pharmacyExcelOverride'));
+	const canExport = $derived(permissionFlag(permissions, 'pharmacyExport'));
 
 	let pharmacyDialog = $state<PharmacyMasterDialog | null>(null);
 	const deleteLoading = createKeyedLoading();
@@ -41,6 +45,22 @@
 		if (!value) return '—';
 		return value instanceof Date ? value.toLocaleString() : String(value);
 	}
+
+	const exportColumns: ExportColumn<PharmacyMaster>[] = [
+		{ header: 'ID', value: (item) => item.id },
+		{ header: 'Class', value: (item) => item.itemClass },
+		{ header: 'Sub class', value: (item) => item.subClass },
+		{ header: 'Item name', value: (item) => item.itemName },
+		{ header: 'Generic name', value: (item) => item.genericName },
+		{ header: 'Strength', value: (item) => item.strengthValue },
+		{ header: 'Issue unit', value: (item) => item.issueUnit },
+		{ header: 'Entry date', value: (item) => displayDate(item.entryDate) },
+		{
+			header: 'Active',
+			value: (item) => (item.active == null ? '' : item.active ? 'active' : 'inactive')
+		},
+		{ header: 'Facility', value: (item) => facilityLabel(item.facilityId) }
+	];
 </script>
 
 <svelte:boundary>
@@ -50,8 +70,11 @@
 
 	<PrivatePageHeader title="Pharmacy Master" icon={Pill} />
 
-	{#if canExcel || canCreate}
+	{#if canExcel || canCreate || canExport}
 		<div class="mb-4 flex flex-wrap justify-end gap-2">
+			{#if canExport}
+				<TableExportButton rows={items} columns={exportColumns} fileBaseName="pharmacy" />
+			{/if}
 			{#if canExcel}
 				<ExcelOverrideButton
 					confirmMessage="Override all pharmacy master rows with this Excel file? Existing records will be replaced."
@@ -63,7 +86,7 @@
 			{#if canCreate}
 				<button
 					type="button"
-					class="btn btn-primary cursor-pointer gap-2"
+					class="btn cursor-pointer gap-2 btn-primary"
 					onclick={() => pharmacyDialog?.open()}
 				>
 					<Plus class="h-4 w-4" />

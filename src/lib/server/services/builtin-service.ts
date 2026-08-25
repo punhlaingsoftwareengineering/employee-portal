@@ -6,7 +6,8 @@ import {
 	N8N_MONITOR_ORIGIN,
 	OAI_ORDER_SENDER_ORIGIN,
 	ORIGIN,
-	PHH_CALLTRACKER_DASHBOARD_ORIGIN
+	PHH_CALLTRACKER_DASHBOARD_ORIGIN,
+	QMS_ORIGIN
 } from '$app/env/private';
 import {
 	BUILTIN_SERVICES,
@@ -16,6 +17,7 @@ import {
 	OAI_ORDER_SENDER_SERVICE_ID,
 	PHH_CALLTRACKER_DASHBOARD_SERVICE_ID,
 	PHH_DRIVE_SERVICE_ID,
+	QMS_SERVICE_ID,
 	getBuiltinServiceDefinition,
 	isBuiltinServiceId,
 	type BuiltinServiceDefinition
@@ -215,6 +217,22 @@ async function upsertPhhCalltrackerDashboardService() {
 	});
 }
 
+async function upsertQmsService() {
+	const origin = QMS_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
+
+	await upsertServiceRow({
+		id: QMS_SERVICE_ID,
+		name: 'QMS',
+		description: 'Queue Management System: delayed ticket alerts and dashboard',
+		category: 'Clinical',
+		accentColor: '#F37021',
+		link: origin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
@@ -225,6 +243,7 @@ export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	await upsertN8nChatbotService();
 	await upsertN8nMonitorService();
 	await upsertPhhCalltrackerDashboardService();
+	await upsertQmsService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -290,6 +309,16 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 
 	if (serviceId === PHH_CALLTRACKER_DASHBOARD_SERVICE_ID) {
 		const serviceOrigin = PHH_CALLTRACKER_DASHBOARD_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(serviceOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === QMS_SERVICE_ID) {
+		const serviceOrigin = QMS_ORIGIN?.trim().replace(/\/$/, '');
 		if (!serviceOrigin) return false;
 		try {
 			return new URL(link).origin === new URL(serviceOrigin).origin;

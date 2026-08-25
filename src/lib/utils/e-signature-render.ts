@@ -154,14 +154,7 @@ export async function renderGifBlob(signaturePngBlob: Blob): Promise<Blob> {
 	return new Blob([new Uint8Array(bytes)], { type: 'image/gif' });
 }
 
-export function downloadBlob(blob: Blob, filename: string) {
-	const url = URL.createObjectURL(blob);
-	const anchor = document.createElement('a');
-	anchor.href = url;
-	anchor.download = filename;
-	anchor.click();
-	URL.revokeObjectURL(url);
-}
+export { downloadBlob } from '$lib/utils/download';
 
 export function blobToDataUrl(blob: Blob): Promise<string> {
 	return new Promise((resolve, reject) => {

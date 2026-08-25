@@ -64,7 +64,8 @@
 				{ key: 'employeeCreate', label: 'Manual add' },
 				{ key: 'employeeUpdate', label: 'Edit row' },
 				{ key: 'employeeDelete', label: 'Delete' },
-				{ key: 'employeeExcelOverride', label: 'Excel override' }
+				{ key: 'employeeExcelOverride', label: 'Excel override' },
+				{ key: 'employeeExport', label: 'Export' }
 			]
 		},
 		{
@@ -74,7 +75,8 @@
 				{ key: 'doctorCreate', label: 'Manual add' },
 				{ key: 'doctorUpdate', label: 'Edit row' },
 				{ key: 'doctorDelete', label: 'Delete' },
-				{ key: 'doctorExcelOverride', label: 'Excel override' }
+				{ key: 'doctorExcelOverride', label: 'Excel override' },
+				{ key: 'doctorExport', label: 'Export' }
 			]
 		},
 		{
@@ -84,7 +86,8 @@
 				{ key: 'pharmacyCreate', label: 'Manual add' },
 				{ key: 'pharmacyUpdate', label: 'Edit row' },
 				{ key: 'pharmacyDelete', label: 'Delete' },
-				{ key: 'pharmacyExcelOverride', label: 'Excel override' }
+				{ key: 'pharmacyExcelOverride', label: 'Excel override' },
+				{ key: 'pharmacyExport', label: 'Export' }
 			]
 		},
 		{
@@ -272,9 +275,7 @@
 			name = existing?.name ?? '';
 			description = existing?.description ?? '';
 			flags = existing ? pickExistingFlags(existing) : emptyPermissionFlags(NAV_DEFAULTS);
-			const assignableServiceIds = new Set(
-				allServices.filter((s) => !s.isPublic).map((s) => s.id)
-			);
+			const assignableServiceIds = new Set(allServices.filter((s) => !s.isPublic).map((s) => s.id));
 			const assignableAppIds = new Set(allApps.filter((a) => !a.isPublic).map((a) => a.id));
 			selectedServiceIds =
 				existing?.id != null
@@ -384,7 +385,7 @@
 </script>
 
 <dialog bind:this={dialog} class="modal">
-	<div class="modal-box modal-box-fit role-dialog-box">
+	<div class="modal-box-fit role-dialog-box modal-box">
 		<h3 class="text-lg font-bold">{isEdit ? 'Edit role' : 'New role'}</h3>
 
 		{#if opening}
@@ -399,7 +400,7 @@
 								<input
 									type="text"
 									bind:value={name}
-									class="input input-bordered w-full max-w-md cursor-text"
+									class="input-bordered input w-full max-w-md cursor-text"
 									required
 								/>
 							</td>
@@ -409,9 +410,8 @@
 							<td class="form-table-field">
 								<textarea
 									bind:value={description}
-									class="textarea textarea-bordered w-full max-w-md cursor-text"
-									rows="2"
-								></textarea>
+									class="textarea-bordered textarea w-full max-w-md cursor-text"
+									rows="2"></textarea>
 							</td>
 						</tr>
 					</tbody>
@@ -433,7 +433,7 @@
 											<span>Select all</span>
 											<input
 												type="checkbox"
-												class="checkbox checkbox-sm cursor-pointer"
+												class="checkbox cursor-pointer checkbox-sm"
 												checked={sectionSelected(section)}
 												onchange={(event) =>
 													setSection(section, (event.currentTarget as HTMLInputElement).checked)}
@@ -452,13 +452,10 @@
 												<label class="role-dialog-checkbox">
 													<input
 														type="checkbox"
-														class="checkbox checkbox-sm cursor-pointer"
+														class="checkbox cursor-pointer checkbox-sm"
 														checked={flags[item.key]}
 														onchange={(event) =>
-															setFlag(
-																item.key,
-																(event.currentTarget as HTMLInputElement).checked
-															)}
+															setFlag(item.key, (event.currentTarget as HTMLInputElement).checked)}
 													/>
 													<span>{item.label}</span>
 												</label>
@@ -488,7 +485,7 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm cursor-pointer"
+													class="checkbox cursor-pointer checkbox-sm"
 													checked={allServicesSelected}
 													onchange={(event) =>
 														setAllServices((event.currentTarget as HTMLInputElement).checked)}
@@ -515,7 +512,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm cursor-pointer"
+															class="checkbox cursor-pointer checkbox-sm"
 															checked={selectedServiceIds.includes(item.id)}
 															onchange={(event) =>
 																toggleService(
@@ -552,7 +549,7 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm cursor-pointer"
+													class="checkbox cursor-pointer checkbox-sm"
 													checked={allAppsSelected}
 													onchange={(event) =>
 														setAllApps((event.currentTarget as HTMLInputElement).checked)}
@@ -579,7 +576,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm cursor-pointer"
+															class="checkbox cursor-pointer checkbox-sm"
 															checked={selectedAppIds.includes(item.id)}
 															onchange={(event) =>
 																toggleApp(
@@ -616,12 +613,10 @@
 												<span>Select all</span>
 												<input
 													type="checkbox"
-													class="checkbox checkbox-sm cursor-pointer"
+													class="checkbox cursor-pointer checkbox-sm"
 													checked={allCommunityLinksSelected}
 													onchange={(event) =>
-														setAllCommunityLinks(
-															(event.currentTarget as HTMLInputElement).checked
-														)}
+														setAllCommunityLinks((event.currentTarget as HTMLInputElement).checked)}
 												/>
 											</label>
 										{/if}
@@ -644,7 +639,7 @@
 													<label class="role-dialog-checkbox">
 														<input
 															type="checkbox"
-															class="checkbox checkbox-sm cursor-pointer"
+															class="checkbox cursor-pointer checkbox-sm"
 															checked={selectedCommunityLinkIds.includes(item.id)}
 															onchange={(event) =>
 																toggleCommunityLink(
@@ -679,16 +674,19 @@
 				</div>
 
 				{#if error}
-					<div class="alert alert-error mt-4">
+					<div class="mt-4 alert alert-error">
 						<span>{error}</span>
 					</div>
 				{/if}
 
 				<div class="modal-action">
-					<button type="button" class="btn btn-ghost cursor-pointer" onclick={close} disabled={submitting}
-						>Cancel</button
+					<button
+						type="button"
+						class="btn cursor-pointer btn-ghost"
+						onclick={close}
+						disabled={submitting}>Cancel</button
 					>
-					<button type="submit" class="btn btn-primary cursor-pointer" disabled={submitting}>
+					<button type="submit" class="btn cursor-pointer btn-primary" disabled={submitting}>
 						{#if submitting}
 							<LoadingSpinner size="sm" />
 						{:else}

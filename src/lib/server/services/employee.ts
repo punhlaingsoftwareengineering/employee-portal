@@ -26,6 +26,7 @@ import {
 	parseEmployeeExcelRows,
 	parseExcelTimestamp
 } from '$lib/server/excel-import';
+import { newEmployeeRowId } from '$lib/utils/employee-id';
 
 function isUniqueViolation(err: unknown): boolean {
 	return (
@@ -88,13 +89,14 @@ export async function getEmployee(perms: UserPermissions, id: string) {
 export async function createEmployee(perms: UserPermissions, input: CreateEmployeeInput) {
 	assertCanCreate(perms);
 	const data = createEmployeeSchema.parse(input);
+	const id = newEmployeeRowId(data.id ?? data.employeeNo);
 	const existing = await db.query.employee.findFirst({
-		where: eq(employee.id, data.id)
+		where: eq(employee.id, id)
 	});
 	if (existing) {
 		error(
 			409,
-			`Employee ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+			`Employee ID "${id}" already exists. Choose a different ID or edit the existing record.`
 		);
 	}
 
@@ -102,7 +104,7 @@ export async function createEmployee(perms: UserPermissions, input: CreateEmploy
 		const [record] = await db
 			.insert(employee)
 			.values({
-				id: data.id,
+				id,
 				employeeNo: data.employeeNo ?? null,
 				employeeName: data.employeeName ?? null,
 				position: data.position ?? null,
@@ -119,7 +121,7 @@ export async function createEmployee(perms: UserPermissions, input: CreateEmploy
 		if (isUniqueViolation(err)) {
 			error(
 				409,
-				`Employee ID "${data.id}" already exists. Choose a different ID or edit the existing record.`
+				`Employee ID "${id}" already exists. Choose a different ID or edit the existing record.`
 			);
 		}
 		throw err;
@@ -159,29 +161,6 @@ export async function deleteEmployee(perms: UserPermissions, id: string) {
 	await db.delete(employee).where(eq(employee.id, id));
 }
 
-function slugPart(value: string | null): string {
-	return (value ?? '')
-		.toLowerCase()
-		.replace(/\u00a0/g, ' ')
-		.trim()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '')
-		.slice(0, 40);
-}
-
-function employeeRowId(
-	employeeNo: string | null,
-	employeeName: string | null,
-	position: string | null,
-	facility: string | null,
-	rowIndex: number
-): string {
-	if (employeeNo) return employeeNo;
-	const slug = [employeeName, position, facility].map(slugPart).filter(Boolean).join('_');
-	const base = slug ? `nf-${slug}` : `nf-row-${rowIndex}`;
-	return base.slice(0, 100);
-}
-
 export async function overrideEmployeesFromExcel(
 	perms: UserPermissions,
 	input: OverrideEmployeesFromExcelInput
@@ -208,7 +187,6 @@ export async function overrideEmployeesFromExcel(
 
 	for (let index = 0; index < rows.length; index++) {
 		const row = rows[index]!;
-		const rowIndex = index + 2;
 		const employeeNo = excelEmployeeNo(row, 'emp_no', 'employee_no', 'employeeno', 'id');
 		const employeeName = excelText(row, 'name', 'employee_name', 'employeename');
 		if (!employeeNo && !employeeName) continue;
@@ -216,12 +194,12 @@ export async function overrideEmployeesFromExcel(
 		const position = excelText(row, 'position');
 		const department = excelText(row, 'department');
 		const facility = excelText(row, 'facility');
-		let id = employeeRowId(employeeNo, employeeName, position, facility, rowIndex);
+		let id = newEmployeeRowId(employeeNo);
 		if (usedIds.has(id)) {
 			if (employeeNo) {
 				error(400, `Excel file contains duplicate Emp No "${employeeNo}"`);
 			}
-			id = `${id.slice(0, 90)}-${rowIndex}`.slice(0, 100);
+			id = crypto.randomUUID();
 		}
 		usedIds.add(id);
 		values.push({
@@ -230,9 +208,7 @@ export async function overrideEmployeesFromExcel(
 			employeeName,
 			position,
 			department,
-			joinDate: parseExcelDate(
-				row.joined_date ?? row.join_date ?? row.joindate ?? row.joineddate
-			),
+			joinDate: parseExcelDate(row.joined_date ?? row.join_date ?? row.joindate ?? row.joineddate),
 			facility,
 			entryDate: parseExcelTimestamp(row.entry_date ?? row.entrydate),
 			userId: excelText(row, 'user_id', 'userid'),

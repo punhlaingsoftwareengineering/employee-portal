@@ -43,46 +43,36 @@
 	const availableServices = $derived(page.data.availableServices ?? []);
 	const availableApps = $derived(page.data.availableApps ?? []);
 
-	const hasAnyTools = $derived(
-		isAdmin || availableServices.length > 0 || availableApps.length > 0
-	);
+	const hasAnyTools = $derived(isAdmin || availableServices.length > 0 || availableApps.length > 0);
 	const canManageTools = $derived(canAccessToolsManage(permissions));
 
 	const canSeeDashboard = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navDashboard) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navDashboard) ?? false)
 	);
 	const canSeeCommunity = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navCommunity) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navCommunity) ?? false)
 	);
 	const canSeeEmployees = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navEmployees) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navEmployees) ?? false)
 	);
 	const canSeeDepartments = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navDepartments) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navDepartments) ?? false)
 	);
 	const canSeeFacilities = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navFacilities) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navFacilities) ?? false)
 	);
 	const canSeePharmacy = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navPharmacy) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navPharmacy) ?? false)
 	);
 	const canSeeDoctors = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navDoctors) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navDoctors) ?? false)
 	);
 	const canSeeTools = $derived(
 		(hasAnyTools || canManageTools) &&
 			(isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navTools) ?? false))
 	);
 	const canSeeSettings = $derived(
-		isAdmin ||
-			(permissions?.departmentRoles?.some((a) => a.permissions.navSettings) ?? false)
+		isAdmin || (permissions?.departmentRoles?.some((a) => a.permissions.navSettings) ?? false)
 	);
 	const canSeeUsers = $derived(canAccessUsersPage(permissions));
 	const canSeeRoles = $derived(canAccessRolesPage(permissions));
@@ -98,7 +88,8 @@
 						p.employeeCreate ||
 						p.employeeUpdate ||
 						p.employeeDelete ||
-						p.employeeExcelOverride
+						p.employeeExcelOverride ||
+						p.employeeExport
 					);
 				}) ??
 					false))
@@ -111,10 +102,7 @@
 				(permissions?.departmentRoles?.some((a) => {
 					const p = a.permissions;
 					return (
-						p.departmentReadAll ||
-						p.departmentCreate ||
-						p.departmentUpdate ||
-						p.departmentDelete
+						p.departmentReadAll || p.departmentCreate || p.departmentUpdate || p.departmentDelete
 					);
 				}) ??
 					false))
@@ -140,7 +128,8 @@
 						p.pharmacyCreate ||
 						p.pharmacyUpdate ||
 						p.pharmacyDelete ||
-						p.pharmacyExcelOverride
+						p.pharmacyExcelOverride ||
+						p.pharmacyExport
 					);
 				}) ??
 					false))
@@ -156,7 +145,8 @@
 						p.doctorCreate ||
 						p.doctorUpdate ||
 						p.doctorDelete ||
-						p.doctorExcelOverride
+						p.doctorExcelOverride ||
+						p.doctorExport
 					);
 				}) ??
 					false))
@@ -185,7 +175,7 @@
 	<header class="portal-panel-header -mx-3 shrink-0 px-3 pt-0">
 		<a
 			href={PUBLIC_ROUTES.onboarding}
-			class="btn btn-ghost portal-panel-header__title h-auto min-h-0 w-full justify-start"
+			class="portal-panel-header__title btn h-auto min-h-0 w-full justify-start btn-ghost"
 		>
 			<PortalIcon iconUrl={appSettings.iconUrl} class="h-5 w-5" />
 			<span class="inline-flex min-w-0 items-baseline gap-1.5">
@@ -197,7 +187,7 @@
 		</a>
 	</header>
 
-	<nav class="menu menu-sm my-2 min-h-0 flex-1 overflow-y-auto px-0">
+	<nav class="menu my-2 min-h-0 flex-1 overflow-y-auto menu-sm px-0">
 		<ul>
 			{#if !permissions?.isGuest}
 				{#if canSeeDashboard}
