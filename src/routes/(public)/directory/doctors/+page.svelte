@@ -2,10 +2,13 @@
 	import { Stethoscope } from '@lucide/svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 
 	let { data } = $props();
+	const seo = pageSeo.directoryDoctors;
 
 	function display(value: string | number | null | undefined): string {
 		if (value == null) return '—';
@@ -14,7 +17,12 @@
 	}
 </script>
 
-<PageTitle title="Doctor Directory" />
+<SeoHead
+	title={seo.title}
+	description={seo.description}
+	path={PUBLIC_ROUTES.directoryDoctors}
+	jsonLdType="CollectionPage"
+/>
 
 <div class="container mx-auto max-w-6xl px-4 py-4">
 	<SectionHead icon={Stethoscope} title="Doctor Directory" />

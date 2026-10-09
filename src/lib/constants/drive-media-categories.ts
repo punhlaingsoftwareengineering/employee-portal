@@ -3,6 +3,7 @@ export const PORTAL_DRIVE_CATEGORIES = [
 	'facilities',
 	'notifications',
 	'onboarding-slides',
+	'daily-popups',
 	'tool-guides',
 	'tool-learnings',
 	'newsletters',

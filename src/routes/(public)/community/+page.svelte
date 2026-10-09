@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { MessageCircle, Share2 } from '@lucide/svelte';
 	import CommunityLinkCard from '$lib/components/CommunityLinkCard.svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
 	import { AUTH_ROUTES } from '$lib/constants/auth-routes';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 
 	let { data } = $props();
+	const seo = pageSeo.community;
 </script>
 
-<PageTitle title="Community" />
+<SeoHead title={seo.title} description={seo.description} path={PUBLIC_ROUTES.community} />
 
 <div class="container mx-auto max-w-5xl px-4 py-4">
 	{#if data.sections.length === 0}

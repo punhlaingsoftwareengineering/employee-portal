@@ -12,7 +12,12 @@
 	} = $props();
 </script>
 
-<h2 class="card-title min-w-0 gap-2 text-lg {className}">
-	<Icon class="h-5 w-5 shrink-0 text-primary" />
+<h3 class="card-title min-w-0 gap-2.5 text-base font-bold text-base-content {className}">
+	<span
+		class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+		aria-hidden="true"
+	>
+		<Icon class="h-4 w-4" />
+	</span>
 	<span class="min-w-0 wrap-break-word">{title}</span>
-</h2>
+</h3>

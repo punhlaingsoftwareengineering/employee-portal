@@ -19,6 +19,10 @@
 	}
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 <div
 	class="portal-private relative min-h-screen overscroll-none lg:flex lg:h-screen lg:overflow-hidden"
 	style:--portal-navbar-height="4rem"

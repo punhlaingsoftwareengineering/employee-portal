@@ -8,20 +8,15 @@ import {
 import { listPublicOnboardingSlides } from '$lib/server/services/onboarding-slide';
 import { listPublicPharmacyMasters } from '$lib/server/services/pharmacy-master';
 import { listPublicServices } from '$lib/server/services/service';
+import { getPublicDailyPopupPayload } from '$lib/server/services/daily-popup';
 import { ONBOARDING_NEWSLETTER_DISPLAY_LIMIT } from '$lib/constants/onboarding';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const [
-		publicServices,
-		publicApps,
-		slides,
-		facilities,
-		carouselConfig,
-		newsletters,
-		newsletterTotal,
-		pharmacyMasters
-	] = await Promise.all([
+	/** Await popup only so HTML can stream and the dialog can open first. */
+	const dailyPopup = await getPublicDailyPopupPayload();
+
+	const content = Promise.all([
 		listPublicServices(),
 		listPublicApps(),
 		listPublicOnboardingSlides(),
@@ -30,16 +25,30 @@ export const load: PageServerLoad = async () => {
 		listPublicNewsletters(ONBOARDING_NEWSLETTER_DISPLAY_LIMIT),
 		countNewsletters(),
 		listPublicPharmacyMasters()
-	]);
+	]).then(
+		([
+			publicServices,
+			publicApps,
+			slides,
+			facilities,
+			carouselConfig,
+			newsletters,
+			newsletterTotal,
+			pharmacyMasters
+		]) => ({
+			publicServices,
+			publicApps,
+			slides,
+			facilities,
+			carouselIntervalMs: carouselConfig.intervalMs,
+			newsletters,
+			newsletterTotal,
+			pharmacyMasters
+		})
+	);
 
 	return {
-		publicServices,
-		publicApps,
-		slides,
-		facilities,
-		carouselIntervalMs: carouselConfig.intervalMs,
-		newsletters,
-		newsletterTotal,
-		pharmacyMasters
+		dailyPopup,
+		content
 	};
 };

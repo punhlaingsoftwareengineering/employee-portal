@@ -6,7 +6,8 @@ export const PUBLIC_ROUTES = {
 	apps: '/apps',
 	newsletters: '/newsletters',
 	directoryEmployees: '/directory/employees',
-	directoryDoctors: '/directory/doctors'
+	directoryDoctors: '/directory/doctors',
+	eSignature: '/tools/e-signature'
 } as const;
 
 export function publicAppHref(id: string): string {

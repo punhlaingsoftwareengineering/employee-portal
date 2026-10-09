@@ -26,14 +26,24 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		? hasAppAccess(await getUserPermissions(locals.user.id))
 		: false;
 
-	const [announcement, notificationData, publicServices, publicApps] = await Promise.all([
+	const [announcement, notificationData] = await Promise.all([
 		onOnboarding ? getActiveAnnouncement() : Promise.resolve(null),
 		canUseNotifications && locals.user
 			? listUserNotifications(locals.user.id)
-			: Promise.resolve(emptyNotifications),
-		listPublicServices(),
-		listPublicApps()
+			: Promise.resolve(emptyNotifications)
 	]);
+
+	/**
+	 * Stream nav section flags so public TTFB is not blocked on full services/apps lists.
+	 * Onboarding page streams the same lists for page content (separate request path is OK;
+	 * layout only needs boolean flags for the navbar).
+	 */
+	const onboardingSections = Promise.all([listPublicServices(), listPublicApps()]).then(
+		([publicServices, publicApps]) => ({
+			hasServices: publicServices.length > 0,
+			hasApps: publicApps.length > 0
+		})
+	);
 
 	return {
 		announcement,
@@ -43,9 +53,6 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		canUseNotifications,
 		user: locals.user ?? null,
 		docsHref,
-		onboardingSections: {
-			hasServices: publicServices.length > 0,
-			hasApps: publicApps.length > 0
-		}
+		onboardingSections
 	};
 };

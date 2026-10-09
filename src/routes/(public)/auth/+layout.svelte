@@ -19,6 +19,9 @@
 </script>
 
 <PageTitle title={authTitle} />
+<svelte:head>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
 
 <div class="container mx-auto w-full max-w-2xl px-4 py-6">
 	<div class="w-full space-y-4">

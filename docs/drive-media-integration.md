@@ -52,6 +52,7 @@ portal/
   facilities/
   notifications/
   onboarding-slides/
+  daily-popups/
   tool-guides/
   tool-learnings/
   newsletters/

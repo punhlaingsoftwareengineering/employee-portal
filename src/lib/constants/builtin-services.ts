@@ -1,6 +1,6 @@
 import type { ServiceEmbedMode } from '$lib/constants/service-embed';
 
-/** Stable ID — upserted by ensureBuiltinServices(). */
+/** Stable ID: public e-signature generator card. */
 export const E_SIGNATURE_SERVICE_ID = 'c8e4f2a1-9b3d-4e5f-a1b2-3c4d5e6f7081';
 
 /** Stable ID — upserted by ensureBuiltinServices(). */
@@ -58,7 +58,7 @@ export const BUILTIN_SERVICES: readonly BuiltinServiceDefinition[] = [
 		accentColor: '#0B2D5C',
 		path: E_SIGNATURE_SERVICE_PATH,
 		embedMode: 'external',
-		isPublic: false
+		isPublic: true
 	},
 	{
 		id: RATING_SERVICE_ID,

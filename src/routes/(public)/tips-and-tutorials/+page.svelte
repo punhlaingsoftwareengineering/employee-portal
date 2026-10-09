@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { BookOpen, ExternalLink, FileText, GraduationCap, Play, Search } from '@lucide/svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 
 	let { data } = $props();
+	const seo = pageSeo.tipsAndTutorials;
 
 	let searchQuery = $state('');
 
@@ -28,7 +31,12 @@
 	);
 </script>
 
-<PageTitle title="Tips & Tutorials" />
+<SeoHead
+	title={seo.title}
+	description={seo.description}
+	path={PUBLIC_ROUTES.tipsAndTutorials}
+	jsonLdType="CollectionPage"
+/>
 
 <div class="container mx-auto max-w-5xl px-4 py-4">
 	{#if hasAnyContent}

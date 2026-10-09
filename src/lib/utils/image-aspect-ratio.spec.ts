@@ -28,6 +28,11 @@ describe('matchesAspectRatio', () => {
 		expect(matchesAspectRatio({ width: 1920, height: 1080 }, IMAGE_ASPECT.announcement)).toBe(false);
 	});
 
+	it('accepts notice 4:5 poster', () => {
+		expect(matchesAspectRatio({ width: 480, height: 600 }, IMAGE_ASPECT.notice)).toBe(true);
+		expect(matchesAspectRatio({ width: 1920, height: 1080 }, IMAGE_ASPECT.notice)).toBe(false);
+	});
+
 	it('builds a clear mismatch message', () => {
 		const message = aspectMismatchMessage({ width: 1920, height: 1080 }, IMAGE_ASPECT.carousel);
 		expect(message).toContain('21:9');

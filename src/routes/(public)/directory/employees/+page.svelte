@@ -2,12 +2,15 @@
 	import { Users } from '@lucide/svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import DataTableColumn from '$lib/components/DataTableColumn.svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
 	import { ONBOARDING_FACILITY_TABS } from '$lib/constants/onboarding';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 	import { formatLoyaltyTenure } from '$lib/utils/loyalty-tenure';
 
 	let { data } = $props();
+	const seo = pageSeo.directoryEmployees;
 
 	function facilityLabel(facilityId: string | null): string {
 		if (!facilityId) return '—';
@@ -19,7 +22,12 @@
 	}
 </script>
 
-<PageTitle title="Employee Directory" />
+<SeoHead
+	title={seo.title}
+	description={seo.description}
+	path={PUBLIC_ROUTES.directoryEmployees}
+	jsonLdType="CollectionPage"
+/>
 
 <div class="container mx-auto max-w-6xl px-4 py-4">
 	<SectionHead icon={Users} title="Employee Directory" />

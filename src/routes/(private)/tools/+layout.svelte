@@ -7,7 +7,6 @@
 
 	const showTabs = $derived(
 		!page.url.pathname.startsWith('/tools/manage') &&
-			!page.url.pathname.startsWith('/tools/e-signature') &&
 			!page.url.pathname.startsWith('/tools/rating')
 	);
 

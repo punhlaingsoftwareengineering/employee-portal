@@ -67,6 +67,50 @@
 	</head>
 
 	<body data-sveltekit-preload-data="hover">
+		<script>
+			/*! Early daily popup: open as soon as #daily-popup-dialog streams in (before full page/hydration). */
+			(function () {
+				var KEY = 'employee-portal-daily-popup-dismissed-at-v1';
+				var FORCE = 'dailyPopup';
+				function shouldShow(cooldownMinutes) {
+					try {
+						if (new URLSearchParams(location.search).get(FORCE) === '1') return true;
+						var raw = localStorage.getItem(KEY);
+						if (!raw) return true;
+						var t = Date.parse(raw);
+						if (Number.isNaN(t)) return true;
+						var mins = Math.max(1, Math.min(1440, Math.round(Number(cooldownMinutes) || 15)));
+						return Date.now() - t >= mins * 60000;
+					} catch (e) {
+						return true;
+					}
+				}
+				function openDaily(d) {
+					if (!d || d.open || d.getAttribute('data-opened') === '1') return;
+					if (!shouldShow(d.getAttribute('data-cooldown'))) return;
+					try {
+						d.showModal();
+						d.setAttribute('data-opened', '1');
+					} catch (e) {}
+				}
+				var existing = document.getElementById('daily-popup-dialog');
+				if (existing) {
+					openDaily(existing);
+					return;
+				}
+				var obs = new MutationObserver(function () {
+					var d = document.getElementById('daily-popup-dialog');
+					if (d) {
+						openDaily(d);
+						obs.disconnect();
+					}
+				});
+				obs.observe(document.documentElement, { childList: true, subtree: true });
+				setTimeout(function () {
+					obs.disconnect();
+				}, 15000);
+			})();
+		</script>
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>

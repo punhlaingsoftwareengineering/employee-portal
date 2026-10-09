@@ -181,6 +181,81 @@ html[data-app-font='pangolin'] {
 		overflow: visible;
 	}
 
+	/** Wide bento card (full masonry width: 2 cols on md, 3 on xl). */
+	.card-masonry > .card-span-2 {
+		column-span: all;
+	}
+
+	/* Settings page: sectioned layout (replaces uneven masonry for this route) */
+	.settings-page {
+		@apply flex flex-col gap-8 pb-8;
+	}
+
+	.settings-toc {
+		@apply sticky top-14 z-20 -mx-1 flex gap-2 overflow-x-auto px-1 py-2;
+		scrollbar-width: thin;
+	}
+
+	.settings-toc a {
+		@apply btn btn-sm btn-ghost shrink-0 cursor-pointer gap-1.5 rounded-full border border-base-300 bg-base-100 shadow-sm;
+	}
+
+	.settings-toc a:hover {
+		@apply border-primary/40 bg-primary/10 text-primary;
+	}
+
+	.settings-section {
+		@apply flex flex-col gap-4;
+	}
+
+	.settings-section__head {
+		@apply flex items-start gap-3 border-b border-base-300 pb-3;
+	}
+
+	.settings-section__icon {
+		@apply flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-primary/10 text-primary;
+	}
+
+	.settings-section__title {
+		@apply text-lg font-bold tracking-tight text-base-content;
+	}
+
+	.settings-section__desc {
+		@apply mt-0.5 text-sm text-base-content/65;
+	}
+
+	.settings-section__body {
+		@apply flex flex-col gap-4;
+	}
+
+	.settings-grid {
+		@apply grid grid-cols-1 items-start gap-4;
+	}
+
+	.settings-grid--policies {
+		@apply md:grid-cols-2 xl:grid-cols-3;
+	}
+
+	.settings-grid--pair {
+		@apply lg:grid-cols-2;
+	}
+
+	.settings-card {
+		@apply card bg-base-100 shadow-sm ring-1 ring-base-300/60;
+	}
+
+	.settings-card > .card-body {
+		@apply gap-4;
+	}
+
+	.settings-card__meta {
+		@apply flex flex-wrap items-center gap-2;
+	}
+
+	.settings-card__hint {
+		@apply text-xs text-base-content/55;
+	}
+
 	.card-grid {
 		@apply grid items-start gap-4;
 	}

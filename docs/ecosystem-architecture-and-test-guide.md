@@ -97,7 +97,7 @@ flowchart TB
 | **Roles** | `/roles` | Access role + permission assignment |
 | **Settings** | `/settings` | Theme, font, branding, announcements |
 | **Tools Admin** | `/tools/manage/*` | Services, apps, guides, learnings CRUD |
-| **E-Signature** | `/tools/e-signature` | Built-in signature generator |
+| **E-Signature** | `/tools/e-signature` | Public built-in signature generator (no login) |
 | **Notifications** | `/notifications`, `/api/notifications/*` | Notification list + SSE stream |
 | **Drive Media** | `/api/drive-media/[category]/*` | Server-side PHH-DRIVE upload proxy |
 | **AI Assistant** | `/api/ai-chat` | Rule-based chat endpoint |
@@ -155,7 +155,7 @@ flowchart TB
 | Better Auth | `/api/auth/*` | All auth operations |
 | Drive media | `/api/drive-media/[category]/*` | GET, POST upload, POST pick, DELETE |
 
-**Drive media categories:** `announcements`, `facilities`, `notifications`, `onboarding-slides`, `tool-guides`, `tool-learnings`, `newsletters`, `notification-sounds`, `apps`, `services`, `branding`, `documentation`
+**Drive media categories:** `announcements`, `facilities`, `notifications`, `onboarding-slides`, `daily-popups`, `tool-guides`, `tool-learnings`, `newsletters`, `notification-sounds`, `apps`, `services`, `branding`, `documentation`
 
 ### 2.5 Database Schema (Portal)
 

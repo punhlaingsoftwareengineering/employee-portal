@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { ArrowLeft, Newspaper } from '@lucide/svelte';
 	import OnboardingNewsletterGrid from '$lib/components/OnboardingNewsletterGrid.svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 	import SectionHead from '$lib/components/SectionHead.svelte';
 	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 
 	let { data } = $props();
+	const seo = pageSeo.newsletters;
 </script>
 
-<PageTitle title="Newsletters" />
+<SeoHead title={seo.title} description={seo.description} path={PUBLIC_ROUTES.newsletters} />
 
 <div class="container mx-auto max-w-5xl px-4 py-4">
 	<a href={PUBLIC_ROUTES.onboarding} class="btn btn-ghost btn-sm mb-4 gap-2">

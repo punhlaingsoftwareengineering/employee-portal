@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { ArrowLeft, PenLine } from '@lucide/svelte';
-	import PrivatePageHeader from '$lib/components/PrivatePageHeader.svelte';
 	import ESignatureDownloads from '$lib/components/e-signature/ESignatureDownloads.svelte';
 	import ESignatureForm from '$lib/components/e-signature/ESignatureForm.svelte';
 	import ESignaturePreview from '$lib/components/e-signature/ESignaturePreview.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
+	import SectionHead from '$lib/components/SectionHead.svelte';
+	import { PUBLIC_ROUTES } from '$lib/constants/public-routes';
+	import { pageSeo } from '$lib/constants/seo';
 	import {
 		eSignatureDefaultFormData,
 		type ESignatureFormData
@@ -27,6 +31,9 @@
 	let gifDataUrl = $state<string | null>(null);
 	let generateError = $state<string | null>(null);
 	let captureElement = $state<HTMLDivElement | null>(null);
+
+	const backHref = $derived(page.data.user ? '/tools' : PUBLIC_ROUTES.services);
+	const backLabel = $derived(page.data.user ? 'Back to tools' : 'Back to services');
 
 	function handleFormSubmit(data: ESignatureFormData) {
 		formData = data;
@@ -68,41 +75,49 @@
 	}
 </script>
 
-<PrivatePageHeader title="E-Signature Generator" icon={PenLine} />
+<SeoHead
+	title={pageSeo.eSignature.title}
+	description={pageSeo.eSignature.description}
+	path={PUBLIC_ROUTES.eSignature}
+/>
 
-<div class="mb-4">
-	<a href="/tools" class="btn btn-ghost btn-sm gap-2">
-		<ArrowLeft class="h-4 w-4" />
-		Back to tools
-	</a>
-</div>
+<div class="container mx-auto max-w-5xl px-4 py-4">
+	<SectionHead icon={PenLine} title="E-Signature Generator" />
 
-<p class="mb-6 text-base-content/70">
-	Enter your details to generate a Pun Hlaing Hospitals email footer as PNG and animated GIF.
-</p>
-
-{#if step === 'form'}
-	{#key `${formData.employeeNo}-${formData.email}-${formData.name}`}
-		<ESignatureForm initialData={formData} onSubmit={handleFormSubmit} />
-	{/key}
-{:else}
-	<ESignaturePreview data={formData} onEdit={handleEdit} bind:captureElement />
-
-	<div class="mt-6">
-		<ESignatureDownloads
-			{generated}
-			{generating}
-			{pngBlob}
-			{gifBlob}
-			{pngDataUrl}
-			{gifDataUrl}
-			onGenerate={handleGenerate}
-		/>
+	<div class="mb-4">
+		<a href={backHref} class="btn btn-ghost btn-sm gap-2 cursor-pointer">
+			<ArrowLeft class="h-4 w-4" />
+			{backLabel}
+		</a>
 	</div>
 
-	{#if generateError}
-		<div class="alert alert-error mt-4 max-w-2xl">
-			<span>{generateError}</span>
+	<p class="mb-6 text-sm text-base-content/70">
+		Enter your details to generate a Pun Hlaing Hospitals email footer as PNG and animated GIF.
+	</p>
+
+	{#if step === 'form'}
+		{#key `${formData.employeeNo}-${formData.email}-${formData.name}`}
+			<ESignatureForm initialData={formData} onSubmit={handleFormSubmit} />
+		{/key}
+	{:else}
+		<ESignaturePreview data={formData} onEdit={handleEdit} bind:captureElement />
+
+		<div class="mt-6">
+			<ESignatureDownloads
+				{generated}
+				{generating}
+				{pngBlob}
+				{gifBlob}
+				{pngDataUrl}
+				{gifDataUrl}
+				onGenerate={handleGenerate}
+			/>
 		</div>
+
+		{#if generateError}
+			<div class="alert alert-error mt-4 max-w-2xl">
+				<span>{generateError}</span>
+			</div>
+		{/if}
 	{/if}
-{/if}
+</div>

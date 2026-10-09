@@ -102,6 +102,11 @@
 					src={normalizePublicDriveUrl(slide.imageUrl)}
 					alt={slide.title}
 					class="aspect-[21/9] w-full object-cover"
+					width="1680"
+					height="720"
+					fetchpriority={index === 0 ? 'high' : 'auto'}
+					loading={index === 0 ? 'eager' : 'lazy'}
+					decoding={index === 0 ? 'sync' : 'async'}
 				/>
 				{#if showCaption}
 					<figcaption

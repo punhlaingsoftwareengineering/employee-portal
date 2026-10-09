@@ -15,8 +15,9 @@
 	);
 	const docsHref = $derived(page.data.docsHref ?? null);
 
-	const onboardingSections = $derived(
-		page.data.onboardingSections ?? { hasServices: false, hasApps: false }
+	const onboardingSectionsPromise = $derived(
+		page.data.onboardingSections ??
+			Promise.resolve({ hasServices: false, hasApps: false })
 	);
 	const onTipsPage = $derived(
 		page.url.pathname === PUBLIC_ROUTES.tipsAndTutorials ||
@@ -75,16 +76,18 @@
 			<li>
 				<a href={PUBLIC_ROUTES.community} class:active={onCommunityPage}>Community</a>
 			</li>
-			{#if onboardingSections.hasServices}
-				<li>
-					<a href={PUBLIC_ROUTES.services} class:active={onServicesPage}>Services</a>
-				</li>
-			{/if}
-			{#if onboardingSections.hasApps}
-				<li>
-					<a href={PUBLIC_ROUTES.apps} class:active={onAppsPage}>Apps</a>
-				</li>
-			{/if}
+			{#await onboardingSectionsPromise then onboardingSections}
+				{#if onboardingSections.hasServices}
+					<li>
+						<a href={PUBLIC_ROUTES.services} class:active={onServicesPage}>Services</a>
+					</li>
+				{/if}
+				{#if onboardingSections.hasApps}
+					<li>
+						<a href={PUBLIC_ROUTES.apps} class:active={onAppsPage}>Apps</a>
+					</li>
+				{/if}
+			{/await}
 		</ul>
 	</div>
 

@@ -543,6 +543,18 @@ export function canSettingsOnboardingDelete(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'settingsOnboardingDelete');
 }
 
+export function canSettingsDailyPopupCreate(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'settingsDailyPopupCreate');
+}
+
+export function canSettingsDailyPopupUpdate(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'settingsDailyPopupUpdate');
+}
+
+export function canSettingsDailyPopupDelete(perms: UserPermissions): boolean {
+	return hasFlag(perms, 'settingsDailyPopupDelete');
+}
+
 export function canSettingsAnnouncementCreate(perms: UserPermissions): boolean {
 	return hasFlag(perms, 'settingsAnnouncementCreate');
 }

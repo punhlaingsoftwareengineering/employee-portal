@@ -3,20 +3,19 @@
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import AppSettingsSync from '$lib/components/AppSettingsSync.svelte';
 	import LoadingProgressHost from '$lib/components/LoadingProgressHost.svelte';
-	import PageTitle from '$lib/components/PageTitle.svelte';
 	import SupportFab from '$lib/components/SupportFab.svelte';
 	import ToastHost from '$lib/components/ToastHost.svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import { DEFAULT_APP_TITLE } from '$lib/constants/app-settings';
 
 	let { data, children } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>{DEFAULT_APP_TITLE}</title>
 </svelte:head>
-
-<PageTitle />
 
 <AppSettingsSync
 	branding={data.appBranding}

@@ -61,6 +61,28 @@ export const IMAGE_ASPECT = {
 		height: 5,
 		usage: 'Newsletter covers'
 	},
+	/**
+	 * Welcome / notice dialog poster (same 4:5 as newsletter covers).
+	 * Prefer 4:5 over 1:1 so title + body still fit without a tall empty frame.
+	 * Design size ≈ 480×600.
+	 */
+	notice: {
+		label: '4:5',
+		width: 4,
+		height: 5,
+		usage: 'Welcome / notice dialog posters',
+		tolerance: 0.05
+	},
+	/**
+	 * Daily onboarding popup images — target design size 1920×1080 (16:9).
+	 */
+	dailyPopup: {
+		label: '16:9',
+		width: 16,
+		height: 9,
+		usage: 'Daily onboarding popup (1920×1080)',
+		tolerance: 0.02
+	},
 	/** App detail screenshot carousel (680×550 display) */
 	screenshot: {
 		label: '680:550',
