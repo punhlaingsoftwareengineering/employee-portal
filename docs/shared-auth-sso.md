@@ -22,6 +22,7 @@ Per-app public URLs (must match the browser address):
 | employee-portal | `DRIVE_ORIGIN` | `http://drive.local.test` | `https://drive.phh.com` |
 | employee-portal | `DOCS_ORIGIN` | `http://docs.local.test` | `https://docs.phh.com` |
 | employee-portal | `OAI_ORDER_SENDER_ORIGIN` | `http://oai-order-sender.local.test` | `https://ordersenderoai.phh.com` |
+| employee-portal | `BED_STATUS_MANAGER_ORIGIN` | `http://bed-status.local.test` | `https://bedstatus.phh.com` |
 | employee-portal | `N8N_CHATBOT_ORIGIN` | `http://chatbot.local.test` | `https://chatbotn8n.phh.com` |
 | employee-portal | `N8N_MONITOR_ORIGIN` | `http://monitor.local.test` | `https://monitorn8n.phh.com` |
 | employee-portal | `PHH_CALLTRACKER_DASHBOARD_ORIGIN` | `http://dashboardroutetracker.local.test` | `https://dashboardroutetracker.phh.com` |
@@ -43,6 +44,8 @@ Portal also accepts `PORTAL_TRUSTED_REDIRECT_ORIGINS` (defaults to trusting sibl
 
 `OAI_ORDER_SENDER_ORIGIN` syncs the **OAI Order Sender** service tile on portal startup. Grant access via **Settings → Access roles** (assign OAI Order Sender service).
 
+`BED_STATUS_MANAGER_ORIGIN` syncs the **Bed Status Manager** service tile. Grant access via **Settings → Access roles**.
+
 `N8N_CHATBOT_ORIGIN` syncs the **N8N Chatbot** service tile. `N8N_MONITOR_ORIGIN` syncs **N8N Monitor**. `PHH_CALLTRACKER_DASHBOARD_ORIGIN` syncs **PHH CallTracker Dashboard**. `QMS_ORIGIN` syncs **QMS** (Queue Management System).
 
 `MARI_CHATBOT_ORIGIN` syncs the **Mari Chatbot** service tile on portal startup. Grant access via **Settings â†’ Access roles** (assign Mari Chatbot service).
@@ -62,6 +65,7 @@ ORIGIN=http://portal.local.test
 DRIVE_ORIGIN=http://drive.local.test
 DOCS_ORIGIN=http://docs.local.test
 OAI_ORDER_SENDER_ORIGIN=http://oai-order-sender.local.test
+BED_STATUS_MANAGER_ORIGIN=http://bed-status.local.test
 N8N_CHATBOT_ORIGIN=http://chatbot.local.test
 N8N_MONITOR_ORIGIN=http://monitor.local.test
 PHH_CALLTRACKER_DASHBOARD_ORIGIN=http://dashboardroutetracker.local.test
@@ -218,6 +222,7 @@ Optional Caddy overrides in employee-portal `.env`:
 | `CADDY_DRIVE_UPSTREAM` | `localhost:1025` | Drive backend |
 | `CADDY_DOCS_UPSTREAM` | `localhost:1026` | Docs backend |
 | `CADDY_OAI_ORDER_SENDER_UPSTREAM` | `localhost:6002` | OAI Order Sender backend |
+| `CADDY_BED_STATUS_MANAGER_UPSTREAM` | `localhost:6005` | Bed Status Manager backend |
 | `CADDY_QMS_UPSTREAM` | `localhost:1028` | QMS backend |
 | `CADDY_TLS` | infer from URL scheme | `auto` = HTTPS blocks, `off` = HTTP |
 

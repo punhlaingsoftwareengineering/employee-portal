@@ -33,6 +33,9 @@ export const PHH_CALLTRACKER_DASHBOARD_SERVICE_ID = 'e7f9a1b3-c5d6-7e9f-0a1b-2c3
 /** Stable ID — link synced from QMS_ORIGIN env on startup. */
 export const QMS_SERVICE_ID = 'a1b2c3d4-e5f6-4789-a012-3456789abcde';
 
+/** Stable ID — link synced from BED_STATUS_MANAGER_ORIGIN env on startup. */
+export const BED_STATUS_MANAGER_SERVICE_ID = 'f8a0b2c4-d6e7-4f8a-9b0c-1d2e3f4a5b6c';
+
 export const E_SIGNATURE_SERVICE_PATH = '/tools/e-signature';
 export const RATING_SERVICE_PATH = '/tools/rating';
 export const EMPLOYEE_DIRECTORY_SERVICE_PATH = '/directory/employees';
@@ -100,7 +103,8 @@ const BUILTIN_SERVICE_IDS = new Set([
 	N8N_CHATBOT_SERVICE_ID,
 	N8N_MONITOR_SERVICE_ID,
 	PHH_CALLTRACKER_DASHBOARD_SERVICE_ID,
-	QMS_SERVICE_ID
+	QMS_SERVICE_ID,
+	BED_STATUS_MANAGER_SERVICE_ID
 ]);
 
 export function isBuiltinServiceId(id: string): boolean {

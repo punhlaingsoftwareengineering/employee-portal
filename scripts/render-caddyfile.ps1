@@ -13,11 +13,13 @@ $portalOrigin = Get-EnvValue $envVars @('ORIGIN', 'PORTAL_ORIGIN')
 $driveOrigin = Get-EnvValue $envVars @('DRIVE_ORIGIN')
 $docsOrigin = Get-EnvValue $envVars @('DOCS_ORIGIN')
 $oaiOrderSenderOrigin = Get-EnvValue $envVars @('OAI_ORDER_SENDER_ORIGIN')
+$bedStatusManagerOrigin = Get-EnvValue $envVars @('BED_STATUS_MANAGER_ORIGIN')
 $qmsOrigin = Get-EnvValue $envVars @('QMS_ORIGIN')
 $portalUpstream = Get-EnvValue $envVars @('CADDY_PORTAL_UPSTREAM')
 $driveUpstream = Get-EnvValue $envVars @('CADDY_DRIVE_UPSTREAM')
 $docsUpstream = Get-EnvValue $envVars @('CADDY_DOCS_UPSTREAM')
 $oaiOrderSenderUpstream = Get-EnvValue $envVars @('CADDY_OAI_ORDER_SENDER_UPSTREAM')
+$bedStatusManagerUpstream = Get-EnvValue $envVars @('CADDY_BED_STATUS_MANAGER_UPSTREAM')
 $qmsUpstream = Get-EnvValue $envVars @('CADDY_QMS_UPSTREAM')
 $caddyTls = Get-EnvValue $envVars @('CADDY_TLS')
 
@@ -44,6 +46,12 @@ $oaiOrderSenderBlock = ''
 if ($oaiOrderSenderOrigin) {
 	if (-not $oaiOrderSenderUpstream) { $oaiOrderSenderUpstream = 'localhost:6002' }
 	$oaiOrderSenderBlock = Get-CaddySiteBlock -Origin $oaiOrderSenderOrigin -Upstream $oaiOrderSenderUpstream -TlsMode $caddyTls
+}
+
+$bedStatusManagerBlock = ''
+if ($bedStatusManagerOrigin) {
+	if (-not $bedStatusManagerUpstream) { $bedStatusManagerUpstream = 'localhost:6005' }
+	$bedStatusManagerBlock = Get-CaddySiteBlock -Origin $bedStatusManagerOrigin -Upstream $bedStatusManagerUpstream -TlsMode $caddyTls
 }
 
 $mariChatbotBlock = ''
@@ -79,6 +87,10 @@ if ($oaiOrderSenderBlock) {
 	$content += "`n`n$oaiOrderSenderBlock"
 }
 
+if ($bedStatusManagerBlock) {
+	$content += "`n`n$bedStatusManagerBlock"
+}
+
 if ($mariChatbotBlock) {
 	$content += "`n`n$mariChatbotBlock"
 }
@@ -96,6 +108,9 @@ if ($docsOrigin) {
 }
 if ($oaiOrderSenderOrigin) {
 	Write-Host "  OAI Order Sender: $oaiOrderSenderOrigin -> $oaiOrderSenderUpstream"
+}
+if ($bedStatusManagerOrigin) {
+	Write-Host "  Bed Status Manager: $bedStatusManagerOrigin -> $bedStatusManagerUpstream"
 }
 if ($mariChatbotOrigin) {
 	Write-Host "  MariChatbot: $mariChatbotOrigin -> $mariChatbotUpstream"

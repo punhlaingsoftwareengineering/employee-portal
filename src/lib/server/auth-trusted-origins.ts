@@ -1,4 +1,5 @@
 import {
+	BED_STATUS_MANAGER_ORIGIN,
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
 	N8N_CHATBOT_ORIGIN,
@@ -57,6 +58,7 @@ export function getAuthTrustedOrigins(): string[] {
 	addOrigin(trusted, N8N_MONITOR_ORIGIN);
 	addOrigin(trusted, PHH_CALLTRACKER_DASHBOARD_ORIGIN);
 	addOrigin(trusted, QMS_ORIGIN);
+	addOrigin(trusted, BED_STATUS_MANAGER_ORIGIN);
 	addOriginsList(trusted, PORTAL_TRUSTED_REDIRECT_ORIGINS);
 
 	return [...trusted];

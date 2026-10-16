@@ -60,6 +60,11 @@ export const variables = defineEnvVars({
 			'QMS (Queue Management System) public URL (e.g. `https://qmsdashboard.phh.com` or `http://qmsdashboard.local.test`). Used for SSO redirects and Tools tile link.',
 		schema: optionalString
 	},
+	BED_STATUS_MANAGER_ORIGIN: {
+		description:
+			'Bed Status Manager public URL (e.g. `https://bedstatus.phh.com` or `http://bed-status.local.test`). Used for SSO redirects and Tools tile link.',
+		schema: optionalString
+	},
 	DRIVE_TEAM_API_KEY: {
 		description:
 			'Team-scoped PHH-DRIVE API key (`znltv_…`) for server-side portal media uploads. Never expose to the browser.',

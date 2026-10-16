@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import {
+	BED_STATUS_MANAGER_ORIGIN,
 	DOCS_ORIGIN,
 	DRIVE_ORIGIN,
 	N8N_CHATBOT_ORIGIN,
@@ -10,6 +11,7 @@ import {
 	QMS_ORIGIN
 } from '$app/env/private';
 import {
+	BED_STATUS_MANAGER_SERVICE_ID,
 	BUILTIN_SERVICES,
 	DOCS_SERVICE_ID,
 	N8N_CHATBOT_SERVICE_ID,
@@ -233,6 +235,22 @@ async function upsertQmsService() {
 	});
 }
 
+async function upsertBedStatusManagerService() {
+	const origin = BED_STATUS_MANAGER_ORIGIN?.trim().replace(/\/$/, '');
+	if (!origin) return;
+
+	await upsertServiceRow({
+		id: BED_STATUS_MANAGER_SERVICE_ID,
+		name: 'Bed Status Manager',
+		description: 'Search EMR beds and mark selected beds vacant',
+		category: 'Clinical',
+		accentColor: '#0B2D5C',
+		link: origin,
+		embedMode: 'external',
+		isPublic: false
+	});
+}
+
 export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	for (const definition of BUILTIN_SERVICES) {
 		await upsertBuiltinService(definition, origin);
@@ -244,6 +262,7 @@ export async function ensureBuiltinServices(origin: string = ORIGIN) {
 	await upsertN8nMonitorService();
 	await upsertPhhCalltrackerDashboardService();
 	await upsertQmsService();
+	await upsertBedStatusManagerService();
 }
 
 export function ensureBuiltinServicesOnce(origin: string = ORIGIN): Promise<void> {
@@ -319,6 +338,16 @@ export function isBuiltinPortalServiceLink(serviceId: string, link: string, orig
 
 	if (serviceId === QMS_SERVICE_ID) {
 		const serviceOrigin = QMS_ORIGIN?.trim().replace(/\/$/, '');
+		if (!serviceOrigin) return false;
+		try {
+			return new URL(link).origin === new URL(serviceOrigin).origin;
+		} catch {
+			return false;
+		}
+	}
+
+	if (serviceId === BED_STATUS_MANAGER_SERVICE_ID) {
+		const serviceOrigin = BED_STATUS_MANAGER_ORIGIN?.trim().replace(/\/$/, '');
 		if (!serviceOrigin) return false;
 		try {
 			return new URL(link).origin === new URL(serviceOrigin).origin;
